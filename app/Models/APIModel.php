@@ -413,7 +413,7 @@ class APIModel extends Model
 			// Se ejecuta la regla de validación del archivo
 			$validation = \Config\Services::validation();
 			$validation->setRules([$rule => $this->getPhotoRules($rule)]);
-			$validation->reset();
+
 			if ($validation->run($postFiles)) {
 				$file = get_dot_array($postFiles, $rule);
 				if (isset($file)) {
@@ -436,6 +436,19 @@ class APIModel extends Model
 		}
 
 		return $response;
+	}
+
+	public function removeFile($record)
+	{
+		$validatePhoto = isset($this->photoField) && !empty($this->photoField);
+
+		// Se valida los datos de la foto (si aplica)
+		if ($validatePhoto && isset($record[$this->photoField]) && !empty($record[$this->photoField])) {
+			$file = 'images/' . $record[$this->photoField];
+			if (is_readable($file)) {
+				unlink($file);
+			}
+		}
 	}
 
 	/**

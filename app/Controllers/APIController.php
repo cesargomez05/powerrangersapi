@@ -222,6 +222,9 @@ class APIController extends BaseResource
 		if ($result === FALSE) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen
 			return $this->respond(['errors' => $this->model->errors()], 400);
+		} else {
+			// Se procede a eliminar el archivo asociado al registro
+			$this->model->removeFile($record);
 		}
 
 		return $this->success("Record successfully deleted");
