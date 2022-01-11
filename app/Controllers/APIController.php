@@ -76,7 +76,7 @@ class APIController extends BaseResource
 
 		// Se ejecuta el método que valida si existe el registro del elemento 'padre' (si aplica)
 		if (method_exists($this, 'checkParentRecord')) {
-			if (!$this->{'checkParentRecord'}($ids, TRUE)) {
+			if (!$this->{'checkParentRecord'}($ids, true)) {
 				return $this->failNotFound($this->parentRecordNotFoundMessage);
 			}
 		}
@@ -84,7 +84,7 @@ class APIController extends BaseResource
 		// Se obtiene el registro de la base de datos con base a los Ids
 		$response = ['record' => $this->model->getRecord($ids)];
 		if (!$response['record']) {
-			return $this->failNotFound('No record found');
+			return $this->failNotFound('Record not found');
 		}
 		return $this->respond($response);
 	}
@@ -115,7 +115,7 @@ class APIController extends BaseResource
 
 		// Se invoca la función que valida los registros asociados
 		$validRecord = $this->model->validateRecord($filesData, 'record', $postData, $postFiles, $ids, 'post');
-		if ($validRecord !== TRUE) {
+		if ($validRecord !== true) {
 			return $this->respond(['errors' => $validRecord], 400);
 		}
 
@@ -126,7 +126,7 @@ class APIController extends BaseResource
 
 		// Se ejecuta el proceso de insertar el registro en la base de datos
 		$result = $this->insertRecord($postData, $filesData);
-		if ($result !== TRUE) {
+		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen
 			return $this->respond(['errors' => $result], 400);
 		}
@@ -142,7 +142,7 @@ class APIController extends BaseResource
 
 		// Se ejecuta el método que valida si existe el registro del elemento 'padre' (si aplica)
 		if (method_exists($this, 'checkParentRecord')) {
-			if (!$this->{'checkParentRecord'}($ids, TRUE)) {
+			if (!$this->{'checkParentRecord'}($ids, true)) {
 				return $this->failNotFound($this->parentRecordNotFoundMessage);
 			}
 		}
@@ -172,7 +172,7 @@ class APIController extends BaseResource
 
 		// Se invoca la función que valida los registros asociados
 		$validRecord = $this->model->validateRecord($filesData, 'record', $postData, $postFiles, $ids, $method, $record);
-		if ($validRecord !== TRUE) {
+		if ($validRecord !== true) {
 			return $this->respond(['errors' => $validRecord], 400);
 		}
 
@@ -183,7 +183,7 @@ class APIController extends BaseResource
 
 		// Se ejecuta el proceso de actualizar los datos del registro
 		$result = $this->updateRecord($ids, $postData, $filesData);
-		if ($result !== TRUE) {
+		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen
 			return $this->respond(['errors' => $result], 400);
 		}
@@ -198,7 +198,7 @@ class APIController extends BaseResource
 
 		// Se ejecuta el método que valida si existe el registro del elemento 'padre' (si aplica)
 		if (method_exists($this, 'checkParentRecord')) {
-			if (!$this->{'checkParentRecord'}($ids, TRUE)) {
+			if (!$this->{'checkParentRecord'}($ids, true)) {
 				return $this->failNotFound($this->parentRecordNotFoundMessage);
 			}
 		}
@@ -212,14 +212,14 @@ class APIController extends BaseResource
 		// Se ejecuta el método que permite validar registros anidados al que se desea eliminar (si aplica)
 		if (is_callable([$this, 'validateDeleteRecord'])) {
 			$validate = call_user_func_array([$this, 'validateDeleteRecord'], $ids);
-			if ($validate !== TRUE) {
+			if ($validate !== true) {
 				return $this->respond(['errors' => $validate], 400);
 			}
 		}
 
 		// Se ejecuta la sentencia para eliminar el registro de la base de datos
 		$result = $this->model->deleteRecord($ids);
-		if ($result === FALSE) {
+		if ($result === false) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen
 			return $this->respond(['errors' => $this->model->errors()], 400);
 		}
@@ -247,7 +247,7 @@ class APIController extends BaseResource
 		// Se obtiene los datos del registro
 		$response = ['record' => $this->model->getRecordByURI($uris)];
 		if (!$response['record']) {
-			return $this->failNotFound('No record found');
+			return $this->failNotFound('Record not found');
 		}
 
 		// Se ejecuta el método que permite adicionar información adicional al registro (si aplica)
@@ -280,8 +280,8 @@ class APIController extends BaseResource
 		// Se procede a mover los archivos asociados al registro
 		$this->moveRecordFiles($filesData, $postData);
 
-		// Se retorna TRUE para indicar que la función se ejecutó correctamente
-		return TRUE;
+		// Se retorna true para indicar que la función se ejecutó correctamente
+		return true;
 	}
 
 	protected function updateRecord($ids, $postData, $filesData)
@@ -303,8 +303,8 @@ class APIController extends BaseResource
 		// Se procede a mover los archivos asociados al registro
 		$this->moveRecordFiles($filesData, $postData);
 
-		// Se retorna TRUE para indicar que la función se ejecutó correctamente
-		return TRUE;
+		// Se retorna true para indicar que la función se ejecutó correctamente
+		return true;
 	}
 
 	protected function moveRecordFiles($filesData, $postData)

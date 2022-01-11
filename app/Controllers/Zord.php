@@ -2,14 +2,36 @@
 
 namespace App\Controllers;
 
-use App\Models\MegazordZordModel;
-use App\Models\SeasonZordModel;
+use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\RESTful\BaseResource;
 
-class Zord extends APIController
+class Zord extends BaseResource
 {
-	// Atributos de la clase BaseResource
+	use ResponseTrait;
+
 	protected $modelName = 'App\Models\ZordModel';
 
+	public function index()
+	{
+	}
+
+	public function show($id)
+	{
+	}
+
+	public function create()
+	{
+	}
+
+	public function update($id)
+	{
+	}
+
+	public function delete($id)
+	{
+	}
+
+	/*
 	protected function insertRecord(&$postData, $filesData)
 	{
 		// Se inicializa una transacción sobre la base de datos
@@ -41,8 +63,8 @@ class Zord extends APIController
 		// Se procede a mover los archivos asociados al arsenal
 		$this->moveRecordFiles($filesData, $postData);
 
-		// Se retorna TRUE para indicar que la función se ejecutó correctamente
-		return TRUE;
+		// Se retorna true para indicar que la función se ejecutó correctamente
+		return true;
 	}
 
 	protected function validateDeleteRecord($id)
@@ -59,6 +81,6 @@ class Zord extends APIController
 			$errors['megazordZord'] = "The zord has one or many relation megazord-zord records";
 		}
 
-		return count($errors) ? $errors : TRUE;
-	}
+		return count($errors) ? $errors : true;
+	}*/
 }

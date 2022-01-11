@@ -2,13 +2,35 @@
 
 namespace App\Controllers;
 
-use App\Models\TransformationRangerModel;
+use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\RESTful\BaseResource;
 
-class Transformation extends APIController
+class Transformation extends BaseResource
 {
-	// Atributos de la clase BaseResource
+	use ResponseTrait;
+
 	protected $modelName = 'App\Models\TransformationModel';
 
+	public function index()
+	{
+	}
+
+	public function show($id)
+	{
+	}
+
+	public function create()
+	{
+	}
+
+	public function update($id)
+	{
+	}
+
+	public function delete($id)
+	{
+	}
+	/*
 	protected function insertRecord(&$postData, $filesData)
 	{
 		// Se inicializa una transacción sobre la base de datos
@@ -30,7 +52,7 @@ class Transformation extends APIController
 		// Se inserta el lote de datos de los ranges asociados a la transformación
 		$transformationRangerModel = new TransformationRangerModel();
 		$result = $transformationRangerModel->insertBatch($postData['rangers']);
-		if ($result === FALSE) {
+		if ($result === false) {
 			$this->db->transRollback();
 			return ['rangers' => $transformationRangerModel->errors()];
 		}
@@ -41,8 +63,8 @@ class Transformation extends APIController
 		// Se procede a mover los archivos asociados al registro
 		$this->moveRecordFiles($filesData, $postData);
 
-		// Se retorna TRUE para indicar que la función se ejecutó correctamente
-		return TRUE;
+		// Se retorna true para indicar que la función se ejecutó correctamente
+		return true;
 	}
 
 	protected function moveRecordFiles($filesData, $transformation)
@@ -69,6 +91,6 @@ class Transformation extends APIController
 			$errors['transformationRanger'] = 'The transformation has one or many relation transformation-ranger records';
 		}
 
-		return count($errors) ? $errors : TRUE;
-	}
+		return count($errors) ? $errors : true;
+	}*/
 }

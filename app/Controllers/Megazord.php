@@ -2,14 +2,36 @@
 
 namespace App\Controllers;
 
-use App\Models\MegazordZordModel;
-use App\Models\SeasonMegazordModel;
+use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\RESTful\BaseResource;
 
-class Megazord extends APIController
+class Megazord extends BaseResource
 {
-	// Atributos de la clase BaseResource
+	use ResponseTrait;
+
 	protected $modelName = 'App\Models\MegazordModel';
 
+	public function index()
+	{
+	}
+
+	public function show($id)
+	{
+	}
+
+	public function create()
+	{
+	}
+
+	public function update($id)
+	{
+	}
+
+	public function delete($id)
+	{
+	}
+
+	/*
 	protected function insertRecord(&$postData, $filesData)
 	{
 		// Se inicializa una transacción sobre la base de datos
@@ -45,7 +67,7 @@ class Megazord extends APIController
 			$megazordZordModel = new MegazordZordModel();
 			$megazordZordModel->removeValidationRule('megazordId');
 			$result = $megazordZordModel->insertBatch($zordsId);
-			if ($result === FALSE) {
+			if ($result === false) {
 				$this->model->db->transRollback();
 				return ['zordsId' => $megazordZordModel->errors()];
 			}
@@ -57,8 +79,8 @@ class Megazord extends APIController
 		// Se procede a mover los archivos asociados al arsenal
 		$this->moveRecordFiles($filesData, $postData);
 
-		// Se retorna TRUE para indicar que la función se ejecutó correctamente
-		return TRUE;
+		// Se retorna true para indicar que la función se ejecutó correctamente
+		return true;
 	}
 
 	protected function validateDeleteRecord($id)
@@ -75,6 +97,6 @@ class Megazord extends APIController
 			$errors['megazordZord'] = "The megazord has one or many megazord-zord relation records";
 		}
 
-		return count($errors) ? $errors : TRUE;
-	}
+		return count($errors) ? $errors : true;
+	}*/
 }

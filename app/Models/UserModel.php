@@ -62,7 +62,7 @@ class UserModel extends APIModel
 				foreach ($postData['permissions'] as $key => &$value) {
 					// Se ejecuta la validación de los datos de cada uno de los permisos
 					$validRecord = $permissionsModel->validateRecord($filesData['permissions'], $key, $value, $postFiles, [], 'post', null, array_merge($nodes, ['permissions', $key]));
-					if ($validRecord !== TRUE) {
+					if ($validRecord !== true) {
 						$errors[$key] = $validRecord;
 					} else {
 						if (in_array($value['moduleId'], $modulesId)) {
@@ -78,7 +78,7 @@ class UserModel extends APIModel
 			}
 		}
 		$response = parent::validateRecord($filesData, $property, $postData, $postFiles, $ids, $method, $record, $nodes);
-		if ($response === TRUE) {
+		if ($response === true) {
 			if ($method == 'post') {
 				// Se encripta la contraseña usando MD5
 				$postData['password'] = sha1($postData['password']);
@@ -86,7 +86,7 @@ class UserModel extends APIModel
 				if (isset($postData['password'])) {
 					// Se verifica las credenciales del usuario, validando con la contraseña previamente ingresada
 					$user = $this->checkUser($record->username, $postData['password']);
-					if ($user == FALSE) {
+					if ($user == false) {
 						return ['user' => 'Las credenciales de acceso son inválidas'];
 					} else {
 						// Se establece la nueva contraseña
@@ -143,6 +143,6 @@ class UserModel extends APIModel
 		if ($row !== NULL) {
 			return $row;
 		}
-		return FALSE;
+		return false;
 	}
 }

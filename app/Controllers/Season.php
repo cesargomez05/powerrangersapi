@@ -2,51 +2,131 @@
 
 namespace App\Controllers;
 
-use App\Models\CastingModel;
-use App\Models\ChapterModel;
-use App\Models\SeasonMegazordModel;
-use App\Models\SeasonZordModel;
-use App\Models\SerieModel;
+use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\RESTful\BaseResource;
 
-class Season extends APIController
+class Season extends BaseResource
 {
-	// Atributos de la clase BaseResource
+	use ResponseTrait;
+
 	protected $modelName = 'App\Models\SeasonModel';
 
-	// Atributos de la clase APIController
-	protected $existsRecordMessage = 'The season number is used by other record in this serie';
-	protected $parentRecordNotFoundMessage = 'Serie id not found';
+	/**
+	 * @var \App\Models\SeasonModel
+	 */
+	protected $model;
 
-	protected function validateDeleteRecord($serieId, $seasonNumber)
+	protected $helpers = ['app'];
+
+	public function index($serieId)
 	{
-		$errors = [];
+		$filter = $this->request->getGet();
+		set_pagination($filter);
 
-		// Se valida los registros de Casting,Capítulos,Zords,Megazords asociados a la temporada
-		$model = new CastingModel();
-		if ($model->checkRecordsByForeignKey(['serieId' => $serieId, 'seasonNumber' => $seasonNumber])) {
-			$errors['casting'] = "The season has one or many casting records";
-		}
-		$model = new ChapterModel();
-		if ($model->checkRecordsByForeignKey(['serieId' => $serieId, 'seasonNumber' => $seasonNumber])) {
-			$errors['casting'] = "The season has one or many chapters records";
-		}
-		$model = new SeasonZordModel();
-		if ($model->checkRecordsByForeignKey(['serieId' => $serieId, 'seasonNumber' => $seasonNumber])) {
-			$errors['zords'] = "The season has one or many zords records";
-		}
-		$model = new SeasonMegazordModel();
-		if ($model->checkRecordsByForeignKey(['serieId' => $serieId, 'seasonNumber' => $seasonNumber])) {
-			$errors['megazords'] = "The season has one or many megazords records";
-		}
-
-		return count($errors) ? $errors : TRUE;
+		$seasons = $this->model->list($serieId, $filter);
+		return $this->respond($seasons);
 	}
 
-	protected function checkParentRecord($ids, $isUpdate = FALSE)
+	public function show($serieId, $number)
 	{
-		// Se valida los datos de la serie
-		$serieModel = new SerieModel();
-		$serie = $serieModel->getRecord($isUpdate ? array_slice($ids, 0, 1) : $ids);
-		return (bool) $serie !== FALSE;
+		$season = $this->model->get($serieId, $number);
+		if (!isset($season)) {
+			return $this->failNotFound('Record not found');
+		}
+		return $this->respond(['record' => $season]);
+	}
+
+	public function create($serieId)
+	{
+		// Datos de entrada de la petición
+		$postData = $this->request->getPost();
+		$postFiles = $this->request->getFiles();
+
+		// Se valida si no existen datos enviados por método POST
+		if (empty($postData) && empty($postFiles)) {
+			return $this->fail('Please define the data to be recorded');
+		}
+
+		$postData['serieId'] = $serieId;
+
+		// Se valida los datos de la petición
+		$validateRecord = $this->model->validateRecord($postData, $postFiles, 'post');
+		if ($validateRecord !== true) {
+			return $this->respond(['errors' => $validateRecord], 400);
+		}
+
+		$season = $this->model->get($postData['serieId'], $postData['number']);
+		if (isset($season)) {
+			return $this->respond(['error' => 'There one or many season with same serieId and number'], 409);
+		}
+
+		$result = $this->model->insertRecord($postData);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		unset($postData['age']);
+
+		return $this->respondCreated($postData);
+	}
+
+	public function update($serieId, $number)
+	{
+		$season = $this->model->get($serieId, $number);
+		if (!isset($season)) {
+			return $this->failNotFound('Record not found');
+		}
+
+		// Datos de entrada de la petición
+		$postData = $this->request->getPost();
+		unset($postData['_method']);
+		$postFiles = $this->request->getFiles();
+
+		// Se valida si no existen datos enviados por método POST
+		if (empty($postData) && empty($postFiles)) {
+			return $this->fail('Please define the data to be recorded');
+		}
+
+		// Se obtiene el tipo de petición que se realiza a la función (PUT o PATCH)
+		$request = service('request');
+		$method = $request->getMethod();
+
+		// Se valida los datos de la petición
+		$validateRecord = $this->model->validateRecord($postData, $postFiles, $method, $season);
+		if ($validateRecord !== true) {
+			return $this->respond(['errors' => $validateRecord], 400);
+		}
+
+		if ($postData['serieId'] != $serieId || $postData['number'] != $number) {
+			$season = $this->model->get($postData['serieId'], $postData['number']);
+			if (isset($season)) {
+				return $this->respond(['error' => 'There one or many season with same serieId and number'], 409);
+			}
+		}
+
+		$result = $this->model->updateRecord($postData, $serieId, $number);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		return $this->success("Record successfully updated");
+	}
+
+	public function delete($serieId, $number)
+	{
+		$season = $this->model->get($serieId, $number);
+		if (!isset($season)) {
+			return $this->failNotFound('Record not found');
+		}
+
+		$result = $this->model->deleteRecord($serieId, $number);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		return $this->success("Record successfully deleted");
 	}
 }

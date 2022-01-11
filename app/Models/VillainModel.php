@@ -33,7 +33,7 @@ class VillainModel extends APIModel
 			// Se omite la regla de validación correspondiente al Id del Villano que se va a crear
 			$seasonVillainModel->removeValidationRule('villainId');
 			$validRecord = $seasonVillainModel->validateRecord($filesData, 'seasonvillain', $postData['seasonvillain'], $postFiles, [], 'post', null, array_merge($nodes, ['seasonvillain']));
-			if ($validRecord !== TRUE) {
+			if ($validRecord !== true) {
 				return ['seasonvillain' => $validRecord];
 			}
 		}

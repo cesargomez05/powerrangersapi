@@ -49,7 +49,7 @@ class TransformationModel extends APIModel
 			foreach ($postData['rangers'] as $key => &$value) {
 				// Se ejecuta la validación de los datos de cada uno de los rangers
 				$validRecord = $transformationRangerModel->validateRecord($filesData['rangers'], $key, $value, $postFiles, [], 'post', $record, array_merge($nodes, ['rangers', $key]));
-				if ($validRecord !== TRUE) {
+				if ($validRecord !== true) {
 					$errors[$key] = $validRecord;
 				}
 			}

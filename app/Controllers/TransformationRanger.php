@@ -2,12 +2,32 @@
 
 namespace App\Controllers;
 
-class TransformationRanger extends APIController
-{
-	// Atributos de la clase APIController
-	protected $existsRecordMessage = 'The record information is used by other record in this season';
-	protected $parentRecordNotFoundMessage = 'Transformation id not found';
+use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\RESTful\BaseResource;
 
-	// Atributos de la clase BaseResource
+class TransformationRanger extends BaseResource
+{
+	use ResponseTrait;
+
 	protected $modelName = 'App\Models\TransformationRangerModel';
+
+	public function index($transformationId)
+	{
+	}
+
+	public function show($transformationId, $rangerId)
+	{
+	}
+
+	public function create($transformationId)
+	{
+	}
+
+	public function update($transformationId, $rangerId)
+	{
+	}
+
+	public function delete($transformationId, $rangerId)
+	{
+	}
 }

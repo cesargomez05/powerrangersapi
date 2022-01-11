@@ -2,22 +2,37 @@
 
 namespace App\Controllers;
 
-use App\Models\UserModel;
+use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\RESTful\BaseResource;
 
-class Permission extends APIController
+class Permission extends BaseResource
 {
-	// Atributos de la clase BaseResource
+	use ResponseTrait;
+
 	protected $modelName = 'App\Models\PermissionModel';
 
+	public function index($userId)
+	{
+	}
+
+	public function create($userId)
+	{
+	}
+
+	public function delete($userId, $moduleId)
+	{
+	}
+
+	/*
 	// Atributos de la clase APIController
 	protected $existsRecordMessage = 'The permission information is used by other record in this season';
 	protected $parentRecordNotFoundMessage = 'User id not found';
 
-	protected function checkParentRecord($ids, $isUpdate = FALSE)
+	protected function checkParentRecord($ids, $isUpdate = false)
 	{
 		// Se valida los datos del usuario
 		$userModel = new UserModel();
 		$user = $userModel->getRecord($isUpdate ? array_slice($ids, 0, 1) : $ids);
-		return (bool) $user !== FALSE;
-	}
+		return (bool) $user !== false;
+	}*/
 }

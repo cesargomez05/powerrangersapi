@@ -57,7 +57,7 @@ class ApiRules
 		$columns = array_slice($fields, 1);
 
 		$ids = [];
-		$isValid = TRUE;
+		$isValid = true;
 		foreach ($columns as $column) {
 			preg_match('/([a-zA-Z0-9]+)(\?)*/', $column, $matches);
 
@@ -65,14 +65,14 @@ class ApiRules
 				if (isset($data[$matches[1]])) {
 					array_push($ids, $data[$matches[1]]);
 				} else {
-					$isValid = FALSE;
+					$isValid = false;
 				}
 			} else {
-				$isValid = FALSE;
+				$isValid = false;
 			}
 			if (!$isValid && isset($matches[2])) {
 				array_push($ids, '');
-				$isValid = TRUE;
+				$isValid = true;
 			}
 		}
 		if ($isValid) {
@@ -115,7 +115,7 @@ class ApiRules
 		if (isset($str) && strlen($str)) {
 			return preg_match('/^\d+(?:\,\d+)*$/', $str);
 		}
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -139,7 +139,7 @@ class ApiRules
 
 			return $row->total;
 		}
-		return TRUE;
+		return true;
 	}
 
 	public function validate_password($password = null, string $fields = null, array $data = null, &$error = null)
@@ -147,12 +147,12 @@ class ApiRules
 		if (isset($password) && strlen($password)) {
 			$pattern = '/^(?=.*[!@#$%^&*-])(?=.*[0-9])(?=.*[A-Z]).{8,20}$/';
 			if (preg_match($pattern, $password)) {
-				return TRUE;
+				return true;
 			} else {
 				$error = "Cesar";
 			}
-			return FALSE;
+			return false;
 		}
-		return TRUE;
+		return true;
 	}
 }

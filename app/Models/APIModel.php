@@ -154,7 +154,7 @@ class APIModel extends Model
 		// Se ejecuta el método encargado de insertar los registros anidados (si aplica)
 		if (method_exists($this, 'insertNestedRecords')) {
 			$result = $this->{'insertNestedRecords'}($record);
-			if ($result !== TRUE) {
+			if ($result !== true) {
 				$response['error'] = $result;
 				return $response;
 			}
@@ -162,7 +162,7 @@ class APIModel extends Model
 
 		// Se ejecuta la sentencia INSERT del registro
 		$recordId = $this->insert($record);
-		if ($recordId === FALSE) {
+		if ($recordId === false) {
 			$response['error'] = $this->errors();
 			return $response;
 		}
@@ -188,7 +188,7 @@ class APIModel extends Model
 		// Se ejecuta el método encargado de insertar los registros anidados (si aplica)
 		if (method_exists($this, 'insertNestedRecords')) {
 			$result = $this->{'insertNestedRecords'}($record);
-			if ($result !== TRUE) {
+			if ($result !== true) {
 				$response['error'] = $result;
 				return $response;
 			}
@@ -199,7 +199,7 @@ class APIModel extends Model
 
 		// Se ejecuta la sentencia UPDATE
 		$result = $this->update(null, $record);
-		if ($result === FALSE) {
+		if ($result === false) {
 			$response['error'] = $this->errors();
 			return $response;
 		}
@@ -218,15 +218,15 @@ class APIModel extends Model
 	 * Valida los datos del registro con los valores de llave primaria compuesta.
 	 * @param object $record Datos del registro.
 	 * @param array $ids Ids principales del registro.
-	 * @return bool Valor que indica si las reglas de validación se cumplen (TRUE) o no (FALSE).
+	 * @return bool Valor que indica si las reglas de validación se cumplen (true) o no (false).
 	 */
 	public function validateRecordFields(&$record, $ids, $method, $prevRecord = null): bool
 	{
-		$hasPrimaryKeys = FALSE;
+		$hasPrimaryKeys = false;
 
 		// Se valida si el modelo tiene definido llaves primarias compuestas, para establecer los valores (según sea el caso)
 		if (isset($this->primaryKeys) && count($this->primaryKeys) > 0) {
-			$hasPrimaryKeys = TRUE;
+			$hasPrimaryKeys = true;
 
 			if ($method == 'post') {
 				foreach ($ids as $i => $id) {
@@ -297,22 +297,22 @@ class APIModel extends Model
 		$this->setValidationRules($validationRules);
 		$this->validation->reset();
 		if (!$this->validate($record)) {
-			return FALSE;
+			return false;
 		}
 
-		return TRUE;
+		return true;
 	}
 
 	/**
 	 * Consulta si existe registros cuyos Id correspondan a los definidos en el objeto de datos.
 	 * @param object $record Datos del registro.
-	 * @return bool Valor que indica si las reglas de validación se cumplen (TRUE) o no (FALSE).
+	 * @return bool Valor que indica si las reglas de validación se cumplen (true) o no (false).
 	 */
 	public function existsRecord($record, $ids = []): bool
 	{
 		// Se valida si el modelo tiene definido llaves primarias compuestas, para establecer los valores (según sea el caso)
 		if (isset($this->primaryKeys) && count($this->primaryKeys) > 0) {
-			$hasChange = count($ids) == 0 ? TRUE : FALSE;
+			$hasChange = count($ids) == 0 ? true : false;
 
 			// Se define la condición de la sentencia a ejecutar para validar la existencia de registros
 			foreach ($this->primaryKeys as $i => $column) {
@@ -337,11 +337,11 @@ class APIModel extends Model
 			if ($count) {
 				// Se consulta si hubo cambios en alguno de los datos
 				if ($hasChange) {
-					return TRUE;
+					return true;
 				}
 			}
 		}
-		return FALSE;
+		return false;
 	}
 
 	/**
@@ -355,12 +355,12 @@ class APIModel extends Model
 		foreach ($foreignKeyColumns as $column => $value) {
 			$this->where($column, $value);
 		}
-		// Se obtiene el número de registros y se retorna si este es mayor a cero (TRUE) o no (FALSE)
+		// Se obtiene el número de registros y se retorna si este es mayor a cero (true) o no (false)
 		$count = $this->countAllResults();
 		return (bool) $count > 0;
 	}
 
-	public function setSlugValue(&$record, $hasPrimaryKeys, $ids = FALSE)
+	public function setSlugValue(&$record, $hasPrimaryKeys, $ids = false)
 	{
 		// Se genera el valor del URI asociado al registro (si aplica)
 		if (isset($this->columnValue) && !empty($this->columnValue)) {
@@ -375,7 +375,7 @@ class APIModel extends Model
 
 			// Se obtiene el valor del slug para el registro
 			$slug = $Slug->create_uri($record, $ids);
-			if ($slug !== FALSE) {
+			if ($slug !== false) {
 				$record[$this->uriColumn] = $slug;
 			}
 		}
@@ -391,10 +391,10 @@ class APIModel extends Model
 
 		// Se valida los datos del registro, contemplando la generación del SLUG
 		$validation = $this->validateRecordFields($postData, $ids, $method, $record);
-		if ($validation === FALSE) {
+		if ($validation === false) {
 			return $this->errors();
 		}
-		return TRUE;
+		return true;
 	}
 
 	public function checkUploadFile(&$postData, $postFiles, $nodes)
@@ -468,7 +468,7 @@ class APIModel extends Model
 		}
 
 		// Número de registros asociados a la consulta
-		$response['count'] = $this->countAllResults(FALSE);
+		$response['count'] = $this->countAllResults(false);
 
 		// Se valida si el número de registros es menor a la cantidad de registros a consultar
 		if ($response['count'] < $filter['pageSize'] * $filter['page']) {
@@ -565,7 +565,7 @@ class APIModel extends Model
 			$model = model('App\\Models\\' . $modelName);
 			// Se realiza la validación del registro
 			$validRecord = $model->validateRecord($filesData, $property, $postData[$property], $postFiles, [], 'post', null, $nodes);
-			if ($validRecord !== TRUE) {
+			if ($validRecord !== true) {
 				$errors[$property] = $validRecord;
 				// Se retorna al llamado de la función
 				return;

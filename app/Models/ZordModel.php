@@ -34,7 +34,7 @@ class ZordModel extends APIModel
 			// Se omite la regla de validación correspondiente al Id del Zord que se va a crear
 			$seasonZordModel->removeValidationRule('zordId');
 			$validRecord = $seasonZordModel->validateRecord($filesData, 'seasonzord', $postData['seasonzord'], $postFiles, [], 'post', null, array_merge($nodes, ['seasonzord']));
-			if ($validRecord !== TRUE) {
+			if ($validRecord !== true) {
 				return ['seasonzord' => $validRecord];
 			}
 		}

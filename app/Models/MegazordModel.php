@@ -42,7 +42,7 @@ class MegazordModel extends APIModel
 			// Se omite la regla de validación correspondiente al Id del Megazord que se va a crear
 			$seasonMegazordModel->removeValidationRule('megazordId');
 			$validRecord = $seasonMegazordModel->validateRecord($filesData, 'seasonmegazord', $postData['seasonmegazord'], $postFiles, [], 'post', null, array_merge($nodes, ['seasonmegazord']));
-			if ($validRecord !== TRUE) {
+			if ($validRecord !== true) {
 				return ['seasonmegazord' => $validRecord];
 			}
 		}

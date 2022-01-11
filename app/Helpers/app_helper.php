@@ -30,12 +30,20 @@ if (!function_exists('set_pagination')) {
 if (!function_exists('get_dot_array')) {
 	function get_dot_array(&$arr, $path)
 	{
-		//$list = ['rangers' => ['form' => 7123]];
-		//echo json_encode(get_dot_array($list, 'rangers.form'));
 		$keys = explode('.', $path);
 		foreach ($keys as $key) {
 			$arr = &$arr[$key];
 		}
 		return $arr;
+	}
+}
+
+if (!function_exists('move_files')) {
+	function move_files(&$postData, $key = 'photo')
+	{
+		if (isset($postData) && isset($postData['file'])) {
+			$postData['file']->move('images', $postData[$key]);
+			unset($postData['file']);
+		}
 	}
 }

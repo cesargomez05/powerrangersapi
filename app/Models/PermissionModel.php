@@ -36,6 +36,6 @@ class PermissionModel extends APIModel
 		if ($row !== NULL) {
 			return filter_var($row->available, FILTER_VALIDATE_BOOLEAN);
 		}
-		return FALSE;
+		return false;
 	}
 }

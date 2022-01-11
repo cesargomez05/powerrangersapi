@@ -2,13 +2,36 @@
 
 namespace App\Controllers;
 
-use App\Models\PermissionModel;
+use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\RESTful\BaseResource;
 
-class Module extends APIController
+class Module extends BaseResource
 {
-	// Atributos de la clase BaseResource
+	use ResponseTrait;
+
 	protected $modelName = 'App\Models\ModuleModel';
 
+	public function index()
+	{
+	}
+
+	public function show($id)
+	{
+	}
+
+	public function create()
+	{
+	}
+
+	public function update($id)
+	{
+	}
+
+	public function delete($id)
+	{
+	}
+
+	/*
 	protected function validateDeleteRecord($id)
 	{
 		$errors = [];
@@ -18,6 +41,6 @@ class Module extends APIController
 			$errors['permissions'] = "The module has one or many permissions records";
 		}
 
-		return count($errors) ? $errors : TRUE;
-	}
+		return count($errors) ? $errors : true;
+	}*/
 }

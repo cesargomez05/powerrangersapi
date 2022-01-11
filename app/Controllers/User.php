@@ -2,13 +2,36 @@
 
 namespace App\Controllers;
 
-use App\Models\PermissionModel;
+use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\RESTful\BaseResource;
 
-class User extends APIController
+class User extends BaseResource
 {
-	// Atributos de la clase BaseResource
+	use ResponseTrait;
+
 	protected $modelName = 'App\Models\UserModel';
 
+	public function index()
+	{
+	}
+
+	public function show($id)
+	{
+	}
+
+	public function create()
+	{
+	}
+
+	public function update($id)
+	{
+	}
+
+	public function delete($id)
+	{
+	}
+
+	/*
 	protected function validateDeleteRecord($username)
 	{
 		$errors = [];
@@ -18,7 +41,7 @@ class User extends APIController
 			$errors['permissions'] = "The user has one or many permissions records";
 		}
 
-		return count($errors) ? $errors : TRUE;
+		return count($errors) ? $errors : true;
 	}
 
 	protected function insertRecord(&$postData, $filesData)
@@ -34,7 +57,7 @@ class User extends APIController
 			return $user['error'];
 		}
 
-		/*
+		
 		// Se inserta los datos de los permisos asociados al usuario (si aplica)
 		if (isset($postData['permissions'])) {
 			// Se establece el Id del usuario en cada uno de los permisos
@@ -45,16 +68,16 @@ class User extends APIController
 			// Se ejecuta el proceso de inserción de los datos
 			$permissionModel = new PermissionModel();
 			$result = $permissionModel->insertBatch($postData['permissions']);
-			if ($result === FALSE) {
+			if ($result === false) {
 				$this->db->transRollback();
 				return ['permissions' => $permissionModel->errors()];
 			}
-		}*/
+		}
 
 		// Se finaliza la transacción
 		$this->model->db->transCommit();
 
-		// Se retorna TRUE para indicar que la función se ejecutó correctamente
-		return TRUE;
-	}
+		// Se retorna true para indicar que la función se ejecutó correctamente
+		return true;
+	}*/
 }

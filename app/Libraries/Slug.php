@@ -152,10 +152,10 @@ class Slug
 	 * @uses Slug::create_slug()
 	 * @return string
 	 */
-	public function create_uri($data = '', $ids = FALSE)
+	public function create_uri($data = '', $ids = false)
 	{
 		if (empty($data)) {
-			return FALSE;
+			return false;
 		}
 
 		if (is_array($data)) {
@@ -177,7 +177,7 @@ class Slug
 			return $this->_check_uri($this->create_slug($data), $ids);
 		}
 
-		return FALSE;
+		return false;
 	}
 
 	// ------------------------------------------------------------------------
@@ -198,7 +198,7 @@ class Slug
 		helper(['url', 'text']);
 
 		$string = strtolower(url_title(convert_accented_characters($string), $this->_get_replacement()));
-		return reduce_multiples($string, $this->_get_replacement(), TRUE);
+		return reduce_multiples($string, $this->_get_replacement(), true);
 	}
 
 	// ------------------------------------------------------------------------
@@ -214,7 +214,7 @@ class Slug
 	 * @param int $count
 	 * @return string
 	 */
-	private function _check_uri($uri, $ids = FALSE, $count = 0)
+	private function _check_uri($uri, $ids = false, $count = 0)
 	{
 		$new_uri = ($count > 0) ? $uri . $this->_get_replacement() . $count : $uri;
 

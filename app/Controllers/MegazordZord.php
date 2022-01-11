@@ -2,12 +2,29 @@
 
 namespace App\Controllers;
 
-class MegazordZord extends APIController
+use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\RESTful\BaseResource;
+
+class MegazordZord extends BaseResource
 {
-	// Atributos de la clase BaseResource
+	use ResponseTrait;
+
 	protected $modelName = 'App\Models\MegazordZordModel';
 
+	public function index($megazordId)
+	{
+	}
+
+	public function create($megazordId)
+	{
+	}
+
+	public function delete($megazordId, $zordId)
+	{
+	}
+
+	/*
 	// Atributos de la clase APIController
 	protected $existsRecordMessage = 'The record information is used by other record in this season';
-	protected $parentRecordNotFoundMessage = 'Season id not found';
+	protected $parentRecordNotFoundMessage = 'Season id not found';*/
 }

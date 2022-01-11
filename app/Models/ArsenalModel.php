@@ -34,7 +34,7 @@ class ArsenalModel extends APIModel
 			// Se omite la regla de validación correspondiente al Id del Arsenal que se va a crear
 			$seasonArsenalModel->removeValidationRule('arsenalId');
 			$validRecord = $seasonArsenalModel->validateRecord($filesData, 'seasonarsenal', $postData['seasonarsenal'], $postFiles, [], 'post', null, array_merge($nodes, ['seasonarsenal']));
-			if ($validRecord !== TRUE) {
+			if ($validRecord !== true) {
 				return ['seasonarsenal' => $validRecord];
 			}
 		}

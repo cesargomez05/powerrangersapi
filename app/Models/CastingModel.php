@@ -63,7 +63,7 @@ class CastingModel extends APIModel
 		$this->insertNestedRecord($errors, $casting, 'actor', 'ActorModel', 'actorId');
 		$this->insertNestedRecord($errors, $casting, 'character', 'CharacterModel', 'characterId');
 		$this->insertNestedRecord($errors, $casting, 'ranger', 'RangerModel', 'rangerId');
-		return count($errors) ? $errors : TRUE;
+		return count($errors) ? $errors : true;
 	}
 
 	public function getList($filter, $uris = null, $isTeamUp = null)
