@@ -23,7 +23,7 @@ class RangerModel extends Model
 
 	protected function setRecordsCondition($query)
 	{
-		if (isset($query['q']) && !empty($query['q']) && count($this->filterColumns) > 0) {
+		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('name', $query['q'], 'both');
 			$this->groupEnd();
@@ -37,14 +37,16 @@ class RangerModel extends Model
 		return count($record) ? $record[0] : null;
 	}
 
-	public function insertRecord(&$record)
+	public function insertRecord(&$record, $subTransaction = false)
 	{
-		$this->db->transBegin();
+		if (!$subTransaction) {
+			$this->db->transBegin();
+		}
 
 		if (isset($record['morpher'])) {
 			$morpherModel = new \App\Models\MorpherModel();
 
-			$morpherResult = $morpherModel->insertRecord($record['morpher']);
+			$morpherResult = $morpherModel->insertRecord($record['morpher'], true);
 			if ($morpherResult !== true) {
 				$this->db->transRollback();
 				return $morpherResult;
@@ -64,7 +66,9 @@ class RangerModel extends Model
 			$record[$this->primaryKey] = $recordId;
 		}
 
-		$this->db->transCommit();
+		if (!$subTransaction) {
+			$this->db->transCommit();
+		}
 
 		return true;
 	}
@@ -127,7 +131,7 @@ class RangerModel extends Model
 			$morpherModel = new \App\Models\MorpherModel();
 			$morpherErrors = $morpherModel->validateRecord($postData['morpher'], isset($postFiles['morpher']) ? $postFiles['morpher'] : [], 'post');
 			if ($morpherErrors !== true) {
-				$errors = array_merge(['morpher' => $morpherErrors], $errors);
+				$errors['morpher'] = $morpherErrors;
 			}
 		}
 

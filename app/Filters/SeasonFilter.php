@@ -56,6 +56,12 @@ class SeasonFilter implements FilterInterface
 	{
 		$seasonModel = new \App\Models\SeasonModel();
 
+		$validationId = $seasonModel->validateId($serieId, $seasonNumber);
+		if ($validationId !== true) {
+			header('HTTP/1.1 ' . 500);
+			die(json_encode(['errors' => $validationId]));
+		}
+
 		$season = $seasonModel->get($serieId, $seasonNumber);
 		if (!isset($season)) {
 			header('HTTP/1.1 ' . 404);

@@ -26,10 +26,10 @@ trait ModelTrait
 		return $response;
 	}
 
-	public function validateId($id, $property = 'id')
+	public function validateId($id, $property = 'id', $message = 'Id is not valid')
 	{
 		$validation = \Config\Services::validation();
-		$validation->setRule($property, 'Id is not valid', 'required|is_natural_no_zero');
+		$validation->setRule($property, $message, 'required|is_natural_no_zero');
 		if ($validation->run([$property => $id])) {
 			return true;
 		} else {
@@ -42,7 +42,7 @@ trait ModelTrait
 		$rules = array_keys($this->validationRules);
 		foreach ($rules as $field) {
 			if ($method == 'patch') {
-				if (!isset($postData[$field]) || empty($postData[$field])) {
+				if (!isset($postData[$field])) {
 					if (isset($prevRecord[$field])) {
 						$postData[$field] = $prevRecord[$field];
 					} else {
@@ -50,7 +50,7 @@ trait ModelTrait
 					}
 				}
 			} else {
-				if (!isset($postData[$field]) || empty($postData[$field])) {
+				if (!isset($postData[$field])) {
 					$postData[$field] = null;
 				}
 			}

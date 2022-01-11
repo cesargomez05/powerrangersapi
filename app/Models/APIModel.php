@@ -459,7 +459,7 @@ class APIModel extends Model
 	protected function getRecords($filter, &$response)
 	{
 		// Se define los criterios de consulta de los registros (si aplica)
-		if (isset($filter['q']) && !empty($filter['q']) && count($this->filterColumns) > 0) {
+		if (isset($filter['q']) && !empty($filter['q'])) {
 			$this->groupStart();
 			foreach ($this->filterColumns as $value) {
 				$this->orLike($value, $filter['q'], 'both');

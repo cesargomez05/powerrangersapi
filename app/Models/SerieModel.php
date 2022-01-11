@@ -20,7 +20,7 @@ class SerieModel extends Model
 
 	protected function setRecordsCondition($query)
 	{
-		if (isset($query['q']) && !empty($query['q']) && count($this->filterColumns) > 0) {
+		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('title', $query['q'], 'both');
 			$this->groupEnd();
@@ -100,10 +100,10 @@ class SerieModel extends Model
 
 				$seasonErrors = $seasonModel->validateRecord($postData['season'], isset($postFiles['season']) ? $postFiles['season'] : [], 'post');
 				if ($seasonErrors !== true) {
-					$errors = array_merge(['season' => $seasonErrors], $errors);
+					$errors['season'] = $seasonErrors;
 				}
 			} else {
-				$errors = array_merge(['season' => 'The season information is required'], $errors);
+				$errors['season'] = 'The season information is required';
 			}
 		} else {
 			unset($postData['season']);

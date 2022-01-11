@@ -29,7 +29,7 @@ class ChapterModel extends Model
 	public function list($serieId, $seasonNumber, $query)
 	{
 		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber);
-		if (isset($query['q']) && !empty($query['q']) && count($this->filterColumns) > 0) {
+		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('title', $query['q'], 'both');
 			$this->orLike('titleSpanish', $query['q'], 'both');

@@ -29,7 +29,7 @@ class MorpherModel extends Model
 
 	protected function setRecordsCondition($query)
 	{
-		if (isset($query['q']) && !empty($query['q']) && count($this->filterColumns) > 0) {
+		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('name', $query['q'], 'both');
 			$this->groupEnd();

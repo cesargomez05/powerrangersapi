@@ -9,6 +9,7 @@ class SeasonModel extends Model
 {
 	use ModelTrait {
 		list as public listTrait;
+		validateId as public validateIdTrait;
 	}
 
 	protected $table = 'seasons';
@@ -24,10 +25,21 @@ class SeasonModel extends Model
 		'ageId' => 'required|is_natural_no_zero|exists_id[ages.id]'
 	];
 
+	public function validateId($serieId, $seasonNumber)
+	{
+		$validation = \Config\Services::validation();
+		$validation->setRule('seasonNumber', 'Season number is not valid', 'required|is_natural_no_zero');
+		if ($validation->run(['serieId' => $serieId, 'seasonNumber' => $seasonNumber])) {
+			return true;
+		} else {
+			return $validation->getErrors();
+		}
+	}
+
 	public function list($serieId, $query)
 	{
 		$this->where('serieId', $serieId);
-		if (isset($query['q']) && !empty($query['q']) && count($this->filterColumns) > 0) {
+		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('title', $query['q'], 'both');
 			$this->groupEnd();
@@ -110,7 +122,7 @@ class SeasonModel extends Model
 			$ageModel = new \App\Models\AgeModel();
 			$ageErrors = $ageModel->validateRecord($postData['age'], isset($postFiles['age']) ? $postFiles['age'] : [], 'post');
 			if ($ageErrors !== true) {
-				$errors = array_merge(['age' => $ageErrors], $errors);
+				$errors['age'] = $ageErrors;
 			}
 		}
 

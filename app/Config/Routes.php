@@ -112,10 +112,12 @@ $routes->group('chapters', ['filter' => 'auth:chapter'], function ($routes) {
 
 // Casting
 $routes->group('casting', ['filter' => 'auth:casting'], function ($routes) {
-	$routes->get('(:num)/(:num)', 'Casting::index/$1/$2');
-	$routes->post('(:num)/(:num)', 'Casting::create/$1/$2');
-	$routes->delete('(:num)/(:num)/(:num)/(:num)', 'Casting::delete/$1/$2/$3/$4');
-	$routes->delete('(:num)/(:num)/(:num)/(:num)/(:num)', 'Casting::delete/$1/$2/$3/$4/$5');
+	$filter = ['filter' => 'season_filter'];
+
+	$routes->get('(:num)/(:num)', 'Casting::index/$1/$2', $filter);
+	$routes->post('(:num)/(:num)', 'Casting::create/$1/$2', $filter);
+	$routes->delete('(:num)/(:num)/(:num)/(:num)', 'Casting::delete/$1/$2/$3/$4', $filter);
+	$routes->delete('(:num)/(:num)/(:num)/(:num)/(:num)', 'Casting::delete/$1/$2/$3/$4/$5', $filter);
 });
 
 // Zords

@@ -53,7 +53,7 @@ class SerieFilter implements FilterInterface
 	{
 		$serieModel = new \App\Models\SerieModel();
 
-		$validationId = $serieModel->validateId($serieId, 'serieId');
+		$validationId = $serieModel->validateId($serieId, 'serieId', 'Serie id is not valid');
 		if ($validationId !== true) {
 			header('HTTP/1.1 ' . 500);
 			die(json_encode(['errors' => $validationId]));
