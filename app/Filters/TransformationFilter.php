@@ -6,7 +6,7 @@ use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 
-class SerieFilter implements FilterInterface
+class TransformationFilter implements FilterInterface
 {
 	/**
 	 * Do whatever processing this filter needs to do.
@@ -27,9 +27,9 @@ class SerieFilter implements FilterInterface
 	{
 		header('Content-type: application/json');
 
-		$serieId = $request->getUri()->getSegment(2);
+		$transformationId = $request->getUri()->getSegment(2);
 
-		self::checkSerie($serieId);
+		self::checkTransformation($transformationId);
 	}
 
 	/**
@@ -49,17 +49,17 @@ class SerieFilter implements FilterInterface
 		//
 	}
 
-	public static function checkSerie($serieId)
+	public static function checkTransformation($transformationId)
 	{
-		$serieModel = model('App\Models\SerieModel');
+		$transformationModel = model('App\Models\TransformationModel');
 
-		$validationId = $serieModel->validateId($serieId, 'serieId', 'Serie id is not valid');
+		$validationId = $transformationModel->validateId($transformationId, 'transformationId', 'Transformation id is not valid');
 		if ($validationId !== true) {
 			header('HTTP/1.1 ' . 500);
 			die(json_encode(['errors' => $validationId]));
 		}
 
-		$serie = $serieModel->get($serieId);
+		$serie = $transformationModel->get($transformationId);
 		if (!isset($serie)) {
 			header('HTTP/1.1 ' . 404);
 			die(json_encode([

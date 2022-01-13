@@ -11,6 +11,13 @@ class User extends BaseResource
 
 	protected $modelName = 'App\Models\UserModel';
 
+	/**
+	 * @var \App\Models\UserModel
+	 */
+	protected $model;
+
+	protected $helpers = ['app'];
+
 	public function index()
 	{
 	}

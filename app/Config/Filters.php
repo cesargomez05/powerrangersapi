@@ -3,8 +3,10 @@
 namespace Config;
 
 use App\Filters\AuthFilter;
+use App\Filters\MegazordFilter;
 use App\Filters\SeasonFilter;
 use App\Filters\SerieFilter;
+use App\Filters\TransformationFilter;
 use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Filters\CSRF;
 use CodeIgniter\Filters\DebugToolbar;
@@ -24,7 +26,9 @@ class Filters extends BaseConfig
 		'honeypot' => Honeypot::class,
 		'auth' => AuthFilter::class,
 		'serie_filter' => SerieFilter::class,
-		'season_filter' => SeasonFilter::class
+		'season_filter' => SeasonFilter::class,
+		'megazord_filter' => MegazordFilter::class,
+		'transformation_filter' => TransformationFilter::class
 	];
 
 	/**

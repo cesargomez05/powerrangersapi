@@ -27,13 +27,16 @@ class SeasonModel extends Model
 
 	public function validateId($serieId, $seasonNumber)
 	{
+		$validateSerieId = $this->validateIdTrait($serieId, 'serieId', 'Serie id is not valid');
+		$errors = $validateSerieId ? [] : $validateSerieId;
+
 		$validation = \Config\Services::validation();
 		$validation->setRule('seasonNumber', 'Season number is not valid', 'required|is_natural_no_zero');
-		if ($validation->run(['serieId' => $serieId, 'seasonNumber' => $seasonNumber])) {
-			return true;
-		} else {
-			return $validation->getErrors();
+		if (!$validation->run(['serieId' => $serieId, 'seasonNumber' => $seasonNumber])) {
+			$errors = array_merge($errors, $validation->getErrors());
 		}
+
+		return count($errors) == 0 ? true : $errors;
 	}
 
 	public function list($serieId, $query)
@@ -62,7 +65,7 @@ class SeasonModel extends Model
 		}
 
 		if (isset($record['age'])) {
-			$ageModel = new \App\Models\AgeModel();
+			$ageModel = model('App\Models\AgeModel');
 			$ageResult = $ageModel->insertRecord($record['age']);
 			if ($ageResult !== true) {
 				$this->db->transRollback();
@@ -113,21 +116,21 @@ class SeasonModel extends Model
 
 		$this->validateRecordProperties($postData, $method, $prevRecord);
 
+		if (!$this->validate($postData)) {
+			$errors = array_merge($this->errors(), $errors);
+		}
+
 		// Se valida los datos de la era
 		if (isset($postData['age'])) {
 			// Se omite la validación del Id de la era
 			$this->setValidationRule('ageId', 'permit_empty');
 			unset($postData['ageId']);
 
-			$ageModel = new \App\Models\AgeModel();
+			$ageModel = model('App\Models\AgeModel');
 			$ageErrors = $ageModel->validateRecord($postData['age'], isset($postFiles['age']) ? $postFiles['age'] : [], 'post');
 			if ($ageErrors !== true) {
 				$errors['age'] = $ageErrors;
 			}
-		}
-
-		if (!$this->validate($postData)) {
-			$errors = array_merge($this->errors(), $errors);
 		}
 
 		return count($errors) > 0 ? $errors : true;

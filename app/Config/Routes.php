@@ -132,9 +132,11 @@ $routes->group('zords', ['filter' => 'auth:zord'], function ($routes) {
 
 // Temporada-Zord
 $routes->group('seasonzord', ['filter' => 'auth:zord'], function ($routes) {
-	$routes->get('(:num)/(:num)', 'SeasonZord::index/$1/$2');
-	$routes->post('(:num)/(:num)', 'SeasonZord::create/$1/$2');
-	$routes->delete('(:num)/(:num)/(:num)', 'SeasonZord::delete/$1/$2/$3');
+	$filter = ['filter' => 'season_filter'];
+
+	$routes->get('(:num)/(:num)', 'SeasonZord::index/$1/$2', $filter);
+	$routes->post('(:num)/(:num)', 'SeasonZord::create/$1/$2', $filter);
+	$routes->delete('(:num)/(:num)/(:num)', 'SeasonZord::delete/$1/$2/$3', $filter);
 });
 
 // Megazords
@@ -149,16 +151,20 @@ $routes->group('megazords', ['filter' => 'auth:megazord'], function ($routes) {
 
 // Temporada-Megazord
 $routes->group('seasonmegazord', ['filter' => 'auth:megazord'], function ($routes) {
-	$routes->get('(:num)/(:num)', 'SeasonMegazord::index/$1/$2');
-	$routes->post('(:num)/(:num)', 'SeasonMegazord::create/$1/$2');
-	$routes->delete('(:num)/(:num)/(:num)', 'SeasonMegazord::delete/$1/$2/$3');
+	$filter = ['filter' => 'season_filter'];
+
+	$routes->get('(:num)/(:num)', 'SeasonMegazord::index/$1/$2', $filter);
+	$routes->post('(:num)/(:num)', 'SeasonMegazord::create/$1/$2', $filter);
+	$routes->delete('(:num)/(:num)/(:num)', 'SeasonMegazord::delete/$1/$2/$3', $filter);
 });
 
 // Megazord-Zord
 $routes->group('megazordzord', ['filter' => 'auth:megazord'], function ($routes) {
-	$routes->get('(:num)', 'MegazordZord::index/$1');
-	$routes->post('(:num)', 'MegazordZord::create/$1');
-	$routes->delete('(:num)/(:num)', 'MegazordZord::delete/$1/$2');
+	$filter = ['filter' => 'megazord_filter'];
+
+	$routes->get('(:num)', 'MegazordZord::index/$1', $filter);
+	$routes->post('(:num)', 'MegazordZord::create/$1', $filter);
+	$routes->delete('(:num)/(:num)', 'MegazordZord::delete/$1/$2', $filter);
 });
 
 // Transformaciones
@@ -173,12 +179,14 @@ $routes->group('transformations', ['filter' => 'auth:transformation'], function 
 
 // Transformación-Ranger
 $routes->group('transformationrangers', ['filter' => 'auth:transformation'], function ($routes) {
-	$routes->get('(:num)', 'TransformationRanger::index/$1');
-	$routes->get('(:num)/(:num)', 'TransformationRanger::show/$1/$2');
-	$routes->post('(:num)', 'TransformationRanger::create/$1');
-	$routes->put('(:num)/(:num)', 'TransformationRanger::update/$1/$2');
-	$routes->patch('(:num)/(:num)', 'TransformationRanger::update/$1/$2');
-	$routes->delete('(:num)/(:num)', 'TransformationRanger::delete/$1/$2');
+	$filter = ['filter' => 'transformation_filter'];
+
+	$routes->get('(:num)', 'TransformationRanger::index/$1', $filter);
+	$routes->get('(:num)/(:num)', 'TransformationRanger::show/$1/$2', $filter);
+	$routes->post('(:num)', 'TransformationRanger::create/$1', $filter);
+	$routes->put('(:num)/(:num)', 'TransformationRanger::update/$1/$2', $filter);
+	$routes->patch('(:num)/(:num)', 'TransformationRanger::update/$1/$2', $filter);
+	$routes->delete('(:num)/(:num)', 'TransformationRanger::delete/$1/$2', $filter);
 });
 
 // Morphers
@@ -203,9 +211,11 @@ $routes->group('arsenal', ['filter' => 'auth:arsenal'], function ($routes) {
 
 // Temporada-Arsenal
 $routes->group('seasonarsenal', ['filter' => 'auth:arsenal'], function ($routes) {
-	$routes->get('(:num)/(:num)', 'SeasonArsenal::index/$1/$2');
-	$routes->post('(:num)/(:num)', 'SeasonArsenal::create/$1/$2');
-	$routes->delete('(:num)/(:num)/(:num)', 'SeasonArsenal::delete/$1/$2/$3');
+	$filter = ['filter' => 'season_filter'];
+
+	$routes->get('(:num)/(:num)', 'SeasonArsenal::index/$1/$2', $filter);
+	$routes->post('(:num)/(:num)', 'SeasonArsenal::create/$1/$2', $filter);
+	$routes->delete('(:num)/(:num)/(:num)', 'SeasonArsenal::delete/$1/$2/$3', $filter);
 });
 
 // Villanos
@@ -220,9 +230,11 @@ $routes->group('villains', ['filter' => 'auth:villain'], function ($routes) {
 
 // Temporada-Villano
 $routes->group('seasonvillain', ['filter' => 'auth:villain'], function ($routes) {
-	$routes->get('(:num)/(:num)', 'SeasonVillain::index/$1/$2');
-	$routes->post('(:num)/(:num)', 'SeasonVillain::create/$1/$2');
-	$routes->delete('(:num)/(:num)/(:num)', 'SeasonVillain::delete/$1/$2/$3');
+	$filter = ['filter' => 'season_filter'];
+
+	$routes->get('(:num)/(:num)', 'SeasonVillain::index/$1/$2', $filter);
+	$routes->post('(:num)/(:num)', 'SeasonVillain::create/$1/$2', $filter);
+	$routes->delete('(:num)/(:num)/(:num)', 'SeasonVillain::delete/$1/$2/$3', $filter);
 });
 
 // Módulos

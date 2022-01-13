@@ -73,5 +73,7 @@ class Casting extends BaseResource
 			// Se retorna un mensaje de error si las validaciones no se cumplen
 			return $this->respond(['errors' => $result], 500);
 		}
+
+		return $this->success("Record successfully deleted");
 	}
 }

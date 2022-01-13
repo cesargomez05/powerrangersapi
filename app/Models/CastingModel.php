@@ -21,7 +21,14 @@ class CastingModel extends Model
 		'actorId' => 'required|is_natural_no_zero|exists_id[actors.id]',
 		'characterId' => 'required|is_natural_no_zero|exists_id[characters.id]',
 		'rangerId' => 'permit_empty|is_natural_no_zero|exists_id[rangers.id]',
-		'isTeamUp' => 'required|is_natural|in_list[0,1]'
+		'isTeamUp' => 'required|is_natural|in_list[0,1]',
+		'seasonId' => 'check_id[seasonId,serieId,seasonNumber]|exists_record[seasonId,seasons,serieId,number]'
+	];
+	protected $validationMessages = [
+		'seasonId' => [
+			'check_id' => 'The \'serieId\' and \'seasonNumber\' values are required',
+			'exists_record' => 'The season not exists'
+		]
 	];
 
 	public function list($serieId, $seasonNumber, $query)
@@ -61,7 +68,7 @@ class CastingModel extends Model
 		$this->db->transBegin();
 
 		if (isset($record['actor'])) {
-			$actorModel = new \App\Models\ActorModel();
+			$actorModel = model('App\Models\ActorModel');
 
 			$actorResult = $actorModel->insertRecord($record['actor']);
 			if ($actorResult !== true) {
@@ -73,7 +80,7 @@ class CastingModel extends Model
 		}
 
 		if (isset($record['character'])) {
-			$characterModel = new \App\Models\CharacterModel();
+			$characterModel = model('App\Models\CharacterModel');
 
 			$characterResult = $characterModel->insertRecord($record['character']);
 			if ($characterResult !== true) {
@@ -85,7 +92,7 @@ class CastingModel extends Model
 		}
 
 		if (isset($record['ranger'])) {
-			$rangerModel = new \App\Models\RangerModel();
+			$rangerModel = model('App\Models\RangerModel');
 
 			$rangerResult = $rangerModel->insertRecord($record['ranger'], true);
 			if ($rangerResult !== true) {
@@ -138,7 +145,7 @@ class CastingModel extends Model
 		$this->validateRecordProperties($postData, $method, $prevRecord);
 
 		if (isset($postData['actor'])) {
-			$actorModel = new \App\Models\ActorModel();
+			$actorModel = model('App\Models\ActorModel');
 			$actorModel->setValidationRule('actorId', 'permit_empty');
 			unset($postData['actorId']);
 
@@ -149,7 +156,7 @@ class CastingModel extends Model
 		}
 
 		if (isset($postData['character'])) {
-			$characterModel = new \App\Models\CharacterModel();
+			$characterModel = model('App\Models\CharacterModel');
 			$characterModel->setValidationRule('characterId', 'permit_empty');
 			unset($postData['characterId']);
 
@@ -160,7 +167,7 @@ class CastingModel extends Model
 		}
 
 		if (isset($postData['ranger'])) {
-			$rangerModel = new \App\Models\RangerModel();
+			$rangerModel = model('App\Models\RangerModel');
 			unset($postData['rangerId']);
 
 			$rangerErrors = $rangerModel->validateRecord($postData['ranger'], isset($postFiles['ranger']) ? $postFiles['ranger'] : [], 'post');

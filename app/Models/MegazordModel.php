@@ -2,25 +2,24 @@
 
 namespace App\Models;
 
-class MegazordModel extends APIModel
-{
-	// Atributos de la clase APIModel
-	public $photoField = 'photo';
-	protected $validationRulesCreate = [
-		'zordsId' => 'permit_empty|check_comma_separated|validate_children_ids[zords.id]'
-	];
+use App\Traits\ModelTrait;
+use CodeIgniter\Model;
 
-	// Atributos de la clase Model
+class MegazordModel extends Model
+{
+	use ModelTrait;
+
 	protected $table = 'megazords';
 
-	// Atributos de la clase BaseModel
 	protected $allowedFields = ['slug', 'name', 'description', 'photo'];
+
 	protected $validationRules = [
-		'slug' => 'required|max_length[100]',
+		'slug' => 'required_with[name]|max_length[100]',
 		'name' => 'required|max_length[100]',
 		'description' => 'permit_empty',
 		'photo' => 'permit_empty|max_length[100]'
 	];
+
 	protected $validationMessages = [
 		'zordsId' => [
 			'check_comma_separated' => 'Please set the zords id by comma separated',
@@ -28,24 +27,123 @@ class MegazordModel extends APIModel
 		]
 	];
 
-	public function validateRecord(&$filesData, $property, &$postData, $postFiles, $ids, $method, $record = null, $nodes = [])
+	protected function setRecordsCondition($query)
 	{
-		// Se valida si el proceso corresponde a un nuevo registro de serie
-		if ($method == 'post') {
-			// Se valida si existe la propiedad donde se establece los datos de la relación SeasonMegazord
-			if (!isset($postData['seasonmegazord'])) {
-				return ['seasonmegazord' => 'Please set the season-megazord relation values'];
-			}
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('name', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
 
-			// Se invoca el método que valida los datos de la relación SeasonZord mediante su respectiva clase Model.
-			$seasonMegazordModel = new SeasonMegazordModel();
-			// Se omite la regla de validación correspondiente al Id del Megazord que se va a crear
-			$seasonMegazordModel->removeValidationRule('megazordId');
-			$validRecord = $seasonMegazordModel->validateRecord($filesData, 'seasonmegazord', $postData['seasonmegazord'], $postFiles, [], 'post', null, array_merge($nodes, ['seasonmegazord']));
-			if ($validRecord !== true) {
-				return ['seasonmegazord' => $validRecord];
+	public function get($id)
+	{
+		$this->where('id', $id);
+		$record = $this->findAll();
+		return count($record) ? $record[0] : null;
+	}
+
+	public function insertRecord(&$record)
+	{
+		$this->db->transBegin();
+
+		// Se procede a insertar el registro en la base de datos
+		$recordId = $this->insert($record);
+		if ($recordId === false) {
+			$this->db->transRollback();
+			return $this->errors();
+		}
+
+		if ($recordId !== 0) {
+			$record[$this->primaryKey] = $recordId;
+		}
+
+		// Se inserta los datos de la relación Temporada-Zord (si aplica)
+		if (isset($record['seasonmegazord'])) {
+			$record['seasonmegazord']['megazordId'] = $recordId;
+
+			$seasonMegazordModel = model('App\Models\SeasonMegazordModel');
+			$seasonMegazordResult = $seasonMegazordModel->insertRecord($record['seasonmegazord']);
+			if ($seasonMegazordResult !== true) {
+				$this->db->transRollback();
+				return $seasonMegazordResult;
 			}
 		}
-		return parent::validateRecord($filesData, $property, $postData, $postFiles, $ids, $method, $record, $nodes);
+
+		// Se establece la información de los zords asociados al megazord (si aplica)
+		if (isset($record['zordsId'])) {
+			$zordsId = explode(',', $record['zordsId']);
+			if (count($zordsId)) {
+				$megazordZordModel = model('App\Models\MegazordZordModel');
+
+				// Se asocia los Zords definidos en la lista sobre el Megazord creado
+				$megazordZordResult = $megazordZordModel->insertZords($recordId, $zordsId);
+				if ($megazordZordResult === false) {
+					$this->db->transRollback();
+					return $megazordZordModel->errors();
+				}
+			}
+		}
+
+		$this->db->transCommit();
+
+		return true;
+	}
+
+	public function updateRecord($record, $id)
+	{
+		$this->where('id', $id);
+
+		$result = $this->update(null, $record);
+		return $result === false ? $this->errors() : true;
+	}
+
+	public function deleteRecord($id)
+	{
+		$this->where('id', $id);
+		if (!$this->delete()) {
+			return $this->errors();
+		}
+		return true;
+	}
+
+	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
+	{
+		$errors = $this->validateUploadFiles($postData, $postFiles);
+		if ($errors === true) {
+			$errors = [];
+		}
+
+		$this->validateRecordProperties($postData, $method, $prevRecord);
+
+		$slugSettings = ['title' => 'name', 'field' => 'slug', 'id' => [$this->primaryKey]];
+		$this->setSlugValue($postData, $slugSettings, isset($prevRecord) ? [$prevRecord[$this->primaryKey]] : null);
+
+		if ($method == 'post') {
+			$this->setValidationRule('zordsId', 'permit_empty|check_comma_separated|validate_children_ids[zords.id]');
+
+			// Se valida los datos de la relación del Zord con la temporada
+			if (isset($postData['seasonmegazord'])) {
+				$seasonMegazordModel = model('App\Models\SeasonMegazordModel');
+
+				// Se omite la validación del id del Zord
+				$seasonMegazordModel->setValidationRule('megazordId', 'permit_empty');
+				unset($postData['seasonmegazord']['megazordId']);
+
+				$seasonMegazordErrors = $seasonMegazordModel->validateRecord($postData['seasonmegazord'], isset($postFiles['seasonmegazord']) ? $postFiles['seasonmegazord'] : [], 'post');
+				if ($seasonMegazordErrors !== true) {
+					$errors['seasonmegazord'] = $seasonMegazordErrors;
+				}
+			}
+		} else {
+			unset($postData['seasonmegazord']);
+			unset($postData['zordsId']);
+		}
+
+		if (!$this->validate($postData)) {
+			$errors = array_merge($this->errors(), $errors);
+		}
+
+		return count($errors) > 0 ? $errors : true;
 	}
 }

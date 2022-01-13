@@ -11,86 +11,126 @@ class Transformation extends BaseResource
 
 	protected $modelName = 'App\Models\TransformationModel';
 
+	/**
+	 * @var \App\Models\TransformationModel
+	 */
+	protected $model;
+
+	protected $helpers = ['app'];
+
 	public function index()
 	{
+		$filter = $this->request->getGet();
+		set_pagination($filter);
+
+		$transformations = $this->model->list($filter);
+		return $this->respond($transformations);
 	}
 
 	public function show($id)
 	{
+		$validationId = $this->model->validateId($id);
+		if ($validationId !== true) {
+			return $this->respond(['errors' => $validationId], 400);
+		}
+
+		$transformation = $this->model->get($id);
+		if (!isset($transformation)) {
+			return $this->failNotFound('Record not found');
+		}
+		return $this->respond(['record' => $transformation]);
 	}
 
 	public function create()
 	{
+		// Datos de entrada de la petición
+		$postData = $this->request->getPost();
+		$postFiles = $this->request->getFiles();
+
+		// Se valida si no existen datos enviados por método POST
+		if (empty($postData) && empty($postFiles)) {
+			return $this->fail('Please define the data to be recorded');
+		}
+
+		// Se valida los datos de la petición
+		$validateRecord = $this->model->validateRecord($postData, $postFiles, 'post');
+		if ($validateRecord !== true) {
+			return $this->respond(['errors' => $validateRecord], 400);
+		}
+
+		$result = $this->model->insertRecord($postData);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		// Se "mueve" el archivo subido a la respectiva carpeta
+		//move_files($postData);
+
+		unset($postData['rangers']);
+
+		return $this->respondCreated($postData);
 	}
 
 	public function update($id)
 	{
+		$validationId = $this->model->validateId($id);
+		if ($validationId !== true) {
+			return $this->respond(['errors' => $validationId], 400);
+		}
+
+		$transformation = $this->model->get($id);
+		if (!isset($transformation)) {
+			return $this->failNotFound('Record not found');
+		}
+
+		// Datos de entrada de la petición
+		$postData = $this->request->getPost();
+		unset($postData['_method']);
+		$postFiles = $this->request->getFiles();
+
+		// Se valida si no existen datos enviados por método POST
+		if (empty($postData) && empty($postFiles)) {
+			return $this->fail('Please define the data to be recorded');
+		}
+
+		// Se obtiene el tipo de petición que se realiza a la función (PUT o PATCH)
+		$request = service('request');
+		$method = $request->getMethod();
+
+		// Se valida los datos de la petición
+		$validateRecord = $this->model->validateRecord($postData, $postFiles, $method, $transformation);
+		if ($validateRecord !== true) {
+			return $this->respond(['errors' => $validateRecord], 400);
+		}
+
+		$result = $this->model->updateRecord($postData, $id);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		return $this->success("Record successfully updated");
 	}
 
 	public function delete($id)
 	{
+		$validationId = $this->model->validateId($id);
+		if ($validationId !== true) {
+			return $this->respond(['errors' => $validationId], 400);
+		}
+
+		$transformation = $this->model->get($id);
+		if (!isset($transformation)) {
+			return $this->failNotFound('Record not found');
+		}
+
+		$result = $this->model->deleteRecord($id);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		return $this->success("Record successfully deleted");
 	}
-	/*
-	protected function insertRecord(&$postData, $filesData)
-	{
-		// Se inicializa una transacción sobre la base de datos
-		$this->model->db->transBegin();
-
-		// Se procede a insertar el registro en la base de datos
-		$transformation = $this->model->insertRecord($postData);
-		if (isset($transformation['error'])) {
-			// Se retorna los mensajes de error de la validación
-			$this->model->db->transRollback();
-			return $transformation['error'];
-		}
-
-		// Se recorre la lista de rangers, para establecer el Id de la transformación
-		foreach ($postData['rangers'] as $key => &$ranger) {
-			$ranger['transformationId'] = $transformation['primaryKey'];
-		}
-
-		// Se inserta el lote de datos de los ranges asociados a la transformación
-		$transformationRangerModel = new TransformationRangerModel();
-		$result = $transformationRangerModel->insertBatch($postData['rangers']);
-		if ($result === false) {
-			$this->db->transRollback();
-			return ['rangers' => $transformationRangerModel->errors()];
-		}
-
-		// Se finaliza la transacción
-		$this->model->db->transCommit();
-
-		// Se procede a mover los archivos asociados al registro
-		$this->moveRecordFiles($filesData, $postData);
-
-		// Se retorna true para indicar que la función se ejecutó correctamente
-		return true;
-	}
-
-	protected function moveRecordFiles($filesData, $transformation)
-	{
-		if (isset($filesData['record'])) {
-			$this->moveFiles($filesData['record'], $transformation);
-		}
-		if (isset($transformation['rangers'])) {
-			foreach ($transformation['rangers'] as $key => $ranger) {
-				if (isset($filesData['rangers'][$key])) {
-					$this->moveFiles($filesData['rangers'][$key], $ranger);
-				}
-			}
-		}
-	}
-
-	protected function validateDeleteRecord($id)
-	{
-		$errors = [];
-
-		// Se consulta los registros de transformationRanger asociados a la transformación
-		$model = new TransformationRangerModel();
-		if ($model->checkRecordsByForeignKey(['transformationId' => $id])) {
-			$errors['transformationRanger'] = 'The transformation has one or many relation transformation-ranger records';
-		}
-
-		return count($errors) ? $errors : true;
-	}*/
 }

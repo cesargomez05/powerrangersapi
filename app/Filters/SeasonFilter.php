@@ -54,7 +54,7 @@ class SeasonFilter implements FilterInterface
 
 	public static function checkSeason($serieId, $seasonNumber)
 	{
-		$seasonModel = new \App\Models\SeasonModel();
+		$seasonModel = model('App\Models\SeasonModel');
 
 		$validationId = $seasonModel->validateId($serieId, $seasonNumber);
 		if ($validationId !== true) {

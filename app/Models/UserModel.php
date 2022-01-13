@@ -2,22 +2,15 @@
 
 namespace App\Models;
 
-class UserModel extends APIModel
+use App\Traits\ModelTrait;
+use CodeIgniter\Model;
+
+class UserModel extends Model
 {
-	// Atributos de la clase APIModel
-	protected $columnValue = '';
-	protected $validationRulesCreate = [
-		'confirmPassword' => 'required_with[password]|matches[password]'
-	];
-	protected $validationRulesUpdate = [
-		'password' => 'required',
-		'newPassword' => 'required_with[password]|max_length[100]|validate_password',
-		'confirmPassword' => 'required_with[password]|matches[newPassword]'
-	];
+	use ModelTrait;
 
-
-	// Atributos de la clase Model
 	protected $table = 'oauth_users';
+
 	protected $primaryKey = 'username';
 
 	// Atributos de la clase BaseModel

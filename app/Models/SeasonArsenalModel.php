@@ -2,18 +2,19 @@
 
 namespace App\Models;
 
-class SeasonArsenalModel extends APIModel
-{
-	// Atributos de la clase APIModel
-	protected $primaryKeys = ['serieId', 'seasonNumber', 'arsenalId'];
-	protected $filterColumns = [];
-	protected $columnValue = '';
+use App\Traits\ModelTrait;
+use CodeIgniter\Model;
 
-	// Atributos de la clase Model
+class SeasonArsenalModel extends Model
+{
+	use ModelTrait {
+		list as public listTrait;
+	}
+
 	protected $table = 'season_arsenal';
 
-	// Atributos de la clase BaseModel
 	protected $allowedFields = ['serieId', 'seasonNumber', 'arsenalId', 'rangerId'];
+
 	protected $validationRules = [
 		'serieId' => 'required|is_natural_no_zero|exists_id[series.id]',
 		'seasonNumber' => 'required|is_natural_no_zero',
@@ -28,10 +29,68 @@ class SeasonArsenalModel extends APIModel
 		]
 	];
 
+	public function list($serieId, $seasonNumber, $query)
+	{
+		$this->setTable('view_season_arsenal');
+
+		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('arsenalName', $query['q'], 'both');
+			$this->groupEnd();
+		}
+
+		return $this->listTrait($query);
+	}
+
+	public function get($serieId, $seasonNumber, $arsenalId)
+	{
+		$this->where('serieId', $serieId)
+			->where('seasonNumber', $seasonNumber)
+			->where('arsenalId', $arsenalId);
+
+		$record = $this->findAll();
+		return count($record) ? $record[0] : null;
+	}
+
 	public function insertRecord(&$record)
 	{
-		// Se elimina la propiedad del Id de la temporada
-		unset($record['seasonId']);
-		return parent::insertRecord($record);
+		$prevRecord = $this->get($record['serieId'], $record['seasonNumber'], $record['arsenalId']);
+		if (isset($prevRecord)) {
+			return 'There one or more season-arsenal relationship records';
+		}
+
+		// Se procede a insertar el registro en la base de datos
+		$recordId = $this->insert($record);
+		if ($recordId === false) {
+			return $this->errors();
+		}
+
+		return true;
+	}
+
+	public function deleteRecord($serieId, $seasonNumber, $arsenalId)
+	{
+		$this->where('serieId', $serieId)
+			->where('seasonNumber', $seasonNumber)
+			->where('arsenalId', $arsenalId);
+
+		if (!$this->delete()) {
+			return $this->errors();
+		}
+		return true;
+	}
+
+	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
+	{
+		$errors = [];
+
+		$this->validateRecordProperties($postData, $method, $prevRecord);
+
+		if (!$this->validate($postData)) {
+			$errors = array_merge($this->errors(), $errors);
+		}
+
+		return count($errors) > 0 ? $errors : true;
 	}
 }

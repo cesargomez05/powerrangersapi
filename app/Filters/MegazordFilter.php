@@ -6,7 +6,7 @@ use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 
-class SerieFilter implements FilterInterface
+class MegazordFilter implements FilterInterface
 {
 	/**
 	 * Do whatever processing this filter needs to do.
@@ -27,9 +27,9 @@ class SerieFilter implements FilterInterface
 	{
 		header('Content-type: application/json');
 
-		$serieId = $request->getUri()->getSegment(2);
+		$megazordId = $request->getUri()->getSegment(2);
 
-		self::checkSerie($serieId);
+		self::checkMegazord($megazordId);
 	}
 
 	/**
@@ -49,17 +49,17 @@ class SerieFilter implements FilterInterface
 		//
 	}
 
-	public static function checkSerie($serieId)
+	public static function checkMegazord($megazordId)
 	{
-		$serieModel = model('App\Models\SerieModel');
+		$megazordModel = model('App\Models\MegazordModel');
 
-		$validationId = $serieModel->validateId($serieId, 'serieId', 'Serie id is not valid');
+		$validationId = $megazordModel->validateId($megazordId, 'megazordId', 'Megazord id is not valid');
 		if ($validationId !== true) {
 			header('HTTP/1.1 ' . 500);
 			die(json_encode(['errors' => $validationId]));
 		}
 
-		$serie = $serieModel->get($serieId);
+		$serie = $megazordModel->get($megazordId);
 		if (!isset($serie)) {
 			header('HTTP/1.1 ' . 404);
 			die(json_encode([

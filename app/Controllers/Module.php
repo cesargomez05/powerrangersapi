@@ -11,6 +11,13 @@ class Module extends BaseResource
 
 	protected $modelName = 'App\Models\ModuleModel';
 
+	/**
+	 * @var \App\Models\ModuleModel
+	 */
+	protected $model;
+
+	protected $helpers = ['app'];
+
 	public function index()
 	{
 	}
@@ -30,17 +37,4 @@ class Module extends BaseResource
 	public function delete($id)
 	{
 	}
-
-	/*
-	protected function validateDeleteRecord($id)
-	{
-		$errors = [];
-
-		$model = new PermissionModel();
-		if ($model->checkRecordsByForeignKey(['moduleId' => $id])) {
-			$errors['permissions'] = "The module has one or many permissions records";
-		}
-
-		return count($errors) ? $errors : true;
-	}*/
 }

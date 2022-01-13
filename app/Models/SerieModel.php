@@ -14,7 +14,7 @@ class SerieModel extends Model
 	protected $allowedFields = ['slug', 'title'];
 
 	protected $validationRules = [
-		'slug' => 'required|max_length[50]|is_unique[series.slug,id,{_id}]',
+		'slug' => 'required_with[title]|max_length[50]|is_unique[series.slug,id,{_id}]',
 		'title' => 'required|max_length[50]'
 	];
 
@@ -52,7 +52,7 @@ class SerieModel extends Model
 		// Se establece el Id de la serie creada en los datos de la temporada
 		$record['season']['serieId'] = $recordId;
 
-		$seasonModel = new \App\Models\SeasonModel();
+		$seasonModel = model('App\Models\SeasonModel');
 		$seasonResult = $seasonModel->insertRecord($record['season'], true);
 		if ($seasonResult !== true) {
 			$this->db->transRollback();
@@ -90,7 +90,7 @@ class SerieModel extends Model
 		// Se valida los datos de la temporada (si es método POST)
 		if ($method == 'post') {
 			if (isset($postData['season'])) {
-				$seasonModel = new \App\Models\SeasonModel();
+				$seasonModel = model('App\Models\SeasonModel');
 
 				// Se omite la validación del id de la temporada asociada a la serie a crear
 				$seasonModel->setValidationRule('serieId', 'permit_empty');

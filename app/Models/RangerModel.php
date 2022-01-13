@@ -44,7 +44,7 @@ class RangerModel extends Model
 		}
 
 		if (isset($record['morpher'])) {
-			$morpherModel = new \App\Models\MorpherModel();
+			$morpherModel = model('App\Models\MorpherModel');
 
 			$morpherResult = $morpherModel->insertRecord($record['morpher'], true);
 			if ($morpherResult !== true) {
@@ -78,7 +78,7 @@ class RangerModel extends Model
 		$this->db->transBegin();
 
 		if (isset($record['morpher'])) {
-			$morpherModel = new \App\Models\MorpherModel();
+			$morpherModel = model('App\Models\MorpherModel');
 
 			$morpherResult = $morpherModel->insertRecord($record['morpher']);
 			if ($morpherResult !== true) {
@@ -122,21 +122,21 @@ class RangerModel extends Model
 		$slugSettings = ['title' => 'name', 'field' => 'slug', 'id' => [$this->primaryKey]];
 		$this->setSlugValue($postData, $slugSettings, isset($prevRecord) ? [$prevRecord[$this->primaryKey]] : null);
 
+		if (!$this->validate($postData)) {
+			$errors = array_merge($this->errors(), $errors);
+		}
+
 		// Se valida los datos del Morpher
 		if (isset($postData['morpher'])) {
 			// Se elimina el Id del morpher y los Ids de rangers a asociar al morpher (Si aplica)
 			unset($postData['morpherId']);
 			unset($postData['morpher']['rangersId']);
 
-			$morpherModel = new \App\Models\MorpherModel();
+			$morpherModel = model('App\Models\MorpherModel');
 			$morpherErrors = $morpherModel->validateRecord($postData['morpher'], isset($postFiles['morpher']) ? $postFiles['morpher'] : [], 'post');
 			if ($morpherErrors !== true) {
 				$errors['morpher'] = $morpherErrors;
 			}
-		}
-
-		if (!$this->validate($postData)) {
-			$errors = array_merge($this->errors(), $errors);
 		}
 
 		return count($errors) > 0 ? $errors : true;

@@ -11,72 +11,129 @@ class Villain extends BaseResource
 
 	protected $modelName = 'App\Models\VillainModel';
 
+	/**
+	 * @var \App\Models\VillainModel
+	 */
+	protected $model;
+
+	protected $helpers = ['app'];
+
 	public function index()
 	{
+		$filter = $this->request->getGet();
+		set_pagination($filter);
+
+		$villains = $this->model->list($filter);
+		return $this->respond($villains);
 	}
 
 	public function show($id)
 	{
+		$validationId = $this->model->validateId($id);
+		if ($validationId !== true) {
+			return $this->respond(['errors' => $validationId], 400);
+		}
+
+		$villain = $this->model->get($id);
+		if (!isset($villain)) {
+			return $this->failNotFound('Record not found');
+		}
+		return $this->respond(['record' => $villain]);
 	}
 
 	public function create()
 	{
+		// Datos de entrada de la petición
+		$postData = $this->request->getPost();
+		$postFiles = $this->request->getFiles();
+
+		// Se valida si no existen datos enviados por método POST
+		if (empty($postData) && empty($postFiles)) {
+			return $this->fail('Please define the data to be recorded');
+		}
+
+		// Se valida los datos de la petición
+		$validateRecord = $this->model->validateRecord($postData, $postFiles, 'post');
+		if ($validateRecord !== true) {
+			return $this->respond(['errors' => $validateRecord], 400);
+		}
+
+		$result = $this->model->insertRecord($postData);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		// Se "mueve" el archivo subido a la respectiva carpeta
+		move_files($postData);
+
+		unset($postData['seasonvillain']);
+
+		return $this->respondCreated($postData);
 	}
 
 	public function update($id)
 	{
+		$validationId = $this->model->validateId($id);
+		if ($validationId !== true) {
+			return $this->respond(['errors' => $validationId], 400);
+		}
+
+		$villain = $this->model->get($id);
+		if (!isset($villain)) {
+			return $this->failNotFound('Record not found');
+		}
+
+		// Datos de entrada de la petición
+		$postData = $this->request->getPost();
+		unset($postData['_method']);
+		$postFiles = $this->request->getFiles();
+
+		// Se valida si no existen datos enviados por método POST
+		if (empty($postData) && empty($postFiles)) {
+			return $this->fail('Please define the data to be recorded');
+		}
+
+		// Se obtiene el tipo de petición que se realiza a la función (PUT o PATCH)
+		$request = service('request');
+		$method = $request->getMethod();
+
+		// Se valida los datos de la petición
+		$validateRecord = $this->model->validateRecord($postData, $postFiles, $method, $villain);
+		if ($validateRecord !== true) {
+			return $this->respond(['errors' => $validateRecord], 400);
+		}
+
+		$result = $this->model->updateRecord($postData, $id);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		// Se "mueve" el archivo subido a la respectiva carpeta
+		move_files($postData);
+
+		return $this->success("Record successfully updated");
 	}
 
 	public function delete($id)
 	{
+		$validationId = $this->model->validateId($id);
+		if ($validationId !== true) {
+			return $this->respond(['errors' => $validationId], 400);
+		}
+
+		$villain = $this->model->get($id);
+		if (!isset($villain)) {
+			return $this->failNotFound('Record not found');
+		}
+
+		$result = $this->model->deleteRecord($id);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		return $this->success("Record successfully deleted");
 	}
-
-	/*
-	protected function insertRecord(&$postData, $filesData)
-	{
-		// Se inicializa una transacción sobre la base de datos
-		$this->model->db->transBegin();
-
-		// Se procede a insertar el registro en la base de datos
-		$villain = $this->model->insertRecord($postData);
-		if (isset($villain['error'])) {
-			// Se retorna los mensajes de error de la validación
-			$this->model->db->transRollback();
-			return $villain['error'];
-		}
-
-		// Se define el Id del villano en el registro de SeasonVillain
-		$postData['seasonvillain']['villainId'] = $villain['primaryKey'];
-
-		// Se inserta los datos del SeasonVillain
-		$seasonVillainModel = new SeasonVillainModel();
-		$seasonVillain = $seasonVillainModel->insertRecord($postData['seasonvillain']);
-		if (isset($seasonVillain['error'])) {
-			// Se retorna los mensajes de error de la validación
-			$this->model->db->transRollback();
-			return ['seasonvillain' => $seasonVillain['error']];
-		}
-
-		// Se finaliza la transacción
-		$this->model->db->transCommit();
-
-		// Se procede a mover los archivos asociados al arsenal
-		$this->moveRecordFiles($filesData, $postData);
-
-		// Se retorna true para indicar que la función se ejecutó correctamente
-		return true;
-	}
-
-	protected function validateDeleteRecord($id)
-	{
-		$errors = [];
-
-		// Se consulta los registros 
-		$model = new SeasonVillainModel();
-		if ($model->checkRecordsByForeignKey(['villainId' => $id])) {
-			$errors['seasonVillain'] = "The villain has one or many season-villain relation records";
-		}
-
-		return count($errors) ? $errors : true;
-	}*/
 }

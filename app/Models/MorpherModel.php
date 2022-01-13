@@ -62,7 +62,7 @@ class MorpherModel extends Model
 		if (isset($record['rangersId'])) {
 			$rangersId = explode(',', $record['rangersId']);
 
-			$rangerModel = new \App\Models\RangerModel();
+			$rangerModel = model('App\Models\RangerModel');
 			$result = $rangerModel->builder()->whereIn('id', $rangersId)->update(['morpherId' => $recordId]);
 			if ($result !== true) {
 				$this->db->transRollback();
