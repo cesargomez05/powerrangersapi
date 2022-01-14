@@ -13,8 +13,8 @@ class UserModel extends Model
 
 	protected $primaryKey = 'username';
 
-	// Atributos de la clase BaseModel
 	protected $allowedFields = ['username', 'password', 'first_name', 'last_name', 'email'];
+
 	protected $validationRules = [
 		'username' => 'required|max_length[80]|is_unique[oauth_users.username,username,{_username}]',
 		'password' => 'required|min_length[8]|max_length[20]|validate_password',
@@ -33,91 +33,149 @@ class UserModel extends Model
 			'validate_password' => 'The new password must be between 8 and 20 characters, at least 1 Uppercase and Lowercase character, 1 digit and 1 of the following characters: !@#$%^&*-'
 		]
 	];
+
 	protected $returnType = 'App\Entities\User';
 
-	public function validateRecord(&$filesData, $property, &$postData, $postFiles, $ids, $method, $record = null, $nodes = [])
+	public function validateId($id, $property = 'username', $message = 'Username is not valid')
 	{
-		// Se valida si el proceso corresponde a un nuevo registro de serie
-		if ($method == 'post') {
-			// Se valida si existe datos de al menos 1 permiso
-			if (isset($postData['permissions'])) {
-				if (!is_array($postData['permissions'])) {
-					return ['permissions' => 'The permissions value is not a array'];
-				}
-
-				// Se invoca la clase Model asociada a los permisos; y se omite la validación del Id del usuario
-				$permissionsModel = new PermissionModel();
-				$permissionsModel->removeValidationRule('username');
-
-				// Se recorre la lista de permisos para validar los datos de cada uno de ellos
-				$errors = [];
-				$modulesId = [];
-				foreach ($postData['permissions'] as $key => &$value) {
-					// Se ejecuta la validación de los datos de cada uno de los permisos
-					$validRecord = $permissionsModel->validateRecord($filesData['permissions'], $key, $value, $postFiles, [], 'post', null, array_merge($nodes, ['permissions', $key]));
-					if ($validRecord !== true) {
-						$errors[$key] = $validRecord;
-					} else {
-						if (in_array($value['moduleId'], $modulesId)) {
-							$errors[$key] = 'The moduleId is used by other permission record';
-						} else {
-							array_push($modulesId, $value['moduleId']);
-						}
-					}
-				}
-				if (count($errors)) {
-					return ['permissions' => $errors];
-				}
-			}
+		$validation = \Config\Services::validation();
+		$validation->setRule($property, $message, 'required|max_length[80]');
+		if ($validation->run([$property => $id])) {
+			return true;
+		} else {
+			return $validation->getErrors();
 		}
-		$response = parent::validateRecord($filesData, $property, $postData, $postFiles, $ids, $method, $record, $nodes);
-		if ($response === true) {
-			if ($method == 'post') {
-				// Se encripta la contraseña usando MD5
-				$postData['password'] = sha1($postData['password']);
-			} elseif (in_array($method, ['put', 'patch'])) {
-				if (isset($postData['password'])) {
-					// Se verifica las credenciales del usuario, validando con la contraseña previamente ingresada
-					$user = $this->checkUser($record->username, $postData['password']);
-					if ($user == false) {
-						return ['user' => 'Las credenciales de acceso son inválidas'];
-					} else {
-						// Se establece la nueva contraseña
-						$postData['password'] = sha1($postData['newPassword']);
-					}
-				}
-			}
-		}
-		return $response;
 	}
 
-	public function validateRecordFields(&$record, $ids, $method, $prevRecord = null): bool
+	protected function setRecordsCondition($query)
 	{
-		// Se define los datos de la nueva contraseña (si aplica)
-		if (in_array($method, ['put', 'patch'])) {
-			if (isset($record['newPassword']) || isset($record['confirmPassword'])) {
-				if (!isset($record['password'])) {
-					$record['password'] = '';
-				}
-			}
-			if (!isset($record['newPassword'])) {
-				$record['newPassword'] = '';
-			}
-			if (!isset($record['confirmPassword'])) {
-				$record['confirmPassword'] = '';
-			}
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('first_name', $query['q'], 'both');
+			$this->orLike('last_name', $query['q'], 'both');
+			$this->groupEnd();
 		}
-		return parent::validateRecordFields($record, $ids, $method, $prevRecord);
+	}
+
+	public function get($id)
+	{
+		$this->where('username', $id);
+		$record = $this->findAll();
+		return count($record) ? $record[0] : null;
 	}
 
 	public function insertRecord(&$record)
 	{
-		// Se ejecuta el método para insertar el registro
-		$user = parent::insertRecord($record);
-		if (!isset($user['error'])) {
-			// Se elimina el valor de la contraseña (si no hubo error)
-			unset($record['password']);
+		$this->db->transBegin();
+
+		$this->setValidationRule('password', 'permit_empty');
+		$this->setValidationRule('confirmPassword', 'permit_empty');
+
+		// Se procede a insertar el registro en la base de datos
+		$recordId = $this->insert($record);
+		if ($recordId === false) {
+			$this->db->transRollback();
+			return $this->errors();
 		}
+
+		if (isset($record['permissions']) && count($record['permissions']) > 0) {
+			$permissionModel = model('App\Models\PermissionModel');
+			$permissionResult = $permissionModel->insertPermissions($record['username'], $record['permissions']);
+			if ($permissionResult === false) {
+				$this->db->transRollback();
+				return $permissionModel->errors();
+			}
+		}
+
+		$this->db->transCommit();
+
+		return true;
+	}
+
+	public function updateRecord($record, $id)
+	{
+		$this->where('username', $id);
+
+		$result = $this->update(null, $record);
+		return $result === false ? $this->errors() : true;
+	}
+
+	public function deleteRecord($id)
+	{
+		$this->where('username', $id);
+		if (!$this->delete()) {
+			return $this->errors();
+		}
+		return true;
+	}
+
+	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
+	{
+		$errors = [];
+
+		if ($method == 'post') {
+			$this->setValidationRule('confirmPassword', 'required_with[password]|matches[password]');
+		}
+		if (in_array($method, ['put', 'patch'])) {
+			if (!isset($postData['username']) || empty($postData['username'])) {
+				$postData['username'] = $prevRecord['username'];
+			}
+			if (!isset($postData['password']) || empty($postData['password'])) {
+				$this->setValidationRule('password', 'permit_empty');
+			}
+
+			$this->setValidationRule('newPassword', 'required_with[password]|max_length[100]|validate_password');
+			$this->setValidationRule('confirmPassword', 'required_with[password]|matches[newPassword]');
+		}
+
+		$this->validateRecordProperties($postData, $method, $prevRecord);
+
+		if (!$this->validate($postData)) {
+			$errors = array_merge($this->errors(), $errors);
+		}
+
+		// Se valida si no hubo error de validación en el campo de contraseña, para establecer el respectivo valor encriptado
+		if (!isset($errors['password'])) {
+			if (isset($postData['password'])) {
+				$postData['password'] = sha1($postData['password']);
+			} else {
+				unset($postData['password']);
+			}
+		}
+
+		if ($method == 'post') {
+			if (isset($postData['permissions'])) {
+				if (!is_array($postData['permissions'])) {
+					$errors = array_merge(['permissions' => 'The permissions value is not a array'], $errors);
+				} else {
+					$permissionModel = model('App\Models\PermissionModel');
+					$permissionModel->setValidationRule('username', 'permit_empty');
+
+					$permissionsErrors = [];
+					$modulesId = [];
+
+					foreach ($postData['permissions'] as $i => $permission) {
+						$permissionErrors = $permissionModel->validateRecord($permission, [], 'post');
+						if ($permissionErrors !== true) {
+							$permissionsErrors[$i] = $permissionErrors;
+						} else {
+							$moduleId = $permission['moduleId'];
+							if (in_array($moduleId, $modulesId)) {
+								$permissionsErrors[$i] = ['moduleId' => 'The module id is used by other record'];
+							} else {
+								$modulesId[] = $moduleId;
+							}
+						}
+					}
+
+					if (count($permissionsErrors) > 0) {
+						$errors['permissions'] = $permissionsErrors;
+					}
+				}
+			}
+		}
+
+		return count($errors) > 0 ? $errors : true;
 	}
 
 	public function checkUser($username, $password)

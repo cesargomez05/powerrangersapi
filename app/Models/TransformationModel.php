@@ -124,7 +124,7 @@ class TransformationModel extends Model
 					if (in_array($rangerId, $rangersId)) {
 						$rangersErrors[$i] = ['rangerId' => 'The ranger id is used by other record'];
 					} else {
-						$rangersId[] = $postData['rangers'][$i]['rangerId'];
+						$rangersId[] = $rangerId;
 					}
 				}
 			}

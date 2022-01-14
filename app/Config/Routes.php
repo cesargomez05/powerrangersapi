@@ -240,28 +240,27 @@ $routes->group('seasonvillain', ['filter' => 'auth:villain'], function ($routes)
 // Módulos
 $routes->group('modules', ['filter' => 'auth:module'], function ($routes) {
 	$routes->get('', 'Module::index');
-	$routes->get('(:alpha)', 'Module::show/$1');
+	$routes->get('(:alphanum)', 'Module::show/$1');
 	$routes->post('', 'Module::create');
-	$routes->put('(:alpha)', 'Module::update/$1');
-	$routes->patch('(:alpha)', 'Module::update/$1');
-	$routes->delete('(:alpha)', 'Module::delete/$1');
+	$routes->put('(:alphanum)', 'Module::update/$1');
+	$routes->patch('(:alphanum)', 'Module::update/$1');
+	$routes->delete('(:alphanum)', 'Module::delete/$1');
 });
 
 // Usuarios
 $routes->group('users', ['filter' => 'auth:user'], function ($routes) {
 	$routes->get('', 'User::index');
-	$routes->get('(:num)', 'User::show/$1');
+	$routes->get('(:alphanum)', 'User::show/$1');
 	$routes->post('', 'User::create');
-	$routes->put('(:num)', 'User::update/$1');
-	$routes->patch('(:num)', 'User::update/$1');
-	$routes->delete('(:num)', 'User::delete/$1');
+	$routes->put('(:alphanum)', 'User::update/$1');
+	$routes->delete('(:alphanum)', 'User::delete/$1');
 });
 
 // Permisos
 $routes->group('permissions', ['filter' => 'auth:permission'], function ($routes) {
-	$routes->get('(:num)', 'Permission::index/$1');
-	$routes->post('(:num)', 'Permission::create/$1');
-	$routes->delete('(:num)/(:alpha)', 'Permission::delete/$1/$2');
+	$routes->get('(:alphanum)', 'Permission::index/$1');
+	$routes->post('(:alphanum)', 'Permission::create/$1');
+	$routes->delete('(:alphanum)/(:alphanum)', 'Permission::delete/$1/$2');
 });
 
 // API
