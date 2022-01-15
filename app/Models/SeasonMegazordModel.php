@@ -8,10 +8,12 @@ use CodeIgniter\Model;
 class SeasonMegazordModel extends Model
 {
 	use ModelTrait {
-		list as public listTrait;
+		insertRecord as insertRecordTrait;
 	}
 
 	protected $table = 'season_megazord';
+
+	protected $useAutoIncrement = false;
 
 	protected $allowedFields = ['serieId', 'seasonNumber', 'megazordId'];
 
@@ -28,7 +30,7 @@ class SeasonMegazordModel extends Model
 		]
 	];
 
-	public function list($serieId, $seasonNumber, $query)
+	protected function setRecordsCondition($query, $serieId, $seasonNumber)
 	{
 		$this->setTable('view_season_megazord');
 
@@ -38,46 +40,24 @@ class SeasonMegazordModel extends Model
 			$this->orLike('megazordName', $query['q'], 'both');
 			$this->groupEnd();
 		}
-
-		return $this->listTrait($query);
 	}
 
-	public function get($serieId, $seasonNumber, $megazordId)
+	protected function setRecordCondition($serieId, $seasonNumber, $megazordId)
 	{
 		$this->where('serieId', $serieId)
 			->where('seasonNumber', $seasonNumber)
 			->where('megazordId', $megazordId);
-
-		$record = $this->findAll();
-		return count($record) ? $record[0] : null;
 	}
 
 	public function insertRecord(&$record)
 	{
-		$prevRecord = $this->get($record['serieId'], $record['seasonNumber'], $record['megazordId']);
-		if (isset($prevRecord)) {
+		$prevRecord = $this->check($record['serieId'], $record['seasonNumber'], $record['megazordId']);
+		if ($prevRecord) {
 			return 'There one or more season-megazord relationship records';
 		}
 
 		// Se procede a insertar el registro en la base de datos
-		$recordId = $this->insert($record);
-		if ($recordId === false) {
-			return $this->errors();
-		}
-
-		return true;
-	}
-
-	public function deleteRecord($serieId, $seasonNumber, $megazordId)
-	{
-		$this->where('serieId', $serieId)
-			->where('seasonNumber', $seasonNumber)
-			->where('megazordId', $megazordId);
-
-		if (!$this->delete()) {
-			return $this->errors();
-		}
-		return true;
+		return $this->insertRecordTrait($record);
 	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)

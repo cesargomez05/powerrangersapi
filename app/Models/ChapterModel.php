@@ -7,11 +7,11 @@ use CodeIgniter\Model;
 
 class ChapterModel extends Model
 {
-	use ModelTrait {
-		list as public listTrait;
-	}
+	use ModelTrait;
 
 	protected $table = 'chapters';
+
+	protected $useAutoIncrement = false;
 
 	// Atributos de la clase BaseModel
 	protected $allowedFields = ['serieId', 'seasonNumber', 'number', 'slug', 'title', 'titleSpanish', 'summary'];
@@ -26,7 +26,7 @@ class ChapterModel extends Model
 		'summary' => 'permit_empty'
 	];
 
-	public function list($serieId, $seasonNumber, $query)
+	protected function setRecordsCondition($query, $serieId, $seasonNumber)
 	{
 		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber);
 		if (isset($query['q']) && !empty($query['q'])) {
@@ -35,43 +35,11 @@ class ChapterModel extends Model
 			$this->orLike('titleSpanish', $query['q'], 'both');
 			$this->groupEnd();
 		}
-
-		return $this->listTrait($query);
 	}
 
-	public function get($serieId, $seasonNumber, $number)
+	protected function setRecordCondition($serieId, $seasonNumber, $number)
 	{
 		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber)->where('number', $number);
-		$record = $this->findAll();
-		return count($record) ? $record[0] : null;
-	}
-
-	public function insertRecord(&$record)
-	{
-		// Se procede a insertar el registro en la base de datos
-		$recordId = $this->insert($record);
-		if ($recordId === false) {
-			return $this->errors();
-		}
-
-		return true;
-	}
-
-	public function updateRecord($record, $serieId, $seasonNumber, $number)
-	{
-		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber)->where('number', $number);
-
-		$result = $this->update(null, $record);
-		return $result === false ? $this->errors() : true;
-	}
-
-	public function deleteRecord($serieId, $seasonNumber, $number)
-	{
-		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber)->where('number', $number);
-		if (!$this->delete()) {
-			return $this->errors();
-		}
-		return true;
 	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)

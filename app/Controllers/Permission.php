@@ -28,7 +28,7 @@ class Permission extends BaseResource
 		$filter = $this->request->getGet();
 		set_pagination($filter);
 
-		$userPermissions = $this->model->list($userId, $filter);
+		$userPermissions = $this->model->list($filter, $userId);
 		return $this->respond($userPermissions);
 	}
 
@@ -72,8 +72,8 @@ class Permission extends BaseResource
 			return $validateUser;
 		}
 
-		$permission = $this->model->get($userId, $moduleId);
-		if (!isset($permission)) {
+		$permission = $this->model->check($userId, $moduleId);
+		if (!$permission) {
 			return $this->failNotFound('Record not found');
 		}
 

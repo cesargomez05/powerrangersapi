@@ -24,7 +24,10 @@ class Filters extends BaseConfig
 		'csrf' => CSRF::class,
 		'toolbar' => DebugToolbar::class,
 		'honeypot' => Honeypot::class,
+		// Autenticación en la API
 		'auth' => AuthFilter::class,
+		// Módulos de la aplicación
+		'actor_filter' => \App\Filters\ActorFilter::class,
 		'serie_filter' => SerieFilter::class,
 		'season_filter' => SeasonFilter::class,
 		'megazord_filter' => MegazordFilter::class,

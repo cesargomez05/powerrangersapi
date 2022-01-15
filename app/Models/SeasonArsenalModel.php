@@ -8,10 +8,12 @@ use CodeIgniter\Model;
 class SeasonArsenalModel extends Model
 {
 	use ModelTrait {
-		list as public listTrait;
+		insertRecord as insertRecordTrait;
 	}
 
 	protected $table = 'season_arsenal';
+
+	protected $useAutoIncrement = false;
 
 	protected $allowedFields = ['serieId', 'seasonNumber', 'arsenalId', 'rangerId'];
 
@@ -29,7 +31,7 @@ class SeasonArsenalModel extends Model
 		]
 	];
 
-	public function list($serieId, $seasonNumber, $query)
+	protected function setRecordsCondition($query, $serieId, $seasonNumber)
 	{
 		$this->setTable('view_season_arsenal');
 
@@ -39,46 +41,24 @@ class SeasonArsenalModel extends Model
 			$this->orLike('arsenalName', $query['q'], 'both');
 			$this->groupEnd();
 		}
-
-		return $this->listTrait($query);
 	}
 
-	public function get($serieId, $seasonNumber, $arsenalId)
+	protected function setRecordCondition($serieId, $seasonNumber, $arsenalId)
 	{
 		$this->where('serieId', $serieId)
 			->where('seasonNumber', $seasonNumber)
 			->where('arsenalId', $arsenalId);
-
-		$record = $this->findAll();
-		return count($record) ? $record[0] : null;
 	}
 
 	public function insertRecord(&$record)
 	{
-		$prevRecord = $this->get($record['serieId'], $record['seasonNumber'], $record['arsenalId']);
-		if (isset($prevRecord)) {
+		$prevRecord = $this->check($record['serieId'], $record['seasonNumber'], $record['arsenalId']);
+		if ($prevRecord) {
 			return 'There one or more season-arsenal relationship records';
 		}
 
 		// Se procede a insertar el registro en la base de datos
-		$recordId = $this->insert($record);
-		if ($recordId === false) {
-			return $this->errors();
-		}
-
-		return true;
-	}
-
-	public function deleteRecord($serieId, $seasonNumber, $arsenalId)
-	{
-		$this->where('serieId', $serieId)
-			->where('seasonNumber', $seasonNumber)
-			->where('arsenalId', $arsenalId);
-
-		if (!$this->delete()) {
-			return $this->errors();
-		}
-		return true;
+		return $this->insertRecordTrait($record);
 	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)

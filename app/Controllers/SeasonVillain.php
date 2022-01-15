@@ -23,7 +23,7 @@ class SeasonVillain extends BaseResource
 		$filter = $this->request->getGet();
 		set_pagination($filter);
 
-		$seasonVillains = $this->model->list($serieId, $seasonNumber, $filter);
+		$seasonVillains = $this->model->list($filter, $serieId, $seasonNumber);
 		return $this->respond($seasonVillains);
 	}
 
@@ -58,8 +58,8 @@ class SeasonVillain extends BaseResource
 
 	public function delete($serieId, $seasonNumber, $villainId)
 	{
-		$seasonZord = $this->model->get($serieId, $seasonNumber, $villainId);
-		if (!isset($seasonZord)) {
+		$seasonZord = $this->model->check($serieId, $seasonNumber, $villainId);
+		if (!$seasonZord) {
 			return $this->failNotFound('Record not found');
 		}
 

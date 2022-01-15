@@ -23,7 +23,7 @@ class SeasonMegazord extends BaseResource
 		$filter = $this->request->getGet();
 		set_pagination($filter);
 
-		$seasonMegazords = $this->model->list($serieId, $seasonNumber, $filter);
+		$seasonMegazords = $this->model->list($filter, $serieId, $seasonNumber);
 		return $this->respond($seasonMegazords);
 	}
 
@@ -58,8 +58,8 @@ class SeasonMegazord extends BaseResource
 
 	public function delete($serieId, $seasonNumber, $megazordId)
 	{
-		$seasonMegazord = $this->model->get($serieId, $seasonNumber, $megazordId);
-		if (!isset($seasonMegazord)) {
+		$seasonMegazord = $this->model->check($serieId, $seasonNumber, $megazordId);
+		if (!$seasonMegazord) {
 			return $this->failNotFound('Record not found');
 		}
 

@@ -8,10 +8,12 @@ use CodeIgniter\Model;
 class PermissionModel extends Model
 {
 	use ModelTrait {
-		list as public listTrait;
+		insertRecord as insertRecordTrait;
 	}
 
 	protected $table = 'permissions';
+
+	protected $useAutoIncrement = false;
 
 	protected $allowedFields = ['username', 'moduleId', 'create', 'read', 'update', 'delete'];
 
@@ -24,7 +26,7 @@ class PermissionModel extends Model
 		'delete' => 'required|is_natural|in_list[0,1]'
 	];
 
-	public function list($username, $query)
+	protected function setRecordsCondition($query, $username)
 	{
 		$this->setTable('view_permissions');
 
@@ -34,17 +36,12 @@ class PermissionModel extends Model
 			$this->orLike('moduleName', $query['q'], 'both');
 			$this->groupEnd();
 		}
-
-		return $this->listTrait($query);
 	}
 
-	public function get($username, $moduleId)
+	protected function setRecordCondition($username, $moduleId)
 	{
 		$this->where('username', $username)
 			->where('moduleId', $moduleId);
-
-		$record = $this->findAll();
-		return count($record) ? $record[0] : null;
 	}
 
 	public function insertRecord(&$record)
@@ -55,23 +52,7 @@ class PermissionModel extends Model
 		}
 
 		// Se procede a insertar el registro en la base de datos
-		$recordId = $this->insert($record);
-		if ($recordId === false) {
-			return $this->errors();
-		}
-
-		return true;
-	}
-
-	public function deleteRecord($username, $moduleId)
-	{
-		$this->where('username', $username)
-			->where('moduleId', $moduleId);
-
-		if (!$this->delete()) {
-			return $this->errors();
-		}
-		return true;
+		return $this->insertRecordTrait($record);
 	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)

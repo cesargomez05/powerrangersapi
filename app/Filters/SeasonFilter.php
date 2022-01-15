@@ -5,6 +5,7 @@ namespace App\Filters;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
+use Config\Services;
 
 class SeasonFilter implements FilterInterface
 {
@@ -31,8 +32,11 @@ class SeasonFilter implements FilterInterface
 		$serieId = $uri->getSegment(2);
 		$seasonNumber = $uri->getSegment(3);
 
-		SerieFilter::checkSerie($serieId);
-		self::checkSeason($serieId, $seasonNumber);
+		$serieValidation = SerieFilter::checkSerie($serieId);
+		if (isset($serieValidation)) {
+			return $serieValidation;
+		}
+		return self::checkSeason($serieId, $seasonNumber);
 	}
 
 	/**
@@ -58,20 +62,12 @@ class SeasonFilter implements FilterInterface
 
 		$validationId = $seasonModel->validateId($serieId, $seasonNumber);
 		if ($validationId !== true) {
-			header('HTTP/1.1 ' . 500);
-			die(json_encode(['errors' => $validationId]));
+			return Services::response()->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['error' => $validationId]);
 		}
 
 		$season = $seasonModel->get($serieId, $seasonNumber);
 		if (!isset($season)) {
-			header('HTTP/1.1 ' . 404);
-			die(json_encode([
-				'status' => 404,
-				'error' => 404,
-				'messages' => [
-					"error" => "Record not found"
-				]
-			]));
+			return Services::response()->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Season not exists']);
 		}
 	}
 }

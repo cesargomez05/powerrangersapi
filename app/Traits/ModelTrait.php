@@ -4,15 +4,18 @@ namespace App\Traits;
 
 trait ModelTrait
 {
+	protected $rulesId = 'required|is_natural_no_zero';
+
 	/**
 	 * Obtiene la lista de registros.
 	 * @param array $query Parámetros de consulta de los registros.
 	 * @return array Resultado de la consulta.
 	 */
-	public function list($query)
+	public function list($query, ...$ids)
 	{
 		if (method_exists($this, 'setRecordsCondition')) {
-			$this->setRecordsCondition($query);
+			array_unshift($ids, $query);
+			call_user_func_array(array($this, "setRecordsCondition"), $ids);
 		}
 
 		$response = [];
@@ -26,10 +29,54 @@ trait ModelTrait
 		return $response;
 	}
 
-	public function validateId($id, $property = 'id', $message = 'Id is not valid')
+	public function check(...$ids)
 	{
-		$validation = \Config\Services::validation();
-		$validation->setRule($property, $message, 'required|is_natural_no_zero');
+		call_user_func_array(array($this, "setRecordCondition"), $ids);
+		return $this->countAllResults() > 0;
+	}
+
+	public function get(...$ids)
+	{
+		call_user_func_array(array($this, "setRecordCondition"), $ids);
+		$record = $this->findAll();
+		return count($record) ? $record[0] : null;
+	}
+
+	public function insertRecord(&$record)
+	{
+		// Se procede a insertar el registro en la base de datos
+		$recordId = $this->insert($record);
+		if ($recordId === false) {
+			return $this->errors();
+		}
+
+		if ($recordId !== 0 && $this->useAutoIncrement) {
+			$record[$this->primaryKey] = $recordId;
+		}
+
+		return true;
+	}
+
+	public function updateRecord($record, ...$ids)
+	{
+		call_user_func_array(array($this, "setRecordCondition"), $ids);
+		$result = $this->update(null, $record);
+		return $result === false ? $this->errors() : true;
+	}
+
+	public function deleteRecord(...$ids)
+	{
+		call_user_func_array(array($this, "setRecordCondition"), $ids);
+		if (!$this->delete()) {
+			return $this->errors();
+		}
+		return true;
+	}
+
+	public function validateId($id, $property = 'id', $label = 'Id')
+	{
+		$validation = \Config\Services::validation(null, false);
+		$validation->setRule($property, $label, $this->rulesId);
 		if ($validation->run([$property => $id])) {
 			return true;
 		} else {
@@ -48,9 +95,11 @@ trait ModelTrait
 					} else {
 						$postData[$field] = null;
 					}
+				} else if (empty($postData[$field])) {
+					$postData[$field] = null;
 				}
 			} else {
-				if (!isset($postData[$field])) {
+				if (!isset($postData[$field]) || empty($postData[$field])) {
 					$postData[$field] = null;
 				}
 			}
@@ -66,7 +115,7 @@ trait ModelTrait
 	 */
 	private function validateUploadFiles(&$postData, $postFiles, $photoField = 'photo')
 	{
-		$validation = \Config\Services::validation();
+		$validation = \Config\Services::validation(null, false);
 		$validation->setRules([$photoField => "permit_empty|uploaded[{$photoField}]|is_image[{$photoField}]|max_size[{$photoField},1024]"]);
 		if ($validation->run($postFiles)) {
 			$file = get_dot_array($postFiles, $photoField);

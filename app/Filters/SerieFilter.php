@@ -25,11 +25,9 @@ class SerieFilter implements FilterInterface
 	 */
 	public function before(RequestInterface $request, $arguments = null)
 	{
-		header('Content-type: application/json');
-
 		$serieId = $request->getUri()->getSegment(2);
 
-		self::checkSerie($serieId);
+		return self::checkSerie($serieId);
 	}
 
 	/**

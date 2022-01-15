@@ -23,7 +23,7 @@ class MegazordZord extends BaseResource
 		$filter = $this->request->getGet();
 		set_pagination($filter);
 
-		$megazordZords = $this->model->list($megazordId, $filter);
+		$megazordZords = $this->model->list($filter, $megazordId);
 		return $this->respond($megazordZords);
 	}
 
@@ -57,8 +57,8 @@ class MegazordZord extends BaseResource
 
 	public function delete($megazordId, $zordId)
 	{
-		$seasonMegazord = $this->model->get($megazordId, $zordId);
-		if (!isset($seasonMegazord)) {
+		$seasonMegazord = $this->model->check($megazordId, $zordId);
+		if (!$seasonMegazord) {
 			return $this->failNotFound('Record not found');
 		}
 

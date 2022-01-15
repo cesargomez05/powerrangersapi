@@ -8,11 +8,13 @@ use CodeIgniter\Model;
 class SeasonModel extends Model
 {
 	use ModelTrait {
-		list as public listTrait;
+		insertRecord as insertRecordTrait;
 		validateId as public validateIdTrait;
 	}
 
 	protected $table = 'seasons';
+
+	protected $useAutoIncrement = false;
 
 	protected $allowedFields = ['serieId', 'number', 'year', 'title', 'ageId', 'synopsis'];
 
@@ -25,21 +27,7 @@ class SeasonModel extends Model
 		'ageId' => 'required|is_natural_no_zero|exists_id[ages.id]'
 	];
 
-	public function validateId($serieId, $seasonNumber)
-	{
-		$validateSerieId = $this->validateIdTrait($serieId, 'serieId', 'Serie id is not valid');
-		$errors = $validateSerieId ? [] : $validateSerieId;
-
-		$validation = \Config\Services::validation();
-		$validation->setRule('seasonNumber', 'Season number is not valid', 'required|is_natural_no_zero');
-		if (!$validation->run(['serieId' => $serieId, 'seasonNumber' => $seasonNumber])) {
-			$errors = array_merge($errors, $validation->getErrors());
-		}
-
-		return count($errors) == 0 ? true : $errors;
-	}
-
-	public function list($serieId, $query)
+	protected function setRecordsCondition($query, $serieId)
 	{
 		$this->where('serieId', $serieId);
 		if (isset($query['q']) && !empty($query['q'])) {
@@ -47,15 +35,11 @@ class SeasonModel extends Model
 			$this->orLike('title', $query['q'], 'both');
 			$this->groupEnd();
 		}
-
-		return $this->listTrait($query);
 	}
 
-	public function get($serieId, $number)
+	protected function setRecordCondition($serieId, $number)
 	{
 		$this->where('serieId', $serieId)->where('number', $number);
-		$record = $this->findAll();
-		return count($record) ? $record[0] : null;
 	}
 
 	public function insertRecord(&$record, $subTransaction = false)
@@ -76,14 +60,10 @@ class SeasonModel extends Model
 		}
 
 		// Se procede a insertar el registro en la base de datos
-		$recordId = $this->insert($record);
-		if ($recordId === false) {
+		$result = $this->insertRecordTrait($record);
+		if ($result !== true) {
 			$this->db->transRollback();
-			return $this->errors();
-		}
-
-		if ($recordId !== 0) {
-			$record[$this->primaryKey] = $recordId;
+			return $result;
 		}
 
 		if (!$subTransaction) {
@@ -93,21 +73,18 @@ class SeasonModel extends Model
 		return true;
 	}
 
-	public function updateRecord($record, $serieId, $number)
+	public function validateId($serieId, $seasonNumber)
 	{
-		$this->where('serieId', $serieId)->where('number', $number);
+		$validateSerieId = $this->validateIdTrait($serieId, 'serieId', 'Serie id');
+		$errors = $validateSerieId ? [] : $validateSerieId;
 
-		$result = $this->update(null, $record);
-		return $result === false ? $this->errors() : true;
-	}
-
-	public function deleteRecord($serieId, $number)
-	{
-		$this->where('serieId', $serieId)->where('number', $number);
-		if (!$this->delete()) {
-			return $this->errors();
+		$validation = \Config\Services::validation();
+		$validation->setRule('seasonNumber', 'Season number is not valid', 'required|is_natural_no_zero');
+		if (!$validation->run(['serieId' => $serieId, 'seasonNumber' => $seasonNumber])) {
+			$errors = array_merge($errors, $validation->getErrors());
 		}
-		return true;
+
+		return count($errors) == 0 ? true : $errors;
 	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)

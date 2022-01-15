@@ -7,11 +7,13 @@ use CodeIgniter\Model;
 
 class MegazordZordModel extends Model
 {
-	use ModelTrait {
-		list as public listTrait;
+	use ModelTrait{
+		insertRecord as insertRecordTrait;
 	}
 
 	protected $table = 'megazord_zord';
+
+	protected $useAutoIncrement = false;
 
 	protected $allowedFields = ['megazordId', 'zordId'];
 
@@ -20,7 +22,7 @@ class MegazordZordModel extends Model
 		'zordId' => 'required|is_natural_no_zero|exists_id[zords.id]'
 	];
 
-	public function list($megazordId, $query)
+	protected function setRecordsCondition($query, $megazordId)
 	{
 		$this->setTable('view_megazord_zord');
 
@@ -30,44 +32,23 @@ class MegazordZordModel extends Model
 			$this->orLike('zordName', $query['q'], 'both');
 			$this->groupEnd();
 		}
-
-		return $this->listTrait($query);
 	}
 
-	public function get($megazordId, $zordId)
+	protected function setRecordCondition($megazordId, $zordId)
 	{
 		$this->where('megazordId', $megazordId)
 			->where('zordId', $zordId);
-
-		$record = $this->findAll();
-		return count($record) ? $record[0] : null;
 	}
 
 	public function insertRecord(&$record)
 	{
-		$prevRecord = $this->get($record['megazordId'], $record['zordId']);
-		if (isset($prevRecord)) {
+		$prevRecord = $this->check($record['megazordId'], $record['zordId']);
+		if ($prevRecord) {
 			return 'There one or more megazord-zord relationship records';
 		}
 
 		// Se procede a insertar el registro en la base de datos
-		$recordId = $this->insert($record);
-		if ($recordId === false) {
-			return $this->errors();
-		}
-
-		return true;
-	}
-
-	public function deleteRecord($megazordId, $zordId)
-	{
-		$this->where('megazordId', $megazordId)
-			->where('zordId', $zordId);
-
-		if (!$this->delete()) {
-			return $this->errors();
-		}
-		return true;
+		return $this->insertRecordTrait($record);
 	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)

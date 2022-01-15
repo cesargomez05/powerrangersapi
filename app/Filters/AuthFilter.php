@@ -11,6 +11,7 @@ use App\Libraries\JsonWebToken;
 use App\Models\ModuleModel;
 use App\Models\PermissionModel;
 use App\Models\UserModel;
+use Config\Services;
 
 class AuthFilter implements FilterInterface
 {
@@ -32,19 +33,18 @@ class AuthFilter implements FilterInterface
 				$permission = 'delete';
 				break;
 			default:
-				header('Content-type: application/json');
-				die(json_encode(['status' => 500, 'message' => 'Method not available']));
+				self::throwError(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR, 'Method not available');
 		}
 
 		// Se valida los parámetros definidos en la ruta
 		if (!isset($arguments)) {
-			$this->throwError(500, 'Invalid resource filter parameters');
+			self::throwError(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR, 'Invalid resource filter parameters');
 		}
 
 		// Se obtiene el Id del recurso
 		$moduleId = isset($arguments[0]) ? $arguments[0] : '';
 		if (!$moduleId) {
-			$this->throwError(500, 'Invalid module parameter');
+			return self::throwError(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR, 'Invalid module parameter');
 		}
 
 		// Se valida si el módulo a ejecutar corresponde a aquellos protegidos solamente para el usuario 'root'
@@ -55,7 +55,7 @@ class AuthFilter implements FilterInterface
 			if ($username == 'root') {
 				return;
 			} else {
-				$this->throwError(401, 'User not authorized for access this resource');
+				return self::throwError(ResponseInterface::HTTP_UNAUTHORIZED, 'User not authorized for access this resource');
 			}
 		}
 
@@ -63,30 +63,30 @@ class AuthFilter implements FilterInterface
 		$moduleModel = new ModuleModel();
 		$module = $moduleModel->find($moduleId);
 		if (!$module) {
-			$this->throwError(500, 'Resource not found');
+			return self::throwError(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR, 'Resource not found');
 		}
 
 		// Se valida que exista algún tipo de autorización
 		if (!isset($_SERVER['HTTP_AUTHORIZATION'])) {
-			$this->throwError(500, 'Authorization type not found');
+			return self::throwError(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR, 'Authorization type not found');
 		}
 
 		// Se valida a través de la propiedad '$_SERVER['HTTP_AUTHORIZATION']' el tipo de autorización
 		if ((bool) preg_match('/^Basic/', $_SERVER['HTTP_AUTHORIZATION'])) {
 			// Se valida la autenticación Basic (usuario y contraseña)
-			$this->validateBasicAuthentication($username);
+			self::validateBasicAuthentication($username);
 		} elseif ((bool) preg_match('/^Bearer/', $_SERVER['HTTP_AUTHORIZATION'])) {
 			// Se valida la autenticación con OAuth2
-			$this->validateOAuth2Authentication($username);
+			self::validateOAuth2Authentication($username);
 		} else {
 			// Se valida la autenticación con JWT (JSON Web Token)
-			$this->validateJWTAuthentication($_SERVER['HTTP_AUTHORIZATION'], $username);
+			self::validateJWTAuthentication($_SERVER['HTTP_AUTHORIZATION'], $username);
 		}
 
 		// Se consulta los permisos asociados al usuario autenticado y recurso
 		$permissionModel = new PermissionModel();
 		if (!$permissionModel->checkPermissions($username, $moduleId, $permission)) {
-			$this->throwError(403, 'Cannot have permissions for ' . $permission . ' records in this resource');
+			return self::throwError(ResponseInterface::HTTP_FORBIDDEN, 'Cannot have permissions for ' . $permission . ' records in this resource');
 		}
 	}
 
@@ -125,14 +125,12 @@ class AuthFilter implements FilterInterface
 			$jsonWebToken = new JsonWebToken();
 			$jsonWebToken->decryptToken($token, $username);
 		} catch (\Exception $ex) {
-			AuthFilter::throwError(500, 'Invalid JWT value');
+			AuthFilter::throwError(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR, 'Invalid JWT value');
 		}
 	}
 
 	protected static function throwError($code, $message)
 	{
-		header('Content-type: application/json');
-		header('HTTP/1.1 ' . $code);
-		die(json_encode(['status' => $code, 'message' => $message]));
+		return Services::response()->setStatusCode($code)->setJSON(['status' => $code, 'message' => $message]);
 	}
 }

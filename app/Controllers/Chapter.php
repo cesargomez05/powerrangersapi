@@ -23,7 +23,7 @@ class Chapter extends BaseResource
 		$filter = $this->request->getGet();
 		set_pagination($filter);
 
-		$chapters = $this->model->list($serieId, $seasonNumber, $filter);
+		$chapters = $this->model->list($filter, $serieId, $seasonNumber);
 		return $this->respond($chapters);
 	}
 

@@ -23,7 +23,7 @@ class Casting extends BaseResource
 		$filter = $this->request->getGet();
 		set_pagination($filter);
 
-		$casting = $this->model->list($serieId, $seasonNumber, $filter);
+		$casting = $this->model->list($filter, $serieId, $seasonNumber);
 		return $this->respond($casting);
 	}
 
@@ -63,8 +63,8 @@ class Casting extends BaseResource
 
 	public function delete($serieId, $seasonNumber, $actorId, $characterId, $rangerId = null)
 	{
-		$casting = $this->model->get($serieId, $seasonNumber, $actorId, $characterId, $rangerId);
-		if (!isset($casting)) {
+		$casting = $this->model->check($serieId, $seasonNumber, $actorId, $characterId, $rangerId);
+		if (!$casting) {
 			return $this->failNotFound('Record not found');
 		}
 

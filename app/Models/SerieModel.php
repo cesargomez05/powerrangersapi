@@ -7,7 +7,9 @@ use CodeIgniter\Model;
 
 class SerieModel extends Model
 {
-	use ModelTrait;
+	use ModelTrait {
+		insertRecord as insertRecordTrait;
+	}
 
 	protected $table = 'series';
 
@@ -27,11 +29,9 @@ class SerieModel extends Model
 		}
 	}
 
-	public function get($id)
+	protected function setRecordCondition($id)
 	{
 		$this->where('id', $id);
-		$record = $this->findAll();
-		return count($record) ? $record[0] : null;
 	}
 
 	public function insertRecord(&$record)
@@ -39,18 +39,14 @@ class SerieModel extends Model
 		$this->db->transBegin();
 
 		// Se procede a insertar el registro en la base de datos
-		$recordId = $this->insert($record);
-		if ($recordId === false) {
+		$result = $this->insertRecordTrait($record);
+		if ($result !== true) {
 			$this->db->transRollback();
-			return $this->errors();
-		}
-
-		if ($recordId !== 0) {
-			$record[$this->primaryKey] = $recordId;
+			return $result;
 		}
 
 		// Se establece el Id de la serie creada en los datos de la temporada
-		$record['season']['serieId'] = $recordId;
+		$record['season']['serieId'] = $record[$this->primaryKey];
 
 		$seasonModel = model('App\Models\SeasonModel');
 		$seasonResult = $seasonModel->insertRecord($record['season'], true);
@@ -61,23 +57,6 @@ class SerieModel extends Model
 
 		$this->db->transCommit();
 
-		return true;
-	}
-
-	public function updateRecord($record, $id)
-	{
-		$this->where('id', $id);
-
-		$result = $this->update(null, $record);
-		return $result === false ? $this->errors() : true;
-	}
-
-	public function deleteRecord($id)
-	{
-		$this->where('id', $id);
-		if (!$this->delete()) {
-			return $this->errors();
-		}
 		return true;
 	}
 

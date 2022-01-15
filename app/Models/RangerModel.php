@@ -7,7 +7,10 @@ use CodeIgniter\Model;
 
 class RangerModel extends Model
 {
-	use ModelTrait;
+	use ModelTrait {
+		insertRecord as insertRecordTrait;
+		updateRecord as updateRecordTrait;
+	}
 
 	protected $table = 'rangers';
 
@@ -30,11 +33,9 @@ class RangerModel extends Model
 		}
 	}
 
-	public function get($id)
+	protected function setRecordCondition($id)
 	{
 		$this->where('id', $id);
-		$record = $this->findAll();
-		return count($record) ? $record[0] : null;
 	}
 
 	public function insertRecord(&$record, $subTransaction = false)
@@ -56,14 +57,10 @@ class RangerModel extends Model
 		}
 
 		// Se procede a insertar el registro en la base de datos
-		$recordId = $this->insert($record);
-		if ($recordId === false) {
+		$result = $this->insertRecordTrait($record);
+		if ($result !== true) {
 			$this->db->transRollback();
-			return $this->errors();
-		}
-
-		if ($recordId !== 0) {
-			$record[$this->primaryKey] = $recordId;
+			return $result;
 		}
 
 		if (!$subTransaction) {
@@ -89,8 +86,8 @@ class RangerModel extends Model
 			$record['morpherId'] = $record['morpher']['id'];
 		}
 
-		$this->where('id', $id);
-		$result = $this->update(null, $record);
+		// Se actualiza los datos del ranger
+		$result = $this->updateRecordTrait($record, $id);
 		if ($result !== true) {
 			$this->db->transRollback();
 			return $this->errors();
@@ -98,15 +95,6 @@ class RangerModel extends Model
 
 		$this->db->transCommit();
 
-		return true;
-	}
-
-	public function deleteRecord($id)
-	{
-		$this->where('id', $id);
-		if (!$this->delete()) {
-			return $this->errors();
-		}
 		return true;
 	}
 

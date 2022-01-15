@@ -13,6 +13,8 @@ class UserModel extends Model
 
 	protected $primaryKey = 'username';
 
+	protected $useAutoIncrement = false;
+
 	protected $allowedFields = ['username', 'password', 'first_name', 'last_name', 'email'];
 
 	protected $validationRules = [
@@ -36,16 +38,7 @@ class UserModel extends Model
 
 	protected $returnType = 'App\Entities\User';
 
-	public function validateId($id, $property = 'username', $message = 'Username is not valid')
-	{
-		$validation = \Config\Services::validation();
-		$validation->setRule($property, $message, 'required|max_length[80]');
-		if ($validation->run([$property => $id])) {
-			return true;
-		} else {
-			return $validation->getErrors();
-		}
-	}
+	protected $rulesId = 'required|max_length[80]';
 
 	protected function setRecordsCondition($query)
 	{

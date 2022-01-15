@@ -23,7 +23,7 @@ class Season extends BaseResource
 		$filter = $this->request->getGet();
 		set_pagination($filter);
 
-		$seasons = $this->model->list($serieId, $filter);
+		$seasons = $this->model->list($filter, $serieId);
 		return $this->respond($seasons);
 	}
 

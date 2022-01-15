@@ -7,7 +7,9 @@ use CodeIgniter\Model;
 
 class MegazordModel extends Model
 {
-	use ModelTrait;
+	use ModelTrait {
+		insertRecord as insertRecordTrait;
+	}
 
 	protected $table = 'megazords';
 
@@ -36,11 +38,9 @@ class MegazordModel extends Model
 		}
 	}
 
-	public function get($id)
+	protected function setRecordCondition($id)
 	{
 		$this->where('id', $id);
-		$record = $this->findAll();
-		return count($record) ? $record[0] : null;
 	}
 
 	public function insertRecord(&$record)
@@ -48,19 +48,15 @@ class MegazordModel extends Model
 		$this->db->transBegin();
 
 		// Se procede a insertar el registro en la base de datos
-		$recordId = $this->insert($record);
-		if ($recordId === false) {
+		$result = $this->insertRecordTrait($record);
+		if ($result !== true) {
 			$this->db->transRollback();
-			return $this->errors();
-		}
-
-		if ($recordId !== 0) {
-			$record[$this->primaryKey] = $recordId;
+			return $result;
 		}
 
 		// Se inserta los datos de la relación Temporada-Zord (si aplica)
 		if (isset($record['seasonmegazord'])) {
-			$record['seasonmegazord']['megazordId'] = $recordId;
+			$record['seasonmegazord']['megazordId'] = $record[$this->primaryKey];
 
 			$seasonMegazordModel = model('App\Models\SeasonMegazordModel');
 			$seasonMegazordResult = $seasonMegazordModel->insertRecord($record['seasonmegazord']);
@@ -77,7 +73,7 @@ class MegazordModel extends Model
 				$megazordZordModel = model('App\Models\MegazordZordModel');
 
 				// Se asocia los Zords definidos en la lista sobre el Megazord creado
-				$megazordZordResult = $megazordZordModel->insertZords($recordId, $zordsId);
+				$megazordZordResult = $megazordZordModel->insertZords($record[$this->primaryKey], $zordsId);
 				if ($megazordZordResult === false) {
 					$this->db->transRollback();
 					return $megazordZordModel->errors();
@@ -87,23 +83,6 @@ class MegazordModel extends Model
 
 		$this->db->transCommit();
 
-		return true;
-	}
-
-	public function updateRecord($record, $id)
-	{
-		$this->where('id', $id);
-
-		$result = $this->update(null, $record);
-		return $result === false ? $this->errors() : true;
-	}
-
-	public function deleteRecord($id)
-	{
-		$this->where('id', $id);
-		if (!$this->delete()) {
-			return $this->errors();
-		}
 		return true;
 	}
 

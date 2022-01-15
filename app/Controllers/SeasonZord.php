@@ -23,7 +23,7 @@ class SeasonZord extends BaseResource
 		$filter = $this->request->getGet();
 		set_pagination($filter);
 
-		$seasonZords = $this->model->list($serieId, $seasonNumber, $filter);
+		$seasonZords = $this->model->list($filter, $serieId, $seasonNumber);
 		return $this->respond($seasonZords);
 	}
 
@@ -58,8 +58,8 @@ class SeasonZord extends BaseResource
 
 	public function delete($serieId, $seasonNumber, $zordId)
 	{
-		$seasonZord = $this->model->get($serieId, $seasonNumber, $zordId);
-		if (!isset($seasonZord)) {
+		$seasonZord = $this->model->check($serieId, $seasonNumber, $zordId);
+		if (!$seasonZord) {
 			return $this->failNotFound('Record not found');
 		}
 

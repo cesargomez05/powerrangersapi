@@ -5,6 +5,7 @@ namespace App\Filters;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
+use Config\Services;
 
 class MegazordFilter implements FilterInterface
 {
@@ -29,7 +30,7 @@ class MegazordFilter implements FilterInterface
 
 		$megazordId = $request->getUri()->getSegment(2);
 
-		self::checkMegazord($megazordId);
+		return self::checkMegazord($megazordId);
 	}
 
 	/**
@@ -55,20 +56,12 @@ class MegazordFilter implements FilterInterface
 
 		$validationId = $megazordModel->validateId($megazordId, 'megazordId', 'Megazord id is not valid');
 		if ($validationId !== true) {
-			header('HTTP/1.1 ' . 500);
-			die(json_encode(['errors' => $validationId]));
+			return Services::response()->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['error' => $validationId]);
 		}
 
 		$serie = $megazordModel->get($megazordId);
 		if (!isset($serie)) {
-			header('HTTP/1.1 ' . 404);
-			die(json_encode([
-				'status' => 404,
-				'error' => 404,
-				'messages' => [
-					"error" => "Record not found"
-				]
-			]));
+			return Services::response()->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Megazord not exists']);
 		}
 	}
 }

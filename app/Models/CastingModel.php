@@ -8,10 +8,12 @@ use CodeIgniter\Model;
 class CastingModel extends Model
 {
 	use ModelTrait {
-		list as public listTrait;
+		insertRecord as insertRecordTrait;
 	}
 
 	protected $table = 'casting';
+
+	protected $useAutoIncrement = false;
 
 	protected $allowedFields = ['serieId', 'seasonNumber', 'actorId', 'characterId', 'rangerId', 'isTeamUp'];
 
@@ -31,7 +33,7 @@ class CastingModel extends Model
 		]
 	];
 
-	public function list($serieId, $seasonNumber, $query)
+	protected function setRecordsCondition($query, $serieId, $seasonNumber)
 	{
 		$this->setTable('view_casting');
 
@@ -42,11 +44,9 @@ class CastingModel extends Model
 			$this->orLike('characterName', $query['q'], 'both');
 			$this->groupEnd();
 		}
-
-		return $this->listTrait($query);
 	}
 
-	public function get($serieId, $seasonNumber, $actorId, $characterId, $rangerId = null)
+	protected function setRecordCondition($serieId, $seasonNumber, $actorId, $characterId, $rangerId = null)
 	{
 		$this->where('serieId', $serieId)
 			->where('seasonNumber', $seasonNumber)
@@ -58,9 +58,6 @@ class CastingModel extends Model
 		} else {
 			$this->where('rangerId IS NULL');
 		}
-
-		$record = $this->findAll();
-		return count($record) ? $record[0] : null;
 	}
 
 	public function insertRecord(&$record)
@@ -103,38 +100,19 @@ class CastingModel extends Model
 			$record['rangerId'] = $record['ranger']['id'];
 		}
 
-		$prevRecord = $this->get($record['serieId'], $record['seasonNumber'], $record['actorId'], $record['characterId'], $record['rangerId']);
-		if (isset($prevRecord)) {
+		$prevRecord = $this->check($record['serieId'], $record['seasonNumber'], $record['actorId'], $record['characterId'], $record['rangerId']);
+		if ($prevRecord) {
 			return 'There one or more casting records with the same values';
 		}
 
-		$result = $this->insert($record);
-		if ($result === false) {
+		$result = $this->insertRecordTrait($record);
+		if ($result !== true) {
 			$this->db->transRollback();
-			return $this->errors();
+			return $result;
 		}
 
 		$this->db->transCommit();
 
-		return true;
-	}
-
-	public function deleteRecord($serieId, $seasonNumber, $actorId, $characterId, $rangerId = null)
-	{
-		$this->where('serieId', $serieId)
-			->where('seasonNumber', $seasonNumber)
-			->where('actorId', $actorId)
-			->where('characterId', $characterId);
-
-		if (isset($rangerId)) {
-			$this->where('rangerId', $rangerId);
-		} else {
-			$this->where('rangerId IS NULL');
-		}
-
-		if (!$this->delete()) {
-			return $this->errors();
-		}
 		return true;
 	}
 

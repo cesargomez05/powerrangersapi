@@ -8,10 +8,12 @@ use CodeIgniter\Model;
 class SeasonZordModel extends Model
 {
 	use ModelTrait {
-		list as public listTrait;
+		insertRecord as insertRecordTrait;
 	}
 
 	protected $table = 'season_zord';
+
+	protected $useAutoIncrement = false;
 
 	protected $allowedFields = ['serieId', 'seasonNumber', 'zordId', 'rangerId'];
 
@@ -29,7 +31,7 @@ class SeasonZordModel extends Model
 		]
 	];
 
-	public function list($serieId, $seasonNumber, $query)
+	protected function setRecordsCondition($query, $serieId, $seasonNumber)
 	{
 		$this->setTable('view_season_zord');
 
@@ -39,46 +41,24 @@ class SeasonZordModel extends Model
 			$this->orLike('zordName', $query['q'], 'both');
 			$this->groupEnd();
 		}
-
-		return $this->listTrait($query);
 	}
 
-	public function get($serieId, $seasonNumber, $zordId)
+	protected function setRecordCondition($serieId, $seasonNumber, $zordId)
 	{
 		$this->where('serieId', $serieId)
 			->where('seasonNumber', $seasonNumber)
 			->where('zordId', $zordId);
-
-		$record = $this->findAll();
-		return count($record) ? $record[0] : null;
 	}
 
 	public function insertRecord(&$record)
 	{
-		$prevRecord = $this->get($record['serieId'], $record['seasonNumber'], $record['zordId']);
-		if (isset($prevRecord)) {
+		$prevRecord = $this->check($record['serieId'], $record['seasonNumber'], $record['zordId']);
+		if ($prevRecord) {
 			return 'There one or more season-zord relationship records';
 		}
 
 		// Se procede a insertar el registro en la base de datos
-		$recordId = $this->insert($record);
-		if ($recordId === false) {
-			return $this->errors();
-		}
-
-		return true;
-	}
-
-	public function deleteRecord($serieId, $seasonNumber, $zordId)
-	{
-		$this->where('serieId', $serieId)
-			->where('seasonNumber', $seasonNumber)
-			->where('zordId', $zordId);
-
-		if (!$this->delete()) {
-			return $this->errors();
-		}
-		return true;
+		return $this->insertRecordTrait($record);
 	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
