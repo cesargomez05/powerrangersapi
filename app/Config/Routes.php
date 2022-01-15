@@ -126,12 +126,12 @@ $routes->group('casting', ['filter' => 'auth:casting'], function ($routes) {
 // Zords
 $routes->group('zords', ['filter' => 'auth:zord'], function ($routes) {
 	$filter = ['filter' => 'zord_filter'];
-	$routes->get('', 'Zord::index');
-	$routes->get('(:alphanum)', 'Zord::show/$1');
-	$routes->post('', 'Zord::create');
-	$routes->put('(:alphanum)', 'Zord::update/$1');
-	$routes->patch('(:alphanum)', 'Zord::update/$1');
-	$routes->delete('(:alphanum)', 'Zord::delete/$1');
+	$routes->get('', 'Zord::index', $filter);
+	$routes->get('(:alphanum)', 'Zord::show/$1', $filter);
+	$routes->post('', 'Zord::create', $filter);
+	$routes->put('(:alphanum)', 'Zord::update/$1', $filter);
+	$routes->patch('(:alphanum)', 'Zord::update/$1', $filter);
+	$routes->delete('(:alphanum)', 'Zord::delete/$1', $filter);
 });
 
 // Temporada-Zord
@@ -145,12 +145,12 @@ $routes->group('seasonzord', ['filter' => 'auth:zord'], function ($routes) {
 // Megazords
 $routes->group('megazords', ['filter' => 'auth:megazord'], function ($routes) {
 	$filter = ['filter' => 'megazord_filter'];
-	$routes->get('', 'Megazord::index');
-	$routes->get('(:alphanum)', 'Megazord::show/$1');
-	$routes->post('', 'Megazord::create');
-	$routes->put('(:alphanum)', 'Megazord::update/$1');
-	$routes->patch('(:alphanum)', 'Megazord::update/$1');
-	$routes->delete('(:alphanum)', 'Megazord::delete/$1');
+	$routes->get('', 'Megazord::index', $filter);
+	$routes->get('(:alphanum)', 'Megazord::show/$1', $filter);
+	$routes->post('', 'Megazord::create', $filter);
+	$routes->put('(:alphanum)', 'Megazord::update/$1', $filter);
+	$routes->patch('(:alphanum)', 'Megazord::update/$1', $filter);
+	$routes->delete('(:alphanum)', 'Megazord::delete/$1', $filter);
 });
 
 // Temporada-Megazord
@@ -172,12 +172,12 @@ $routes->group('megazordzord', ['filter' => 'auth:megazord'], function ($routes)
 // Transformaciones
 $routes->group('transformations', ['filter' => 'auth:transformation'], function ($routes) {
 	$filter = ['filter' => 'transformation_filter'];
-	$routes->get('', 'Transformation::index');
-	$routes->get('(:alphanum)', 'Transformation::show/$1');
-	$routes->post('', 'Transformation::create');
-	$routes->put('(:alphanum)', 'Transformation::update/$1');
-	$routes->patch('(:alphanum)', 'Transformation::update/$1');
-	$routes->delete('(:alphanum)', 'Transformation::delete/$1');
+	$routes->get('', 'Transformation::index', $filter);
+	$routes->get('(:alphanum)', 'Transformation::show/$1', $filter);
+	$routes->post('', 'Transformation::create', $filter);
+	$routes->put('(:alphanum)', 'Transformation::update/$1', $filter);
+	$routes->patch('(:alphanum)', 'Transformation::update/$1', $filter);
+	$routes->delete('(:alphanum)', 'Transformation::delete/$1', $filter);
 });
 
 // Transformación-Ranger
@@ -194,23 +194,23 @@ $routes->group('transformationrangers', ['filter' => 'auth:transformation'], fun
 // Morphers
 $routes->group('morphers', ['filter' => 'auth:morpher'], function ($routes) {
 	$filter = ['filter' => 'morpher_filter'];
-	$routes->get('', 'Morpher::index');
-	$routes->get('(:alphanum)', 'Morpher::show/$1');
-	$routes->post('', 'Morpher::create');
-	$routes->put('(:alphanum)', 'Morpher::update/$1');
-	$routes->patch('(:alphanum)', 'Morpher::update/$1');
-	$routes->delete('(:alphanum)', 'Morpher::delete/$1');
+	$routes->get('', 'Morpher::index', $filter);
+	$routes->get('(:alphanum)', 'Morpher::show/$1', $filter);
+	$routes->post('', 'Morpher::create', $filter);
+	$routes->put('(:alphanum)', 'Morpher::update/$1', $filter);
+	$routes->patch('(:alphanum)', 'Morpher::update/$1', $filter);
+	$routes->delete('(:alphanum)', 'Morpher::delete/$1', $filter);
 });
 
 // Arsenal
 $routes->group('arsenal', ['filter' => 'auth:arsenal'], function ($routes) {
 	$filter = ['filter' => 'arsenal_filter'];
-	$routes->get('', 'Arsenal::index');
-	$routes->get('(:alphanum)', 'Arsenal::show/$1');
-	$routes->post('', 'Arsenal::create');
-	$routes->put('(:alphanum)', 'Arsenal::update/$1');
-	$routes->patch('(:alphanum)', 'Arsenal::update/$1');
-	$routes->delete('(:alphanum)', 'Arsenal::delete/$1');
+	$routes->get('', 'Arsenal::index', $filter);
+	$routes->get('(:alphanum)', 'Arsenal::show/$1', $filter);
+	$routes->post('', 'Arsenal::create', $filter);
+	$routes->put('(:alphanum)', 'Arsenal::update/$1', $filter);
+	$routes->patch('(:alphanum)', 'Arsenal::update/$1', $filter);
+	$routes->delete('(:alphanum)', 'Arsenal::delete/$1', $filter);
 });
 
 // Temporada-Arsenal
@@ -224,12 +224,12 @@ $routes->group('seasonarsenal', ['filter' => 'auth:arsenal'], function ($routes)
 // Villanos
 $routes->group('villains', ['filter' => 'auth:villain'], function ($routes) {
 	$filter = ['filter' => 'villain_filter'];
-	$routes->get('', 'Villain::index');
-	$routes->get('(:alphanum)', 'Villain::show/$1');
-	$routes->post('', 'Villain::create');
-	$routes->put('(:alphanum)', 'Villain::update/$1');
-	$routes->patch('(:alphanum)', 'Villain::update/$1');
-	$routes->delete('(:alphanum)', 'Villain::delete/$1');
+	$routes->get('', 'Villain::index', $filter);
+	$routes->get('(:alphanum)', 'Villain::show/$1', $filter);
+	$routes->post('', 'Villain::create', $filter);
+	$routes->put('(:alphanum)', 'Villain::update/$1', $filter);
+	$routes->patch('(:alphanum)', 'Villain::update/$1', $filter);
+	$routes->delete('(:alphanum)', 'Villain::delete/$1', $filter);
 });
 
 // Temporada-Villano
@@ -243,30 +243,30 @@ $routes->group('seasonvillain', ['filter' => 'auth:villain'], function ($routes)
 // Módulos
 $routes->group('modules', ['filter' => 'auth:module'], function ($routes) {
 	$filter = ['filter' => 'module_filter'];
-	$routes->get('', 'Module::index');
-	$routes->get('(:alphanum)', 'Module::show/$1');
-	$routes->post('', 'Module::create');
-	$routes->put('(:alphanum)', 'Module::update/$1');
-	$routes->patch('(:alphanum)', 'Module::update/$1');
-	$routes->delete('(:alphanum)', 'Module::delete/$1');
+	$routes->get('', 'Module::index', $filter);
+	$routes->get('(:alphanum)', 'Module::show/$1', $filter);
+	$routes->post('', 'Module::create', $filter);
+	$routes->put('(:alphanum)', 'Module::update/$1', $filter);
+	$routes->patch('(:alphanum)', 'Module::update/$1', $filter);
+	$routes->delete('(:alphanum)', 'Module::delete/$1', $filter);
 });
 
 // Usuarios
 $routes->group('users', ['filter' => 'auth:user'], function ($routes) {
 	$filter = ['filter' => 'user_filter'];
-	$routes->get('', 'User::index');
-	$routes->get('(:alphanum)', 'User::show/$1');
-	$routes->post('', 'User::create');
-	$routes->put('(:alphanum)', 'User::update/$1');
-	$routes->delete('(:alphanum)', 'User::delete/$1');
+	$routes->get('', 'User::index', $filter);
+	$routes->get('(:alphanum)', 'User::show/$1', $filter);
+	$routes->post('', 'User::create', $filter);
+	$routes->put('(:alphanum)', 'User::update/$1', $filter);
+	$routes->delete('(:alphanum)', 'User::delete/$1', $filter);
 });
 
 // Permisos
 $routes->group('permissions', ['filter' => 'auth:permission'], function ($routes) {
 	$filter = ['filter' => 'permission_filter'];
-	$routes->get('(:alphanum)', 'Permission::index/$1');
-	$routes->post('(:alphanum)', 'Permission::create/$1');
-	$routes->delete('(:alphanum)/(:alphanum)', 'Permission::delete/$1/$2');
+	$routes->get('(:alphanum)', 'Permission::index/$1', $filter);
+	$routes->post('(:alphanum)', 'Permission::create/$1', $filter);
+	$routes->delete('(:alphanum)/(:alphanum)', 'Permission::delete/$1/$2', $filter);
 });
 
 // API

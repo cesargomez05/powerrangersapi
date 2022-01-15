@@ -30,10 +30,21 @@ class Filters extends BaseConfig
 		'season_filter' => \App\Filters\SeasonFilter::class,
 		'chapter_filter' => \App\Filters\ChapterFilter::class,
 		'casting_filter' => \App\Filters\CastingFilter::class,
-
-		
+		'zord_filter' => \App\Filters\ZordFilter::class,
+		'seasonzord_filter' => \App\Filters\SeasonZordFilter::class,
 		'megazord_filter' => \App\Filters\MegazordFilter::class,
-		'transformation_filter' => \App\Filters\TransformationFilter::class
+		'seasonmegazord_filter' => \App\Filters\SeasonMegazordFilter::class,
+		'megazordzord_filter' => \App\Filters\MegazordZordFilter::class,
+		'transformation_filter' => \App\Filters\TransformationFilter::class,
+		'transformationranger_filter' => \App\Filters\TransformationRangerFilter::class,
+		'morpher_filter' => \App\Filters\MorpherFilter::class,
+		'arsenal_filter' => \App\Filters\ArsenalFilter::class,
+		'seasonarsenal_filter' => \App\Filters\SeasonArsenalFilter::class,
+		'villain_filter' => \App\Filters\VillainFilter::class,
+		'seasonvillain_filter' => \App\Filters\SeasonVillainFilter::class,
+		'module_filter' => null,
+		'user_filter' => null,
+		'permission_filter' => null
 	];
 
 	/**

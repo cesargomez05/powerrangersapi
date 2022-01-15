@@ -7,15 +7,15 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
 
-class MegazordFilter implements FilterInterface
+class ZordFilter implements FilterInterface
 {
 	public function before(RequestInterface $request, $arguments = null)
 	{
 		$uri = $request->getUri();
-		$megazordId = $uri->getSegment(2);
+		$zordId = $uri->getSegment(2);
 
-		if (!empty($megazordId)) {
-			return self::checkRecord($megazordId);
+		if (!empty($zordId)) {
+			return self::checkRecord($zordId);
 		}
 	}
 
@@ -23,19 +23,19 @@ class MegazordFilter implements FilterInterface
 	{
 	}
 
-	public static function checkRecord($megazordId)
+	public static function checkRecord($zordId)
 	{
 		$response = Services::response();
-		$model = model('App\Models\MegazordModel');
+		$model = model('App\Models\ZordModel');
 
-		$validationId = $model->validateId($megazordId, 'megazordId', 'Megazord id');
+		$validationId = $model->validateId($zordId, 'zordId', 'Zord id');
 		if ($validationId !== true) {
 			return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
 		}
 
-		$exists = $model->check($megazordId);
+		$exists = $model->check($zordId);
 		if (!$exists) {
-			return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Megazord not found']);
+			return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Zord not found']);
 		}
 	}
 }

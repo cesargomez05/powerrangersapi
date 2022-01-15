@@ -40,11 +40,12 @@ class CastingFilter implements FilterInterface
 			}
 
 			if (isset($rangerId)) {
-				$validation = RangerFilter::checkRecord($actorId);
+				$validation = RangerFilter::checkRecord($rangerId);
 				if (isset($validation)) {
 					return $validation;
 				}
 			}
+
 			$response = Services::response();
 			$model = model('App\Models\CastingModel');
 			$exists = $model->check($serieId, $seasonNumber, $actorId, $characterId, $rangerId);
