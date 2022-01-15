@@ -29,15 +29,7 @@ class User extends BaseResource
 
 	public function show($id)
 	{
-		$validationId = $this->model->validateId($id);
-		if ($validationId !== true) {
-			return $this->respond(['errors' => $validationId], 400);
-		}
-
 		$user = $this->model->get($id);
-		if (!isset($user)) {
-			return $this->failNotFound('Record not found');
-		}
 		return $this->respond(['record' => $user]);
 	}
 
@@ -72,15 +64,7 @@ class User extends BaseResource
 
 	public function update($id)
 	{
-		$validationId = $this->model->validateId($id);
-		if ($validationId !== true) {
-			return $this->respond(['errors' => $validationId], 400);
-		}
-
 		$user = $this->model->get($id);
-		if (!isset($user)) {
-			return $this->failNotFound('Record not found');
-		}
 
 		// Datos de entrada de la petición
 		$postData = $this->request->getPost();
@@ -114,16 +98,6 @@ class User extends BaseResource
 
 	public function delete($id)
 	{
-		$validationId = $this->model->validateId($id);
-		if ($validationId !== true) {
-			return $this->respond(['errors' => $validationId], 400);
-		}
-
-		$user = $this->model->get($id);
-		if (!isset($user)) {
-			return $this->failNotFound('Record not found');
-		}
-
 		$result = $this->model->deleteRecord($id);
 		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen

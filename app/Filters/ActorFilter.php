@@ -15,7 +15,7 @@ class ActorFilter implements FilterInterface
 		$actorId = $uri->getSegment(2);
 
 		if (!empty($actorId)) {
-			return self::checkActor($actorId);
+			return self::checkRecord($actorId);
 		}
 	}
 
@@ -23,7 +23,7 @@ class ActorFilter implements FilterInterface
 	{
 	}
 
-	public static function checkActor($actorId)
+	public static function checkRecord($actorId)
 	{
 		$response = Services::response();
 		$model = model('App\Models\ActorModel');

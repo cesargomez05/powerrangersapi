@@ -29,15 +29,7 @@ class Age extends BaseResource
 
 	public function show($id)
 	{
-		$validationId = $this->model->validateId($id);
-		if ($validationId !== true) {
-			return $this->respond(['errors' => $validationId], 400);
-		}
-
 		$age = $this->model->get($id);
-		if (!isset($age)) {
-			return $this->failNotFound('Record not found');
-		}
 		return $this->respond(['record' => $age]);
 	}
 
@@ -72,15 +64,7 @@ class Age extends BaseResource
 
 	public function update($id)
 	{
-		$validationId = $this->model->validateId($id);
-		if ($validationId !== true) {
-			return $this->respond(['errors' => $validationId], 400);
-		}
-
 		$actor = $this->model->get($id);
-		if (!isset($actor)) {
-			return $this->failNotFound('Record not found');
-		}
 
 		// Datos de entrada de la petición
 		$postData = $this->request->getPost();
@@ -116,16 +100,6 @@ class Age extends BaseResource
 
 	public function delete($id)
 	{
-		$validationId = $this->model->validateId($id);
-		if ($validationId !== true) {
-			return $this->respond(['errors' => $validationId], 400);
-		}
-
-		$actor = $this->model->get($id);
-		if (!isset($actor)) {
-			return $this->failNotFound('Record not found');
-		}
-
 		$result = $this->model->deleteRecord($id);
 		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen
@@ -134,25 +108,4 @@ class Age extends BaseResource
 
 		return $this->success("Record successfully deleted");
 	}
-
-	/*
-	protected function validateDeleteRecord($id)
-	{
-		$errors = [];
-
-		// Se valida los registros de Temporadas asociados a la era
-		$model = new SeasonModel();
-		if ($model->checkRecordsByForeignKey(['ageId' => $id])) {
-			$errors['season'] = "The age has one or many seasons records";
-		}
-
-		return count($errors) ? $errors : true;
-	}
-
-	protected function addRecordInformation(&$response, $ageUri)
-	{
-		// Se obtiene la lista de las temporadas asociadas a la era
-		$seasonModel = new SeasonModel();
-		$response['seasons'] = $seasonModel->getSeasonsByAge($ageUri);
-	}*/
 }

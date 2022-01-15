@@ -58,11 +58,6 @@ class SeasonMegazord extends BaseResource
 
 	public function delete($serieId, $seasonNumber, $megazordId)
 	{
-		$seasonMegazord = $this->model->check($serieId, $seasonNumber, $megazordId);
-		if (!$seasonMegazord) {
-			return $this->failNotFound('Record not found');
-		}
-
 		$result = $this->model->deleteRecord($serieId, $seasonNumber, $megazordId);
 		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen

@@ -2,11 +2,6 @@
 
 namespace Config;
 
-use App\Filters\AuthFilter;
-use App\Filters\MegazordFilter;
-use App\Filters\SeasonFilter;
-use App\Filters\SerieFilter;
-use App\Filters\TransformationFilter;
 use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Filters\CSRF;
 use CodeIgniter\Filters\DebugToolbar;
@@ -25,13 +20,20 @@ class Filters extends BaseConfig
 		'toolbar' => DebugToolbar::class,
 		'honeypot' => Honeypot::class,
 		// Autenticación en la API
-		'auth' => AuthFilter::class,
+		'auth' => \App\Filters\AuthFilter::class,
 		// Módulos de la aplicación
 		'actor_filter' => \App\Filters\ActorFilter::class,
-		'serie_filter' => SerieFilter::class,
-		'season_filter' => SeasonFilter::class,
-		'megazord_filter' => MegazordFilter::class,
-		'transformation_filter' => TransformationFilter::class
+		'age_filter' => \App\Filters\AgeFilter::class,
+		'character_filter' => \App\Filters\CharacterFilter::class,
+		'ranger_filter' => \App\Filters\RangerFilter::class,
+		'serie_filter' => \App\Filters\SerieFilter::class,
+		'season_filter' => \App\Filters\SeasonFilter::class,
+		'chapter_filter' => \App\Filters\ChapterFilter::class,
+		'casting_filter' => \App\Filters\CastingFilter::class,
+
+		
+		'megazord_filter' => \App\Filters\MegazordFilter::class,
+		'transformation_filter' => \App\Filters\TransformationFilter::class
 	];
 
 	/**

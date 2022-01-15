@@ -58,11 +58,6 @@ class SeasonVillain extends BaseResource
 
 	public function delete($serieId, $seasonNumber, $villainId)
 	{
-		$seasonZord = $this->model->check($serieId, $seasonNumber, $villainId);
-		if (!$seasonZord) {
-			return $this->failNotFound('Record not found');
-		}
-
 		$result = $this->model->deleteRecord($serieId, $seasonNumber, $villainId);
 		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen

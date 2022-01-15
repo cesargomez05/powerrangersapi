@@ -30,9 +30,6 @@ class Chapter extends BaseResource
 	public function show($serieId, $seasonNumber, $number)
 	{
 		$chapter = $this->model->get($serieId, $seasonNumber, $number);
-		if (!isset($chapter)) {
-			return $this->failNotFound('Record not found');
-		}
 		return $this->respond(['record' => $chapter]);
 	}
 
@@ -73,9 +70,6 @@ class Chapter extends BaseResource
 	public function update($serieId, $seasonNumber, $number)
 	{
 		$chapter = $this->model->get($serieId, $seasonNumber, $number);
-		if (!isset($chapter)) {
-			return $this->failNotFound('Record not found');
-		}
 
 		// Datos de entrada de la petición
 		$postData = $this->request->getPost();
@@ -118,11 +112,6 @@ class Chapter extends BaseResource
 
 	public function delete($serieId, $seasonNumber, $number)
 	{
-		$chapter = $this->model->get($serieId, $seasonNumber, $number);
-		if (!isset($chapter)) {
-			return $this->failNotFound('Record not found');
-		}
-
 		$result = $this->model->deleteRecord($serieId, $seasonNumber, $number);
 		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen

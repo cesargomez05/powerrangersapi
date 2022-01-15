@@ -26,11 +26,8 @@ class MegazordFilter implements FilterInterface
 	 */
 	public function before(RequestInterface $request, $arguments = null)
 	{
-		header('Content-type: application/json');
-
 		$megazordId = $request->getUri()->getSegment(2);
-
-		return self::checkMegazord($megazordId);
+		return self::checkRecord($megazordId);
 	}
 
 	/**
@@ -50,7 +47,7 @@ class MegazordFilter implements FilterInterface
 		//
 	}
 
-	public static function checkMegazord($megazordId)
+	public static function checkRecord($megazordId)
 	{
 		$megazordModel = model('App\Models\MegazordModel');
 

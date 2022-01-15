@@ -63,11 +63,6 @@ class Casting extends BaseResource
 
 	public function delete($serieId, $seasonNumber, $actorId, $characterId, $rangerId = null)
 	{
-		$casting = $this->model->check($serieId, $seasonNumber, $actorId, $characterId, $rangerId);
-		if (!$casting) {
-			return $this->failNotFound('Record not found');
-		}
-
 		$result = $this->model->deleteRecord($serieId, $seasonNumber, $actorId, $characterId, $rangerId);
 		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen

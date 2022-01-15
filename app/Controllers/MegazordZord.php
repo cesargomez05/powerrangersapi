@@ -57,11 +57,6 @@ class MegazordZord extends BaseResource
 
 	public function delete($megazordId, $zordId)
 	{
-		$seasonMegazord = $this->model->check($megazordId, $zordId);
-		if (!$seasonMegazord) {
-			return $this->failNotFound('Record not found');
-		}
-
 		$result = $this->model->deleteRecord($megazordId, $zordId);
 		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen

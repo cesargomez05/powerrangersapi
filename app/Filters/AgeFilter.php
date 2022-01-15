@@ -7,15 +7,15 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
 
-class SerieFilter implements FilterInterface
+class AgeFilter implements FilterInterface
 {
 	public function before(RequestInterface $request, $arguments = null)
 	{
 		$uri = $request->getUri();
-		$serieId = $uri->getSegment(2);
+		$ageId = $uri->getSegment(2);
 
-		if (!empty($serieId)) {
-			return self::checkRecord($serieId);
+		if (!empty($ageId)) {
+			return self::checkRecord($ageId);
 		}
 	}
 
@@ -23,19 +23,19 @@ class SerieFilter implements FilterInterface
 	{
 	}
 
-	public static function checkRecord($serieId)
+	public static function checkRecord($ageId)
 	{
 		$response = Services::response();
-		$model = model('App\Models\SerieModel');
+		$model = model('App\Models\AgeModel');
 
-		$validationId = $model->validateId($serieId, 'serieId', 'Serie id');
+		$validationId = $model->validateId($ageId, 'ageId', 'Age id');
 		if ($validationId !== true) {
 			return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
 		}
 
-		$exists = $model->check($serieId);
+		$exists = $model->check($ageId);
 		if (!$exists) {
-			return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Serie not found']);
+			return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Actor not found']);
 		}
 	}
 }

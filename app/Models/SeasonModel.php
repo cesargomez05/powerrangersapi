@@ -73,20 +73,6 @@ class SeasonModel extends Model
 		return true;
 	}
 
-	public function validateId($serieId, $seasonNumber)
-	{
-		$validateSerieId = $this->validateIdTrait($serieId, 'serieId', 'Serie id');
-		$errors = $validateSerieId ? [] : $validateSerieId;
-
-		$validation = \Config\Services::validation();
-		$validation->setRule('seasonNumber', 'Season number is not valid', 'required|is_natural_no_zero');
-		if (!$validation->run(['serieId' => $serieId, 'seasonNumber' => $seasonNumber])) {
-			$errors = array_merge($errors, $validation->getErrors());
-		}
-
-		return count($errors) == 0 ? true : $errors;
-	}
-
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
 	{
 		$errors = [];

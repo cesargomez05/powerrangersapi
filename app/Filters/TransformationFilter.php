@@ -26,11 +26,9 @@ class TransformationFilter implements FilterInterface
 	 */
 	public function before(RequestInterface $request, $arguments = null)
 	{
-		header('Content-type: application/json');
-
 		$transformationId = $request->getUri()->getSegment(2);
 
-		return self::checkTransformation($transformationId);
+		return self::checkRecord($transformationId);
 	}
 
 	/**
@@ -50,7 +48,7 @@ class TransformationFilter implements FilterInterface
 		//
 	}
 
-	public static function checkTransformation($transformationId)
+	public static function checkRecord($transformationId)
 	{
 		$transformationModel = model('App\Models\TransformationModel');
 

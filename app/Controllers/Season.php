@@ -30,9 +30,6 @@ class Season extends BaseResource
 	public function show($serieId, $number)
 	{
 		$season = $this->model->get($serieId, $number);
-		if (!isset($season)) {
-			return $this->failNotFound('Record not found');
-		}
 		return $this->respond(['record' => $season]);
 	}
 
@@ -74,9 +71,6 @@ class Season extends BaseResource
 	public function update($serieId, $number)
 	{
 		$season = $this->model->get($serieId, $number);
-		if (!isset($season)) {
-			return $this->failNotFound('Record not found');
-		}
 
 		// Datos de entrada de la petición
 		$postData = $this->request->getPost();
@@ -116,11 +110,6 @@ class Season extends BaseResource
 
 	public function delete($serieId, $number)
 	{
-		$season = $this->model->get($serieId, $number);
-		if (!isset($season)) {
-			return $this->failNotFound('Record not found');
-		}
-
 		$result = $this->model->deleteRecord($serieId, $number);
 		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen

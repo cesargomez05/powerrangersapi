@@ -58,11 +58,6 @@ class SeasonZord extends BaseResource
 
 	public function delete($serieId, $seasonNumber, $zordId)
 	{
-		$seasonZord = $this->model->check($serieId, $seasonNumber, $zordId);
-		if (!$seasonZord) {
-			return $this->failNotFound('Record not found');
-		}
-
 		$result = $this->model->deleteRecord($serieId, $seasonNumber, $zordId);
 		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen

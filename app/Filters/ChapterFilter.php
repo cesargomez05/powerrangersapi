@@ -7,7 +7,7 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
 
-class SeasonFilter implements FilterInterface
+class ChapterFilter implements FilterInterface
 {
 	public function before(RequestInterface $request, $arguments = null)
 	{
@@ -21,25 +21,25 @@ class SeasonFilter implements FilterInterface
 	{
 	}
 
-	public static function checkRecord($serieId, $number = null)
+	public static function checkRecord($serieId, $seasonNumber, $number = null)
 	{
-		$serieValidation = SerieFilter::checkRecord($serieId);
-		if (isset($serieValidation)) {
-			return $serieValidation;
+		$seasonValidation = SeasonFilter::checkRecord($serieId, $seasonNumber);
+		if (isset($seasonValidation)) {
+			return $seasonValidation;
 		}
 
 		if (isset($number)) {
 			$response = Services::response();
-			$model = model('App\Models\SeasonModel');
+			$model = model('App\Models\ChapterModel');
 
-			$validationId = $model->validateId($number, 'number', 'Season number');
+			$validationId = $model->validateId($number, 'number', 'Chapter number');
 			if ($validationId !== true) {
 				return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
 			}
 
-			$exists = $model->check($serieId, $number);
+			$exists = $model->check($serieId, $seasonNumber, $number);
 			if (!$exists) {
-				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Season not found']);
+				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Chapter not found']);
 			}
 		}
 	}

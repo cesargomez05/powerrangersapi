@@ -58,11 +58,6 @@ class SeasonArsenal extends BaseResource
 
 	public function delete($serieId, $seasonNumber, $arsenalId)
 	{
-		$seasonZord = $this->model->check($serieId, $seasonNumber, $arsenalId);
-		if (!$seasonZord) {
-			return $this->failNotFound('Record not found');
-		}
-
 		$result = $this->model->deleteRecord($serieId, $seasonNumber, $arsenalId);
 		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen
