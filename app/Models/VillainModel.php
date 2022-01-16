@@ -36,6 +36,14 @@ class VillainModel extends Model
 		$this->where('id', $id);
 	}
 
+	protected function checkNestedRecords($id, &$errors)
+	{
+		$seasonVillainModel = model('App\Models\SeasonVillainModel');
+		if ($seasonVillainModel->countByVillainId($id)) {
+			$errors['season_villain'] = 'There are nested season-villain records to villain';
+		}
+	}
+
 	public function insertRecord(&$record)
 	{
 		$this->db->transBegin();

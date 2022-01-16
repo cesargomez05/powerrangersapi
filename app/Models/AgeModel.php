@@ -32,6 +32,14 @@ class AgeModel extends Model
 		$this->where('id', $id);
 	}
 
+	protected function checkNestedRecords($id, &$errors)
+	{
+		$seasonModel = model('App\Models\SeasonModel');
+		if ($seasonModel->countByAgeId($id)) {
+			$errors['season'] = 'There are nested season records to age';
+		}
+	}
+
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
 	{
 		$errors = [];

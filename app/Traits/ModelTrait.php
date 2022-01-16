@@ -62,6 +62,16 @@ trait ModelTrait
 		return $result === false ? $this->errors() : true;
 	}
 
+	public function validateNestedRecords(...$ids): array
+	{
+		$errors = [];
+		if (method_exists($this, 'checkNestedRecords')) {
+			$ids[] = &$errors;
+			call_user_func_array(array($this, 'checkNestedRecords'), $ids);
+		}
+		return $errors;
+	}
+
 	public function deleteRecord(...$ids)
 	{
 		call_user_func_array(array($this, "setRecordCondition"), $ids);
@@ -82,8 +92,93 @@ trait ModelTrait
 		}
 	}
 
-	public function getRulesId(){
+	public function getRulesId()
+	{
 		return $this->rulesId ?? 'required|is_natural_no_zero';
+	}
+
+	public function countByActorId($actorId): bool
+	{
+		$this->where('actorId', $actorId);
+		return $this->countAllResults() > 0;
+	}
+
+	public function countByAgeId($ageId): bool
+	{
+		$this->where('ageId', $ageId);
+		return $this->countAllResults() > 0;
+	}
+
+	public function countByArsenalId($arsenalId): bool
+	{
+		$this->where('arsenalId', $arsenalId);
+		return $this->countAllResults() > 0;
+	}
+
+	public function countByCharacterId($characterId): bool
+	{
+		$this->where('characterId', $characterId);
+		return $this->countAllResults() > 0;
+	}
+
+	public function countByMegazordId($megazordId): bool
+	{
+		$this->where('megazordId', $megazordId);
+		return $this->countAllResults() > 0;
+	}
+
+	public function countByModuleId($moduleId): bool
+	{
+		$this->where('moduleId', $moduleId);
+		return $this->countAllResults() > 0;
+	}
+
+	public function countByMorpherId($morpherId): bool
+	{
+		$this->where('morpherId', $morpherId);
+		return $this->countAllResults() > 0;
+	}
+
+	public function countByRangerId($rangerId): bool
+	{
+		$this->where('rangerId', $rangerId);
+		return $this->countAllResults() > 0;
+	}
+
+	public function countBySeasonId($serieId, $seasonNumber): bool
+	{
+		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber);
+		return $this->countAllResults() > 0;
+	}
+
+	public function countBySerieId($serieId): bool
+	{
+		$this->where('serieId', $serieId);
+		return $this->countAllResults() > 0;
+	}
+
+	public function countByTransformationId($transformationId): bool
+	{
+		$this->where('transformationId', $transformationId);
+		return $this->countAllResults() > 0;
+	}
+
+	public function countByUserId($userId): bool
+	{
+		$this->where('userId', $userId);
+		return $this->countAllResults() > 0;
+	}
+
+	public function countByVillainId($villainId): bool
+	{
+		$this->where('villainId', $villainId);
+		return $this->countAllResults() > 0;
+	}
+
+	public function countByZordId($zordId): bool
+	{
+		$this->where('zordId', $zordId);
+		return $this->countAllResults() > 0;
 	}
 
 	private function validateRecordProperties(&$postData, $method, $prevRecord = null)

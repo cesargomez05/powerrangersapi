@@ -36,6 +36,14 @@ class ArsenalModel extends Model
 		$this->where('id', $id);
 	}
 
+	protected function checkNestedRecords($id, &$errors)
+	{
+		$seasonArsenalModel = model('App\Models\SeasonArsenalModel');
+		if ($seasonArsenalModel->countByArsenalId($id)) {
+			$errors['season_arsenal'] = 'There are nested season-arsenal records to arsenal item';
+		}
+	}
+
 	public function insertRecord(&$record)
 	{
 		$this->db->transBegin();

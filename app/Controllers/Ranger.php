@@ -103,6 +103,12 @@ class Ranger extends BaseResource
 
 	public function delete($id)
 	{
+		// Se consulta si existe registros dependientes del registro a eliminar
+		$validations = $this->model->validateNestedRecords($id);
+		if (count($validations) > 0) {
+			return $this->respond(['errors' => $validations], 409);
+		}
+
 		$result = $this->model->deleteRecord($id);
 		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen
@@ -111,40 +117,4 @@ class Ranger extends BaseResource
 
 		return $this->success("Record successfully deleted");
 	}
-
-	/*
-	protected function validateDeleteRecord($id)
-	{
-		$errors = [];
-
-		// Se valida los registros de Casting y de transformationRanger asociados al ranger
-		$model = new CastingModel();
-		if ($model->checkRecordsByForeignKey(['rangerId' => $id])) {
-			$errors['casting'] = "The ranger has one or many casting records";
-		}
-		$model = new TransformationRangerModel();
-		if ($model->checkRecordsByForeignKey(['rangerId' => $id])) {
-			$errors['transformationRanger'] = 'The ranger has one or many transformation-ranger relation records';
-		}
-
-		return count($errors) ? $errors : true;
-	}
-
-	protected function moveRecordFiles($filesData, $ranger)
-	{
-		// Se procede a mover el archivo subido a la carpeta destinada para ello (si aplica)
-		if (isset($filesData['record'])) {
-			$this->moveFiles($filesData['record'], $ranger);
-		}
-		if (isset($ranger['morpher']) && isset($filesData['morpher'])) {
-			$this->moveFiles($filesData['morpher'], $ranger['morpher']);
-		}
-	}
-
-	protected function addRecordInformation(&$response, $rangerUri)
-	{
-		// Se obtiene la información del casting asociado al actor
-		$castingModel = new CastingModel();
-		$response['casting'] = $castingModel->getCastingByRanger($rangerUri);
-	}*/
 }

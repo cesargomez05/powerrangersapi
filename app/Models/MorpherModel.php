@@ -43,6 +43,14 @@ class MorpherModel extends Model
 		$this->where('id', $id);
 	}
 
+	protected function checkNestedRecords($id, &$errors)
+	{
+		$rangerModel = model('App\Models\RangerModel');
+		if ($rangerModel->countByMorpherId($id)) {
+			$errors['ranger'] = 'There are nested ranger records to morpher';
+		}
+	}
+
 	public function insertRecord(&$record, $subTransaction = false)
 	{
 		if (!$subTransaction) {

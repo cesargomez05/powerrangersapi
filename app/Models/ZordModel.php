@@ -36,6 +36,14 @@ class ZordModel extends Model
 		$this->where('id', $id);
 	}
 
+	protected function checkNestedRecords($id, &$errors)
+	{
+		$seasonZordModel = model('App\Models\SeasonZordModel');
+		if ($seasonZordModel->countByZordId($id)) {
+			$errors['season_zord'] = 'There are nested season-zord records to zord';
+		}
+	}
+
 	public function insertRecord(&$record)
 	{
 		$this->db->transBegin();

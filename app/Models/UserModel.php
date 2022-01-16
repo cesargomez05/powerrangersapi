@@ -83,6 +83,14 @@ class UserModel extends Model
 		return true;
 	}
 
+	protected function checkNestedRecords($id, &$errors)
+	{
+		$permissionModel = model('App\Models\PermissionModel');
+		if ($permissionModel->countByUserId($id)) {
+			$errors['permission'] = 'There are nested permission records to user';
+		}
+	}
+
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
 	{
 		$errors = [];

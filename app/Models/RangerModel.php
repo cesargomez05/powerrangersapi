@@ -38,6 +38,26 @@ class RangerModel extends Model
 		$this->where('id', $id);
 	}
 
+	protected function checkNestedRecords($id, &$errors)
+	{
+		$castingModel = model('App\Models\CastingModel');
+		if ($castingModel->countByRangerId($id)) {
+			$errors['casting'] = 'There are nested casting records to ranger';
+		}
+		$seasonArsenalModel = model('App\Models\SeasonArsenalModel');
+		if ($seasonArsenalModel->countByRangerId($id)) {
+			$errors['season_arsenal'] = 'There are nested season-arsenal records to ranger';
+		}
+		$seasonZordModel = model('App\Models\SeasonZordModel');
+		if ($seasonZordModel->countByRangerId($id)) {
+			$errors['season_zord'] = 'There are nested season-zord records to ranger';
+		}
+		$transformationRangerModel = model('App\Models\TransformationRangerModel');
+		if ($transformationRangerModel->countByRangerId($id)) {
+			$errors['transformation_ranger'] = 'There are nested transformation-ranger records to ranger';
+		}
+	}
+
 	public function insertRecord(&$record, $subTransaction = false)
 	{
 		if (!$subTransaction) {

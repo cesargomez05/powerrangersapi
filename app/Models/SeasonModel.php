@@ -40,6 +40,34 @@ class SeasonModel extends Model
 		$this->where('serieId', $serieId)->where('number', $number);
 	}
 
+	protected function checkNestedRecords($serieId, $seasonNumber, &$errors)
+	{
+		$castingModel = model('App\Models\CastingModel');
+		if ($castingModel->countBySeasonId($serieId, $seasonNumber)) {
+			$errors['casting'] = 'There are nested casting records to season';
+		}
+		$chapterModel = model('App\Models\ChapterModel');
+		if ($chapterModel->countBySeasonId($serieId, $seasonNumber)) {
+			$errors['chapter'] = 'There are nested chapter records to season';
+		}
+		$seasonArsenalModel = model('App\Models\SeasonArsenalModel');
+		if ($seasonArsenalModel->countBySeasonId($serieId, $seasonNumber)) {
+			$errors['season_arsenal'] = 'There are nested season-arsenal records to season';
+		}
+		$seasonMegazordModel = model('App\Models\SeasonMegazordModel');
+		if ($seasonMegazordModel->countBySeasonId($serieId, $seasonNumber)) {
+			$errors['season_megazord'] = 'There are nested season-megazord records to season';
+		}
+		$seasonVillainModel = model('App\Models\SeasonVillainModel');
+		if ($seasonVillainModel->countBySeasonId($serieId, $seasonNumber)) {
+			$errors['season_villain'] = 'There are nested season-villain records to season';
+		}
+		$seasonZordModel = model('App\Models\SeasonZordModel');
+		if ($seasonZordModel->countBySeasonId($serieId, $seasonNumber)) {
+			$errors['season_zord'] = 'There are nested season-zord records to season';
+		}
+	}
+
 	public function insertRecord(&$record, $subTransaction = false)
 	{
 		if (!$subTransaction) {

@@ -35,6 +35,14 @@ class ActorModel extends Model
 		$this->where('id', $id);
 	}
 
+	protected function checkNestedRecords($id, &$errors)
+	{
+		$castingModel = model('App\Models\CastingModel');
+		if ($castingModel->countByActorId($id)) {
+			$errors['casting'] = 'There are nested casting records to actor';
+		}
+	}
+
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
 	{
 		$errors = $this->validateUploadFiles($postData, $postFiles);

@@ -34,6 +34,14 @@ class SerieModel extends Model
 		$this->where('id', $id);
 	}
 
+	protected function checkNestedRecords($id, &$errors)
+	{
+		$seasonModel = model('App\Models\SeasonModel');
+		if ($seasonModel->countBySerieId($id)) {
+			$errors['season'] = 'There are nested season records to serie';
+		}
+	}
+
 	public function insertRecord(&$record)
 	{
 		$this->db->transBegin();

@@ -110,6 +110,12 @@ class Season extends BaseResource
 
 	public function delete($serieId, $number)
 	{
+		// Se consulta si existe registros dependientes del registro a eliminar
+		$validations = $this->model->validateNestedRecords($serieId, $number);
+		if (count($validations) > 0) {
+			return $this->respond(['errors' => $validations], 409);
+		}
+
 		$result = $this->model->deleteRecord($serieId, $number);
 		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen
