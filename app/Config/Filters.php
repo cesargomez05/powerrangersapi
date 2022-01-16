@@ -42,9 +42,9 @@ class Filters extends BaseConfig
 		'seasonarsenal_filter' => \App\Filters\SeasonArsenalFilter::class,
 		'villain_filter' => \App\Filters\VillainFilter::class,
 		'seasonvillain_filter' => \App\Filters\SeasonVillainFilter::class,
-		'module_filter' => null,
-		'user_filter' => null,
-		'permission_filter' => null
+		'module_filter' => \App\Filters\ModuleFilter::class,
+		'user_filter' => \App\Filters\UserFilter::class,
+		'permission_filter' => \App\Filters\PermissionFilter::class
 	];
 
 	/**

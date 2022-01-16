@@ -4,8 +4,6 @@ namespace App\Traits;
 
 trait ModelTrait
 {
-	protected $rulesId = 'required|is_natural_no_zero';
-
 	/**
 	 * Obtiene la lista de registros.
 	 * @param array $query Parámetros de consulta de los registros.
@@ -76,12 +74,16 @@ trait ModelTrait
 	public function validateId($id, $property = 'id', $label = 'Id')
 	{
 		$validation = \Config\Services::validation(null, false);
-		$validation->setRule($property, $label, $this->rulesId);
+		$validation->setRule($property, $label, $this->getRulesId());
 		if ($validation->run([$property => $id])) {
 			return true;
 		} else {
 			return $validation->getErrors();
 		}
+	}
+
+	public function getRulesId(){
+		return $this->rulesId ?? 'required|is_natural_no_zero';
 	}
 
 	private function validateRecordProperties(&$postData, $method, $prevRecord = null)

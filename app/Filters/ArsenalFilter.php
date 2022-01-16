@@ -35,7 +35,7 @@ class ArsenalFilter implements FilterInterface
 
 		$exists = $model->check($arsenalId);
 		if (!$exists) {
-			$response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Arsenal not found']);
+			return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Arsenal not found']);
 		}
 	}
 }

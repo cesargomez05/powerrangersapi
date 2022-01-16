@@ -20,11 +20,6 @@ class Permission extends BaseResource
 
 	public function index($userId)
 	{
-		$validateUser = $this->validateUser($userId);
-		if ($validateUser !== true) {
-			return $validateUser;
-		}
-
 		$filter = $this->request->getGet();
 		set_pagination($filter);
 
@@ -34,11 +29,6 @@ class Permission extends BaseResource
 
 	public function create($userId)
 	{
-		$validateUser = $this->validateUser($userId);
-		if ($validateUser !== true) {
-			return $validateUser;
-		}
-
 		// Datos de entrada de la petición
 		$postData = $this->request->getPost();
 		$postFiles = $this->request->getFiles();
@@ -67,16 +57,6 @@ class Permission extends BaseResource
 
 	public function delete($userId, $moduleId)
 	{
-		$validateUser = $this->validateUser($userId);
-		if ($validateUser !== true) {
-			return $validateUser;
-		}
-
-		$permission = $this->model->check($userId, $moduleId);
-		if (!$permission) {
-			return $this->failNotFound('Record not found');
-		}
-
 		$result = $this->model->deleteRecord($userId, $moduleId);
 		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen
@@ -84,20 +64,5 @@ class Permission extends BaseResource
 		}
 
 		return $this->success("Record successfully deleted");
-	}
-
-	private function validateUser($userId)
-	{
-		$userModel = new \App\Models\UserModel();
-		$validationId = $userModel->validateId($userId);
-		if ($validationId !== true) {
-			return $this->respond(['errors' => $validationId], 400);
-		}
-
-		$user = $userModel->get($userId);
-		if (!isset($user)) {
-			return $this->failNotFound('User not found');
-		}
-		return true;
 	}
 }

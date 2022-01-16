@@ -35,7 +35,7 @@ class MorpherFilter implements FilterInterface
 
 		$exists = $model->check($morpherId);
 		if (!$exists) {
-			$response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Morpher not found']);
+			return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Morpher not found']);
 		}
 	}
 }

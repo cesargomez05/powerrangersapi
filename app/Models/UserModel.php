@@ -7,7 +7,9 @@ use CodeIgniter\Model;
 
 class UserModel extends Model
 {
-	use ModelTrait;
+	use ModelTrait {
+		insertRecord as insertRecordTrait;
+	}
 
 	protected $table = 'oauth_users';
 
@@ -48,11 +50,9 @@ class UserModel extends Model
 		}
 	}
 
-	public function get($id)
+	protected function setRecordCondition($id)
 	{
 		$this->where('username', $id);
-		$record = $this->findAll();
-		return count($record) ? $record[0] : null;
 	}
 
 	public function insertRecord(&$record)
@@ -63,10 +63,10 @@ class UserModel extends Model
 		$this->setValidationRule('confirmPassword', 'permit_empty');
 
 		// Se procede a insertar el registro en la base de datos
-		$recordId = $this->insert($record);
-		if ($recordId === false) {
+		$result = $this->insertRecordTrait($record);
+		if ($result !== true) {
 			$this->db->transRollback();
-			return $this->errors();
+			return $result;
 		}
 
 		if (isset($record['permissions']) && count($record['permissions']) > 0) {
@@ -80,23 +80,6 @@ class UserModel extends Model
 
 		$this->db->transCommit();
 
-		return true;
-	}
-
-	public function updateRecord($record, $id)
-	{
-		$this->where('username', $id);
-
-		$result = $this->update(null, $record);
-		return $result === false ? $this->errors() : true;
-	}
-
-	public function deleteRecord($id)
-	{
-		$this->where('username', $id);
-		if (!$this->delete()) {
-			return $this->errors();
-		}
 		return true;
 	}
 
