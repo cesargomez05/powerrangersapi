@@ -2,63 +2,106 @@
 
 namespace App\Controllers;
 
-use App\Models\SeasonModel;
+use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\RESTful\BaseResource;
 
-class Serie extends APIController
+class Serie extends BaseResource
 {
-	// Atributos de la clase BaseResource
+	use ResponseTrait;
+
 	protected $modelName = 'App\Models\SerieModel';
 
-	protected function insertRecord(&$postData, $filesData)
+	/**
+	 * @var \App\Models\SerieModel
+	 */
+	protected $model;
+
+	protected $helpers = ['app'];
+
+	public function index()
 	{
-		// Se inicializa una transacción sobre la base de datos
-		$this->model->db->transBegin();
+		$filter = $this->request->getGet();
+		set_pagination($filter);
 
-		// Se procede a insertar el registro en la base de datos
-		$serie = $this->model->insertRecord($postData);
-		if (isset($serie['error'])) {
-			// Se retorna los mensajes de error de la validación
-			$this->model->db->transRollback();
-			return $serie['error'];
-		}
-
-		// Se establece los valores correpondientes al Id de la temporada
-		$postData['season']['serieId'] = $serie['primaryKey'];
-		$postData['season']['number'] = 1;
-
-		// Se inserta los datos de la temporada
-		$seasonModel = new SeasonModel();
-		$season = $seasonModel->insertRecord($postData['season']);
-		if (isset($season['error'])) {
-			// Se retorna los mensajes de error de la validación
-			$this->model->db->transRollback();
-			return ['season' => $season['error']];
-		}
-
-		// Se finaliza la transacción
-		$this->model->db->transCommit();
-
-		// Se retorna TRUE para indicar que la función se ejecutó correctamente
-		return TRUE;
+		$series = $this->model->list($filter);
+		return $this->respond($series);
 	}
 
-	protected function validateDeleteRecord($id)
+	public function show($id)
 	{
-		$errors = [];
-
-		// Se valida los registros de Temporadas asociados a la serie
-		$model = new SeasonModel();
-		if ($model->checkRecordsByForeignKey(['serieId' => $id])) {
-			$errors['season'] = "The serie has one or many seasons records";
-		}
-
-		return count($errors) ? $errors : TRUE;
+		$serie = $this->model->get($id);
+		return $this->respond(['record' => $serie]);
 	}
 
-	protected function addRecordInformation(&$response, $serieUri)
+	public function create()
 	{
-		// Se obtiene la lista de las temporadas asociadas a la era
-		$seasonModel = new SeasonModel();
-		$response['seasons'] = $seasonModel->getSeasonsBySerie($serieUri);
+		// Datos de entrada de la petición
+		$postData = $this->request->getPost();
+		$postFiles = $this->request->getFiles();
+
+		// Se valida si no existen datos enviados por método POST
+		if (empty($postData) && empty($postFiles)) {
+			return $this->fail('Please define the data to be recorded');
+		}
+
+		// Se valida los datos de la petición
+		$validateRecord = $this->model->validateRecord($postData, $postFiles, 'post');
+		if ($validateRecord !== true) {
+			return $this->respond(['errors' => $validateRecord], 400);
+		}
+
+		$result = $this->model->insertRecord($postData);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		unset($postData['season']);
+
+		return $this->respondCreated($postData);
+	}
+
+	public function update($id)
+	{
+		$serie = $this->model->get($id);
+
+		// Datos de entrada de la petición
+		$postData = $this->request->getPost();
+		unset($postData['_method']);
+		$postFiles = $this->request->getFiles();
+
+		// Se valida si no existen datos enviados por método POST
+		if (empty($postData) && empty($postFiles)) {
+			return $this->fail('Please define the data to be recorded');
+		}
+
+		// Se obtiene el tipo de petición que se realiza a la función (PUT o PATCH)
+		$request = service('request');
+		$method = $request->getMethod();
+
+		// Se valida los datos de la petición
+		$validateRecord = $this->model->validateRecord($postData, $postFiles, $method, $serie);
+		if ($validateRecord !== true) {
+			return $this->respond(['errors' => $validateRecord], 400);
+		}
+
+		$result = $this->model->updateRecord($postData, $id);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		return $this->success("Record successfully updated");
+	}
+
+	public function delete($id)
+	{
+		$result = $this->model->deleteRecord($id);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		return $this->success("Record successfully deleted");
 	}
 }

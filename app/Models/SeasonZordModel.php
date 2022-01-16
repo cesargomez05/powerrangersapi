@@ -2,18 +2,19 @@
 
 namespace App\Models;
 
-class SeasonZordModel extends APIModel
-{
-	// Atributos de la clase APIModel
-	protected $primaryKeys = ['serieId', 'seasonNumber', 'zordId'];
-	protected $filterColumns = [];
-	protected $columnValue = '';
+use App\Traits\ModelTrait;
+use CodeIgniter\Model;
 
-	// Atributos de la clase Model
+class SeasonZordModel extends Model
+{
+	use ModelTrait {
+		insertRecord as insertRecordTrait;
+	}
+
 	protected $table = 'season_zord';
 
-	// Atributos de la clase BaseModel
 	protected $allowedFields = ['serieId', 'seasonNumber', 'zordId', 'rangerId'];
+
 	protected $validationRules = [
 		'serieId' => 'required|is_natural_no_zero|exists_id[series.id]',
 		'seasonNumber' => 'required|is_natural_no_zero',
@@ -28,10 +29,46 @@ class SeasonZordModel extends APIModel
 		]
 	];
 
+	protected function setRecordsCondition($query, $serieId, $seasonNumber)
+	{
+		$this->setTable('view_season_zord');
+
+		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('zordName', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setRecordCondition($serieId, $seasonNumber, $zordId)
+	{
+		$this->where('serieId', $serieId)
+			->where('seasonNumber', $seasonNumber)
+			->where('zordId', $zordId);
+	}
+
 	public function insertRecord(&$record)
 	{
-		// Se elimina la propiedad del Id de la temporada
-		unset($record['seasonId']);
-		return parent::insertRecord($record);
+		$prevRecord = $this->check($record['serieId'], $record['seasonNumber'], $record['zordId']);
+		if ($prevRecord) {
+			return 'There one or more season-zord relationship records';
+		}
+
+		// Se procede a insertar el registro en la base de datos
+		return $this->insertRecordTrait($record);
+	}
+
+	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
+	{
+		$errors = [];
+
+		$this->validateRecordProperties($postData, $method, $prevRecord);
+
+		if (!$this->validate($postData)) {
+			$errors = array_merge($this->errors(), $errors);
+		}
+
+		return count($errors) > 0 ? $errors : true;
 	}
 }

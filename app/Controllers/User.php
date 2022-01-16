@@ -2,59 +2,108 @@
 
 namespace App\Controllers;
 
-use App\Models\PermissionModel;
+use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\RESTful\BaseResource;
 
-class User extends APIController
+class User extends BaseResource
 {
-	// Atributos de la clase BaseResource
+	use ResponseTrait;
+
 	protected $modelName = 'App\Models\UserModel';
 
-	protected function validateDeleteRecord($username)
+	/**
+	 * @var \App\Models\UserModel
+	 */
+	protected $model;
+
+	protected $helpers = ['app'];
+
+	public function index()
 	{
-		$errors = [];
+		$filter = $this->request->getGet();
+		set_pagination($filter);
 
-		$model = new PermissionModel();
-		if ($model->checkRecordsByForeignKey(['username' => $username])) {
-			$errors['permissions'] = "The user has one or many permissions records";
-		}
-
-		return count($errors) ? $errors : TRUE;
+		$users = $this->model->list($filter);
+		return $this->respond($users);
 	}
 
-	protected function insertRecord(&$postData, $filesData)
+	public function show($id)
 	{
-		// Se inicializa una transacción sobre la base de datos
-		$this->model->db->transBegin();
+		$user = $this->model->get($id);
+		return $this->respond(['record' => $user]);
+	}
 
-		// Se procede a insertar los datos del usuario en la base de datos
-		$user = $this->model->insertRecord($postData);
-		if (isset($user['error'])) {
-			// Se retorna los mensajes de error de la validación
-			$this->model->db->transRollback();
-			return $user['error'];
+	public function create()
+	{
+		// Datos de entrada de la petición
+		$postData = $this->request->getPost();
+		$postFiles = $this->request->getFiles();
+
+		// Se valida si no existen datos enviados por método POST
+		if (empty($postData) && empty($postFiles)) {
+			return $this->fail('Please define the data to be recorded');
 		}
 
-		/*
-		// Se inserta los datos de los permisos asociados al usuario (si aplica)
-		if (isset($postData['permissions'])) {
-			// Se establece el Id del usuario en cada uno de los permisos
-			foreach ($postData['permissions'] as $key => &$permission) {
-				$permission['username'] = $user['primaryKey'];
-			}
+		// Se valida los datos de la petición
+		$validateRecord = $this->model->validateRecord($postData, $postFiles, 'post');
+		if ($validateRecord !== true) {
+			return $this->respond(['errors' => $validateRecord], 400);
+		}
 
-			// Se ejecuta el proceso de inserción de los datos
-			$permissionModel = new PermissionModel();
-			$result = $permissionModel->insertBatch($postData['permissions']);
-			if ($result === FALSE) {
-				$this->db->transRollback();
-				return ['permissions' => $permissionModel->errors()];
-			}
-		}*/
+		$result = $this->model->insertRecord($postData);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+		unset($postData['password']);
+		unset($postData['confirmPassword']);
+		unset($postData['permissions']);
 
-		// Se finaliza la transacción
-		$this->model->db->transCommit();
+		return $this->respondCreated($postData);
+	}
 
-		// Se retorna TRUE para indicar que la función se ejecutó correctamente
-		return TRUE;
+	public function update($id)
+	{
+		$user = $this->model->get($id);
+
+		// Datos de entrada de la petición
+		$postData = $this->request->getPost();
+		unset($postData['_method']);
+		$postData['_username'] = $id;
+		$postFiles = $this->request->getFiles();
+
+		// Se valida si no existen datos enviados por método POST
+		if (empty($postData) && empty($postFiles)) {
+			return $this->fail('Please define the data to be recorded');
+		}
+
+		// Se obtiene el tipo de petición que se realiza a la función (PUT o PATCH)
+		$request = service('request');
+		$method = $request->getMethod();
+
+		// Se valida los datos de la petición
+		$validateRecord = $this->model->validateRecord($postData, $postFiles, $method, $user->toArray());
+		if ($validateRecord !== true) {
+			return $this->respond(['errors' => $validateRecord], 400);
+		}
+
+		$result = $this->model->updateRecord($postData, $id);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		return $this->success("Record successfully updated");
+	}
+
+	public function delete($id)
+	{
+		$result = $this->model->deleteRecord($id);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		return $this->success("Record successfully deleted");
 	}
 }

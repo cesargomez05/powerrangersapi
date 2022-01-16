@@ -2,43 +2,57 @@
 
 namespace App\Models;
 
-class ChapterModel extends APIModel
+use App\Traits\ModelTrait;
+use CodeIgniter\Model;
+
+class ChapterModel extends Model
 {
-	// Atributos de la clase APIModel
-	protected $primaryKeys = ['serieId', 'seasonNumber', 'number'];
-	protected $filterColumns = ['title', 'titleSpanish'];
-	protected $columnValue = 'title';
+	use ModelTrait;
 
-	protected $viewName = "chapters_view";
-	protected $uriColumns = ['serieSlug', 'seasonNumber', 'slug'];
-	protected $viewColumns = ['slug', 'title'];
-
-	// Atributos de la clase Model
 	protected $table = 'chapters';
 
 	// Atributos de la clase BaseModel
 	protected $allowedFields = ['serieId', 'seasonNumber', 'number', 'slug', 'title', 'titleSpanish', 'summary'];
+
 	protected $validationRules = [
 		'serieId' => 'required|is_natural_no_zero|exists_id[series.id]',
 		'seasonNumber' => 'required|is_natural_no_zero',
 		'number' => 'required|is_natural_no_zero',
-		'slug' => 'required|max_length[100]',
+		'slug' => 'required_with[title]|max_length[100]',
 		'title' => 'required|max_length[100]',
 		'titleSpanish' => 'required|max_length[100]',
-		'summary' => 'permit_empty',
-		'seasonId' => 'check_id[seasonId,serieId,seasonNumber]|exists_record[seasonId,seasons,serieId,number]'
-	];
-	protected $validationMessages = [
-		'seasonId' => [
-			'check_id' => 'The \'serieId\' and \'seasonNumber\' values are required',
-			'exists_record' => 'The season not exists'
-		]
+		'summary' => 'permit_empty'
 	];
 
-	public function insertRecord(&$record)
+	protected function setRecordsCondition($query, $serieId, $seasonNumber)
 	{
-		// Se elimina la propiedad del Id de la temporada
-		unset($record['seasonId']);
-		return parent::insertRecord($record);
+		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('title', $query['q'], 'both');
+			$this->orLike('titleSpanish', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setRecordCondition($serieId, $seasonNumber, $number)
+	{
+		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber)->where('number', $number);
+	}
+
+	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
+	{
+		$errors = [];
+
+		$this->validateRecordProperties($postData, $method, $prevRecord);
+
+		$slugSettings = ['title' => 'title', 'field' => 'slug', 'id' => ['serieId', 'seasonNumber', 'number']];
+		$this->setSlugValue($postData, $slugSettings, isset($prevRecord) ? [$prevRecord['serieId'], $prevRecord['seasonNumber'], $prevRecord['number']] : null);
+
+		if (!$this->validate($postData)) {
+			$errors = array_merge($this->errors(), $errors);
+		}
+
+		return count($errors) > 0 ? $errors : true;
 	}
 }

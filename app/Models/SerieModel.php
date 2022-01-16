@@ -2,41 +2,96 @@
 
 namespace App\Models;
 
-class SerieModel extends APIModel
-{
-	// Atributos de la clase APIModel
-	protected $filterColumns = ['title'];
-	protected $columnValue = '';
-	protected $viewColumns = ['slug', 'title'];
+use App\Traits\ModelTrait;
+use CodeIgniter\Model;
 
-	// Atributos de la clase Model
+class SerieModel extends Model
+{
+	use ModelTrait {
+		insertRecord as insertRecordTrait;
+	}
+
 	protected $table = 'series';
 
-	// Atributos de la clase BaseModel
 	protected $allowedFields = ['slug', 'title'];
+
 	protected $validationRules = [
-		'slug' => 'required|max_length[50]|is_unique[series.slug,id,{_id}]',
+		'slug' => 'required_with[title]|max_length[50]|is_unique[series.slug,id,{_id}]',
 		'title' => 'required|max_length[50]'
 	];
 
-	public function validateRecord(&$filesData, $property, &$postData, $postFiles, $ids, $method, $record = null, $nodes = [])
+	protected function setRecordsCondition($query)
 	{
-		// Se valida si el proceso corresponde a un nuevo registro de serie
-		if ($method == 'post') {
-			// Se valida la propiedad de los datos de la temporada
-			if (!isset($postData['season'])) {
-				return ['season' => 'Please set the season values'];
-			}
-
-			// Se valida los datos de la temporada
-			$seasonModel = new SeasonModel();
-			// Se elimina las validaciones del Id asociadas a la temporada
-			$seasonModel->removeValidationRule('serieId,number');
-			$validRecord = $seasonModel->validateRecord($filesData, 'season', $postData['season'], $postFiles, [], 'post', null, array_merge($nodes, ['season']));
-			if ($validRecord !== TRUE) {
-				return ['season' => $validRecord];
-			}
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('title', $query['q'], 'both');
+			$this->groupEnd();
 		}
-		return parent::validateRecord($filesData, $property, $postData, $postFiles, $ids, $method, $record, $nodes);
+	}
+
+	protected function setRecordCondition($id)
+	{
+		$this->where('id', $id);
+	}
+
+	public function insertRecord(&$record)
+	{
+		$this->db->transBegin();
+
+		// Se procede a insertar el registro en la base de datos
+		$result = $this->insertRecordTrait($record);
+		if ($result !== true) {
+			$this->db->transRollback();
+			return $result;
+		}
+
+		// Se establece el Id de la serie creada en los datos de la temporada
+		$record['season']['serieId'] = $record[$this->primaryKey];
+
+		$seasonModel = model('App\Models\SeasonModel');
+		$seasonResult = $seasonModel->insertRecord($record['season'], true);
+		if ($seasonResult !== true) {
+			$this->db->transRollback();
+			return $seasonResult;
+		}
+
+		$this->db->transCommit();
+
+		return true;
+	}
+
+	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
+	{
+		$errors = [];
+
+		$this->validateRecordProperties($postData, $method, $prevRecord);
+
+		// Se valida los datos de la temporada (si es método POST)
+		if ($method == 'post') {
+			if (isset($postData['season'])) {
+				$seasonModel = model('App\Models\SeasonModel');
+
+				// Se omite la validación del id de la temporada asociada a la serie a crear
+				$seasonModel->setValidationRule('serieId', 'permit_empty');
+				unset($postData['season']['serieId']);
+				// Se define el número de temporada asociada a la serie a crear
+				$postData['season']['number'] = 1;
+
+				$seasonErrors = $seasonModel->validateRecord($postData['season'], isset($postFiles['season']) ? $postFiles['season'] : [], 'post');
+				if ($seasonErrors !== true) {
+					$errors['season'] = $seasonErrors;
+				}
+			} else {
+				$errors['season'] = 'The season information is required';
+			}
+		} else {
+			unset($postData['season']);
+		}
+
+		if (!$this->validate($postData)) {
+			$errors = array_merge($this->errors(), $errors);
+		}
+
+		return count($errors) > 0 ? $errors : true;
 	}
 }

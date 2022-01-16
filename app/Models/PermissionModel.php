@@ -2,25 +2,69 @@
 
 namespace App\Models;
 
-class PermissionModel extends APIModel
+use App\Traits\ModelTrait;
+use CodeIgniter\Model;
+
+class PermissionModel extends Model
 {
-	// Atributos de la clase APIModel
-	protected $columnValue = '';
+	use ModelTrait {
+		insertRecord as insertRecordTrait;
+	}
 
-	// Atributos de la clase Model
 	protected $table = 'permissions';
-	protected $primaryKeys = ['username', 'moduleId'];
 
-	// Atributos de la clase BaseModel
 	protected $allowedFields = ['username', 'moduleId', 'create', 'read', 'update', 'delete'];
+
 	protected $validationRules = [
-		'username' => 'required|is_natural_no_zero|exists_id[oauth_users.username]',
+		'username' => 'required|alpha_numeric|exists_id[oauth_users.username]',
 		'moduleId' => 'required|alpha_numeric|exists_id[modules.id]',
 		'create' => 'required|is_natural|in_list[0,1]',
 		'read' => 'required|is_natural|in_list[0,1]',
 		'update' => 'required|is_natural|in_list[0,1]',
 		'delete' => 'required|is_natural|in_list[0,1]'
 	];
+
+	protected function setRecordsCondition($query, $username)
+	{
+		$this->setTable('view_permissions');
+
+		$this->where('username', $username);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('moduleName', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setRecordCondition($username, $moduleId)
+	{
+		$this->where('username', $username)
+			->where('moduleId', $moduleId);
+	}
+
+	public function insertRecord(&$record)
+	{
+		$prevRecord = $this->get($record['username'], $record['moduleId']);
+		if (isset($prevRecord)) {
+			return 'The permission has been assigned to user';
+		}
+
+		// Se procede a insertar el registro en la base de datos
+		return $this->insertRecordTrait($record);
+	}
+
+	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
+	{
+		$errors = [];
+
+		$this->validateRecordProperties($postData, $method, $prevRecord);
+
+		if (!$this->validate($postData)) {
+			$errors = array_merge($this->errors(), $errors);
+		}
+
+		return count($errors) > 0 ? $errors : true;
+	}
 
 	public function checkPermissions($username, $moduleId, $permission)
 	{
@@ -36,6 +80,15 @@ class PermissionModel extends APIModel
 		if ($row !== NULL) {
 			return filter_var($row->available, FILTER_VALIDATE_BOOLEAN);
 		}
-		return FALSE;
+		return false;
+	}
+
+	public function insertPermissions($username, $permissions)
+	{
+		foreach ($permissions as &$permission) {
+			$permission['username'] = $username;
+		}
+
+		return $this->insertBatch($permissions);
 	}
 }

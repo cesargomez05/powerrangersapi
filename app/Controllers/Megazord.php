@@ -2,79 +2,113 @@
 
 namespace App\Controllers;
 
-use App\Models\MegazordZordModel;
-use App\Models\SeasonMegazordModel;
+use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\RESTful\BaseResource;
 
-class Megazord extends APIController
+class Megazord extends BaseResource
 {
-	// Atributos de la clase BaseResource
+	use ResponseTrait;
+
 	protected $modelName = 'App\Models\MegazordModel';
 
-	protected function insertRecord(&$postData, $filesData)
+	/**
+	 * @var \App\Models\MegazordModel
+	 */
+	protected $model;
+
+	protected $helpers = ['app'];
+
+	public function index()
 	{
-		// Se inicializa una transacción sobre la base de datos
-		$this->model->db->transBegin();
+		$filter = $this->request->getGet();
+		set_pagination($filter);
 
-		// Se procede a insertar el registro en la base de datos
-		$megazord = $this->model->insertRecord($postData);
-		if (isset($megazord['error'])) {
-			// Se retorna los mensajes de error de la validación
-			$this->model->db->transRollback();
-			return $megazord['error'];
-		}
-
-		// Se define el Id del megazord en el registro de SeasonMegazord
-		$postData['seasonmegazord']['megazordId'] = $megazord['primaryKey'];
-
-		// Se inserta los datos del SeasonMegazord
-		$seasonMegazordModel = new SeasonMegazordModel();
-		$seasonMegazord = $seasonMegazordModel->insertRecord($postData['seasonmegazord']);
-		if (isset($seasonMegazord['error'])) {
-			// Se retorna los mensajes de error de la validación
-			$this->model->db->transRollback();
-			return ['seasonmegazord' => $seasonMegazord['error']];
-		}
-
-		// Se genera el conjunto de registros de la relación entre el Megazord y los Zords que lo conforman (si aplica)
-		if (isset($postData['zordsId']) && strlen($postData['zordsId'])) {
-			$zordsId = [];
-			foreach (explode(',', $postData['zordsId']) as $zordId) {
-				array_push($zordsId, ['megazordId' => $megazord['primaryKey'], 'zordId' => $zordId]);
-			}
-
-			$megazordZordModel = new MegazordZordModel();
-			$megazordZordModel->removeValidationRule('megazordId');
-			$result = $megazordZordModel->insertBatch($zordsId);
-			if ($result === FALSE) {
-				$this->model->db->transRollback();
-				return ['zordsId' => $megazordZordModel->errors()];
-			}
-		}
-
-		// Se finaliza la transacción
-		$this->model->db->transCommit();
-
-		// Se procede a mover los archivos asociados al arsenal
-		$this->moveRecordFiles($filesData, $postData);
-
-		// Se retorna TRUE para indicar que la función se ejecutó correctamente
-		return TRUE;
+		$megazords = $this->model->list($filter);
+		return $this->respond($megazords);
 	}
 
-	protected function validateDeleteRecord($id)
+	public function show($id)
 	{
-		$errors = [];
+		$megazord = $this->model->get($id);
+		return $this->respond(['record' => $megazord]);
+	}
 
-		// Se consulta los registros 
-		$model = new SeasonMegazordModel();
-		if ($model->checkRecordsByForeignKey(['megazordId' => $id])) {
-			$errors['seasonMegazord'] = "The megazord has one or many season-megazord relation records";
-		}
-		$model = new MegazordZordModel();
-		if ($model->checkRecordsByForeignKey(['megazordId' => $id])) {
-			$errors['megazordZord'] = "The megazord has one or many megazord-zord relation records";
+	public function create()
+	{
+		// Datos de entrada de la petición
+		$postData = $this->request->getPost();
+		$postFiles = $this->request->getFiles();
+
+		// Se valida si no existen datos enviados por método POST
+		if (empty($postData) && empty($postFiles)) {
+			return $this->fail('Please define the data to be recorded');
 		}
 
-		return count($errors) ? $errors : TRUE;
+		// Se valida los datos de la petición
+		$validateRecord = $this->model->validateRecord($postData, $postFiles, 'post');
+		if ($validateRecord !== true) {
+			return $this->respond(['errors' => $validateRecord], 400);
+		}
+
+		$result = $this->model->insertRecord($postData);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		// Se "mueve" el archivo subido a la respectiva carpeta
+		move_files($postData);
+
+		unset($postData['seasonmegazord']);
+		unset($postData['zordsId']);
+
+		return $this->respondCreated($postData);
+	}
+
+	public function update($id)
+	{
+		$megazord = $this->model->get($id);
+
+		// Datos de entrada de la petición
+		$postData = $this->request->getPost();
+		unset($postData['_method']);
+		$postFiles = $this->request->getFiles();
+
+		// Se valida si no existen datos enviados por método POST
+		if (empty($postData) && empty($postFiles)) {
+			return $this->fail('Please define the data to be recorded');
+		}
+
+		// Se obtiene el tipo de petición que se realiza a la función (PUT o PATCH)
+		$request = service('request');
+		$method = $request->getMethod();
+
+		// Se valida los datos de la petición
+		$validateRecord = $this->model->validateRecord($postData, $postFiles, $method, $megazord);
+		if ($validateRecord !== true) {
+			return $this->respond(['errors' => $validateRecord], 400);
+		}
+
+		$result = $this->model->updateRecord($postData, $id);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		// Se "mueve" el archivo subido a la respectiva carpeta
+		move_files($postData);
+
+		return $this->success("Record successfully updated");
+	}
+
+	public function delete($id)
+	{
+		$result = $this->model->deleteRecord($id);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		return $this->success("Record successfully deleted");
 	}
 }

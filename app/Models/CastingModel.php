@@ -2,22 +2,19 @@
 
 namespace App\Models;
 
-class CastingModel extends APIModel
+use App\Traits\ModelTrait;
+use CodeIgniter\Model;
+
+class CastingModel extends Model
 {
-	// Atributos de la clase APIModel
-	protected $primaryKeys = ['serieId', 'seasonNumber', 'actorId', 'characterId', 'rangerId'];
-	protected $filterColumns = ['actorName', 'characterName'];
-	protected $columnValue = '';
+	use ModelTrait {
+		insertRecord as insertRecordTrait;
+	}
 
-	protected $viewName = "casting_view";
-	protected $uriColumns = ['serieSlug', 'seasonNumber'];
-	protected $viewColumns = ['actorSlug', 'actorName', 'characterSlug', 'characterName', 'rangerSlug', 'rangerName'];
-
-	// Atributos de la clase Model
 	protected $table = 'casting';
 
-	// Atributos de la clase BaseModel
 	protected $allowedFields = ['serieId', 'seasonNumber', 'actorId', 'characterId', 'rangerId', 'isTeamUp'];
+
 	protected $validationRules = [
 		'serieId' => 'required|is_natural_no_zero|exists_id[series.id]',
 		'seasonNumber' => 'required|is_natural_no_zero',
@@ -34,79 +31,131 @@ class CastingModel extends APIModel
 		]
 	];
 
-	public function getRecordsByFilter($filter, $ids = null)
+	protected function setRecordsCondition($query, $serieId, $seasonNumber)
 	{
-		// Se cambia la tabla sobre la cual se realiza la consulta de registros
 		$this->setTable('view_casting');
-		return parent::getRecordsByFilter($filter, $ids);
+
+		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('actorName', $query['q'], 'both');
+			$this->orLike('characterName', $query['q'], 'both');
+			$this->groupEnd();
+		}
 	}
 
-	public function validateRecord(&$filesData, $property, &$postData, $postFiles, $ids, $method, $record = null, $nodes = [])
+	protected function setRecordCondition($serieId, $seasonNumber, $actorId, $characterId, $rangerId = null)
 	{
-		$errors = [];
-		$this->validateNestedRecord($errors, $filesData, $postData, $postFiles, 'actor', 'ActorModel', 'actorId', array_merge($nodes, ['actor']));
-		$this->validateNestedRecord($errors, $filesData, $postData, $postFiles, 'character', 'CharacterModel', 'characterId', array_merge($nodes, ['character']));
-		$this->validateNestedRecord($errors, $filesData, $postData, $postFiles, 'ranger', 'RangerModel', 'rangerId', array_merge($nodes, ['ranger']));
-		return count($errors) ? $errors : parent::validateRecord($filesData, $property, $postData, $postFiles, $ids, $method, $record, $nodes);
+		$this->where('serieId', $serieId)
+			->where('seasonNumber', $seasonNumber)
+			->where('actorId', $actorId)
+			->where('characterId', $characterId);
+
+		if (isset($rangerId)) {
+			$this->where('rangerId', $rangerId);
+		} else {
+			$this->where('rangerId IS NULL');
+		}
 	}
 
 	public function insertRecord(&$record)
 	{
-		// Se elimina la propiedad del Id de la temporada
-		unset($record['seasonId']);
-		return parent::insertRecord($record);
+		$this->db->transBegin();
+
+		if (isset($record['actor'])) {
+			$actorModel = model('App\Models\ActorModel');
+
+			$actorResult = $actorModel->insertRecord($record['actor']);
+			if ($actorResult !== true) {
+				$this->db->transRollback();
+				return $actorResult;
+			}
+
+			$record['actorId'] = $record['actor']['id'];
+		}
+
+		if (isset($record['character'])) {
+			$characterModel = model('App\Models\CharacterModel');
+
+			$characterResult = $characterModel->insertRecord($record['character']);
+			if ($characterResult !== true) {
+				$this->db->transRollback();
+				return $characterResult;
+			}
+
+			$record['characterId'] = $record['character']['id'];
+		}
+
+		if (isset($record['ranger'])) {
+			$rangerModel = model('App\Models\RangerModel');
+
+			$rangerResult = $rangerModel->insertRecord($record['ranger'], true);
+			if ($rangerResult !== true) {
+				$this->db->transRollback();
+				return $rangerResult;
+			}
+
+			$record['rangerId'] = $record['ranger']['id'];
+		}
+
+		$prevRecord = $this->check($record['serieId'], $record['seasonNumber'], $record['actorId'], $record['characterId'], $record['rangerId']);
+		if ($prevRecord) {
+			return 'There one or more casting records with the same values';
+		}
+
+		$result = $this->insertRecordTrait($record);
+		if ($result !== true) {
+			$this->db->transRollback();
+			return $result;
+		}
+
+		$this->db->transCommit();
+
+		return true;
 	}
 
-	public function insertNestedRecords(&$casting)
+	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
 	{
 		$errors = [];
-		$this->insertNestedRecord($errors, $casting, 'actor', 'ActorModel', 'actorId');
-		$this->insertNestedRecord($errors, $casting, 'character', 'CharacterModel', 'characterId');
-		$this->insertNestedRecord($errors, $casting, 'ranger', 'RangerModel', 'rangerId');
-		return count($errors) ? $errors : TRUE;
-	}
 
-	public function getList($filter, $uris = null, $isTeamUp = null)
-	{
-		$response = [];
+		$this->validateRecordProperties($postData, $method, $prevRecord);
 
-		// Se define la sentencia para los registros de la vista
-		$this->setViewConditions();
+		if (isset($postData['actor'])) {
+			$actorModel = model('App\Models\ActorModel');
+			$actorModel->setValidationRule('actorId', 'permit_empty');
+			unset($postData['actorId']);
 
-		// Se define en la sentencia where de la consulta las URIS del registro
-		$this->setConditionURIs($uris);
-		$this->where('isTeamUp', $isTeamUp);
+			$actorErrors = $actorModel->validateRecord($postData['actor'], isset($postFiles['actor']) ? $postFiles['actor'] : [], 'post');
+			if ($actorErrors !== true) {
+				$errors['actor'] = $actorErrors;
+			}
+		}
 
-		// Se ejecuta la consulta de los registros
-		$this->getRecords($filter, $response);
+		if (isset($postData['character'])) {
+			$characterModel = model('App\Models\CharacterModel');
+			$characterModel->setValidationRule('characterId', 'permit_empty');
+			unset($postData['characterId']);
 
-		return $response;
-	}
+			$characterErrors = $characterModel->validateRecord($postData['character'], isset($postFiles['character']) ? $postFiles['character'] : [], 'post');
+			if ($characterErrors !== true) {
+				$errors['character'] = $characterErrors;
+			}
+		}
 
-	public function getCastingByActor($actorUri)
-	{
-		$this->setViewConditions(['serieSlug', 'serieTitle', 'seasonNumber', 'characterSlug', 'characterName', 'rangerSlug', 'rangerName', 'isTeamUp']);
-		$this->where('actorSlug', $actorUri);
+		if (isset($postData['ranger'])) {
+			$rangerModel = model('App\Models\RangerModel');
+			unset($postData['rangerId']);
 
-		$response = $this->get()->getResultArray();
-		return $response;
-	}
+			$rangerErrors = $rangerModel->validateRecord($postData['ranger'], isset($postFiles['ranger']) ? $postFiles['ranger'] : [], 'post');
+			if ($rangerErrors !== true) {
+				$errors['ranger'] = $rangerErrors;
+			}
+		}
 
-	public function getCastingByCharacter($characterUri)
-	{
-		$this->setViewConditions(['serieSlug', 'serieTitle', 'seasonNumber', 'actorSlug', 'actorName', 'rangerSlug', 'rangerName', 'isTeamUp']);
-		$this->where('characterSlug', $characterUri);
+		if (!$this->validate($postData)) {
+			$errors = array_merge($this->errors(), $errors);
+		}
 
-		$response = $this->get()->getResultArray();
-		return $response;
-	}
-
-	public function getCastingByRanger($rangerUri)
-	{
-		$this->setViewConditions(['serieSlug', 'serieTitle', 'seasonNumber', 'actorSlug', 'actorName', 'characterSlug', 'characterName', 'isTeamUp']);
-		$this->where('rangerSlug', $rangerUri);
-
-		$response = $this->get()->getResultArray();
-		return $response;
+		return count($errors) > 0 ? $errors : true;
 	}
 }

@@ -2,49 +2,131 @@
 
 namespace App\Models;
 
-class RangerModel extends APIModel
-{
-	// Atributos de la clase APIModel
-	protected $photoField = 'photo';
+use App\Traits\ModelTrait;
+use CodeIgniter\Model;
 
-	// Atributos de la clase Model
+class RangerModel extends Model
+{
+	use ModelTrait {
+		insertRecord as insertRecordTrait;
+		updateRecord as updateRecordTrait;
+	}
+
 	protected $table = 'rangers';
 
-	// Atributos de la clase BaseModel
 	protected $allowedFields = ['slug', 'name', 'description', 'photo', 'morpherId'];
+
 	protected $validationRules = [
-		'slug' => 'required|max_length[100]',
+		'slug' => 'required_with[name]|max_length[100]',
 		'name' => 'required|max_length[100]',
 		'description' => 'permit_empty',
 		'photo' => 'permit_empty|max_length[100]',
 		'morpherId' => 'permit_empty|is_natural_no_zero|exists_id[morphers.id]'
 	];
 
-	public function validateRecord(&$filesData, $property, &$postData, $postFiles, $ids, $method, $record = null, $nodes = [])
+	protected function setRecordsCondition($query)
 	{
-		$errors = [];
-		$this->validateNestedRecord($errors, $filesData, $postData, $postFiles, 'morpher', 'MorpherModel', 'morpherId', array_merge($nodes, ['morpher']));
-		return count($errors) ? $errors : parent::validateRecord($filesData, $property, $postData, $postFiles, $ids, $method, $record, $nodes);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('name', $query['q'], 'both');
+			$this->groupEnd();
+		}
 	}
 
-	public function insertNestedRecords(&$ranger)
+	protected function setRecordCondition($id)
 	{
-		$errors = [];
-		$this->insertNestedRecord($errors, $ranger, 'morpher', 'MorpherModel', 'morpherId');
-		return count($errors) ? $errors : TRUE;
+		$this->where('id', $id);
 	}
 
-	public function setRangersMorpher($rangersId, $morpherId)
+	public function insertRecord(&$record, $subTransaction = false)
 	{
-		$response = [];
-
-		// Se ejecuta la sentencia UPDATE para establecer el Id del morpher, a cada uno de los rangers
-		$result = $this->update(explode(',', $rangersId), ['morpherId' => $morpherId]);
-		if ($result === FALSE) {
-			$response['error'] = $this->errors();
-			return $response;
+		if (!$subTransaction) {
+			$this->db->transBegin();
 		}
 
-		return $response;
+		if (isset($record['morpher'])) {
+			$morpherModel = model('App\Models\MorpherModel');
+
+			$morpherResult = $morpherModel->insertRecord($record['morpher'], true);
+			if ($morpherResult !== true) {
+				$this->db->transRollback();
+				return $morpherResult;
+			}
+
+			$record['morpherId'] = $record['morpher']['id'];
+		}
+
+		// Se procede a insertar el registro en la base de datos
+		$result = $this->insertRecordTrait($record);
+		if ($result !== true) {
+			$this->db->transRollback();
+			return $result;
+		}
+
+		if (!$subTransaction) {
+			$this->db->transCommit();
+		}
+
+		return true;
+	}
+
+	public function updateRecord($record, $id)
+	{
+		$this->db->transBegin();
+
+		if (isset($record['morpher'])) {
+			$morpherModel = model('App\Models\MorpherModel');
+
+			$morpherResult = $morpherModel->insertRecord($record['morpher']);
+			if ($morpherResult !== true) {
+				$this->db->transRollback();
+				return $morpherResult;
+			}
+
+			$record['morpherId'] = $record['morpher']['id'];
+		}
+
+		// Se actualiza los datos del ranger
+		$result = $this->updateRecordTrait($record, $id);
+		if ($result !== true) {
+			$this->db->transRollback();
+			return $this->errors();
+		}
+
+		$this->db->transCommit();
+
+		return true;
+	}
+
+	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
+	{
+		$errors = $this->validateUploadFiles($postData, $postFiles);
+		if ($errors === true) {
+			$errors = [];
+		}
+
+		$this->validateRecordProperties($postData, $method, $prevRecord);
+
+		$slugSettings = ['title' => 'name', 'field' => 'slug', 'id' => [$this->primaryKey]];
+		$this->setSlugValue($postData, $slugSettings, isset($prevRecord) ? [$prevRecord[$this->primaryKey]] : null);
+
+		if (!$this->validate($postData)) {
+			$errors = array_merge($this->errors(), $errors);
+		}
+
+		// Se valida los datos del Morpher
+		if (isset($postData['morpher'])) {
+			// Se elimina el Id del morpher y los Ids de rangers a asociar al morpher (Si aplica)
+			unset($postData['morpherId']);
+			unset($postData['morpher']['rangersId']);
+
+			$morpherModel = model('App\Models\MorpherModel');
+			$morpherErrors = $morpherModel->validateRecord($postData['morpher'], isset($postFiles['morpher']) ? $postFiles['morpher'] : [], 'post');
+			if ($morpherErrors !== true) {
+				$errors['morpher'] = $morpherErrors;
+			}
+		}
+
+		return count($errors) > 0 ? $errors : true;
 	}
 }

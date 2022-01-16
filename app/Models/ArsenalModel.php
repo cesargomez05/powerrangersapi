@@ -2,42 +2,103 @@
 
 namespace App\Models;
 
-class ArsenalModel extends APIModel
-{
-	// Atributos de la clase APIModel
-	public $photoField = 'photo';
+use App\Traits\ModelTrait;
+use CodeIgniter\Model;
 
-	// Atributos de la clase Model
+class ArsenalModel extends Model
+{
+	use ModelTrait {
+		insertRecord as insertRecordTrait;
+	}
+
 	protected $table = 'arsenal';
 
-	// Atributos de la clase BaseModel
 	protected $allowedFields = ['slug', 'name', 'description', 'photo'];
+
 	protected $validationRules = [
-		'slug' => 'required|max_length[100]',
+		'slug' => 'required_with[name]|max_length[100]',
 		'name' => 'required|max_length[100]',
 		'description' => 'permit_empty',
 		'photo' => 'permit_empty|max_length[25]'
 	];
 
-	public function validateRecord(&$filesData, $property, &$postData, $postFiles, $ids, $method, $record = null, $nodes = [])
+	protected function setRecordsCondition($query)
 	{
-		$errors = [];
-		// Se valida si el proceso corresponde a un nuevo registro de serie
-		if ($method == 'post') {
-			// Se valida si existe la propiedad donde se establece los datos de la relación SeasonArsenal
-			if (!isset($postData['seasonarsenal'])) {
-				return ['seasonarsenal' => 'Please set the season-arsenal relation values'];
-			}
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('name', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
 
-			// Se invoca el método que valida los datos de la relación SeasonArsenal mediante su respectiva clase Model.
-			$seasonArsenalModel = new SeasonArsenalModel();
-			// Se omite la regla de validación correspondiente al Id del Arsenal que se va a crear
-			$seasonArsenalModel->removeValidationRule('arsenalId');
-			$validRecord = $seasonArsenalModel->validateRecord($filesData, 'seasonarsenal', $postData['seasonarsenal'], $postFiles, [], 'post', null, array_merge($nodes, ['seasonarsenal']));
-			if ($validRecord !== TRUE) {
-				return ['seasonarsenal' => $validRecord];
+	protected function setRecordCondition($id)
+	{
+		$this->where('id', $id);
+	}
+
+	public function insertRecord(&$record)
+	{
+		$this->db->transBegin();
+
+		// Se procede a insertar el registro en la base de datos
+		$result = $this->insertRecordTrait($record);
+		if ($result !== true) {
+			$this->db->transRollback();
+			return $result;
+		}
+
+		// Se inserta los datos de la relación Temporada-Arsenal (si aplica)
+		if (isset($record['seasonarsenal'])) {
+			$record['seasonarsenal']['arsenalId'] = $record[$this->primaryKey];
+
+			$seasonArsenalModel = model('App\Models\SeasonArsenalModel');
+			$seasonArsenalResult = $seasonArsenalModel->insertRecord($record['seasonarsenal']);
+			if ($seasonArsenalResult !== true) {
+				$this->db->transRollback();
+				return $seasonArsenalResult;
 			}
 		}
-		return count($errors) ? $errors : parent::validateRecord($filesData, $property, $postData, $postFiles, $ids, $method, $record, $nodes);
+
+		$this->db->transCommit();
+
+		return true;
+	}
+
+	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
+	{
+		$errors = $this->validateUploadFiles($postData, $postFiles);
+		if ($errors === true) {
+			$errors = [];
+		}
+
+		$this->validateRecordProperties($postData, $method, $prevRecord);
+
+		$slugSettings = ['title' => 'name', 'field' => 'slug', 'id' => [$this->primaryKey]];
+		$this->setSlugValue($postData, $slugSettings, isset($prevRecord) ? [$prevRecord[$this->primaryKey]] : null);
+
+		if (!$this->validate($postData)) {
+			$errors = array_merge($this->errors(), $errors);
+		}
+
+		// Se valida los datos de la relación temporada-Arsenal (si es método POST)
+		if ($method == 'post') {
+			// Se valida los datos de la relación del Arsenal con la temporada
+			if (isset($postData['seasonarsenal'])) {
+				$seasonArsenalModel = model('App\Models\SeasonArsenalModel');
+
+				// Se omite la validación del id del arsenal
+				$seasonArsenalModel->setValidationRule('arsenalId', 'permit_empty');
+				unset($postData['seasonarsenal']['arsenalId']);
+
+				$seasonArsenalResult = $seasonArsenalModel->validateRecord($postData['seasonarsenal'], isset($postFiles['seasonarsenal']) ? $postFiles['seasonarsenal'] : [], 'post');
+				if ($seasonArsenalResult !== true) {
+					$errors['seasonarsenal'] = $seasonArsenalResult;
+				}
+			}
+		} else {
+			unset($postData['seasonarsenal']);
+		}
+
+		return count($errors) > 0 ? $errors : true;
 	}
 }

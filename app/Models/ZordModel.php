@@ -2,42 +2,103 @@
 
 namespace App\Models;
 
-class ZordModel extends APIModel
-{
-	// Atributos de la clase APIModel
-	public $photoField = 'photo';
+use App\Traits\ModelTrait;
+use CodeIgniter\Model;
 
-	// Atributos de la clase Model
+class ZordModel extends Model
+{
+	use ModelTrait {
+		insertRecord as insertRecordTrait;
+	}
+
 	protected $table = 'zords';
 
-	// Atributos de la clase BaseModel
 	protected $allowedFields = ['slug', 'name', 'description', 'photo'];
+
 	protected $validationRules = [
-		'slug' => 'required|max_length[100]',
+		'slug' => 'required_with[name]|max_length[100]',
 		'name' => 'required|max_length[100]',
 		'description' => 'permit_empty',
 		'photo' => 'permit_empty|max_length[100]'
 	];
 
-	public function validateRecord(&$filesData, $property, &$postData, $postFiles, $ids, $method, $record = null, $nodes = [])
+	protected function setRecordsCondition($query)
 	{
-		$errors = [];
-		// Se valida si el proceso corresponde a un nuevo registro de serie
-		if ($method == 'post') {
-			// Se valida si existe la propiedad donde se establece los datos de la relación SeasonZord
-			if (!isset($postData['seasonzord'])) {
-				return ['seasonzord' => 'Please set the season-zord relation values'];
-			}
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('name', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
 
-			// Se invoca el método que valida los datos de la relación SeasonZord mediante su respectiva clase Model.
-			$seasonZordModel = new seasonZordModel();
-			// Se omite la regla de validación correspondiente al Id del Zord que se va a crear
-			$seasonZordModel->removeValidationRule('zordId');
-			$validRecord = $seasonZordModel->validateRecord($filesData, 'seasonzord', $postData['seasonzord'], $postFiles, [], 'post', null, array_merge($nodes, ['seasonzord']));
-			if ($validRecord !== TRUE) {
-				return ['seasonzord' => $validRecord];
+	protected function setRecordCondition($id)
+	{
+		$this->where('id', $id);
+	}
+
+	public function insertRecord(&$record)
+	{
+		$this->db->transBegin();
+
+		// Se procede a insertar el registro en la base de datos
+		$result = $this->insertRecordTrait($record);
+		if ($result !== true) {
+			$this->db->transRollback();
+			return $result;
+		}
+
+		// Se inserta los datos de la relación Temporada-Zord (si aplica)
+		if (isset($record['seasonzord'])) {
+			$record['seasonzord']['zordId'] = $record[$this->primaryKey];
+
+			$seasonZordModel = model('App\Models\SeasonZordModel');
+			$seasonZordResult = $seasonZordModel->insertRecord($record['seasonzord']);
+			if ($seasonZordResult !== true) {
+				$this->db->transRollback();
+				return $seasonZordResult;
 			}
 		}
-		return count($errors) ? $errors : parent::validateRecord($filesData, $property, $postData, $postFiles, $ids, $method, $record, $nodes);
+
+		$this->db->transCommit();
+
+		return true;
+	}
+
+	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
+	{
+		$errors = $this->validateUploadFiles($postData, $postFiles);
+		if ($errors === true) {
+			$errors = [];
+		}
+
+		$this->validateRecordProperties($postData, $method, $prevRecord);
+
+		$slugSettings = ['title' => 'name', 'field' => 'slug', 'id' => [$this->primaryKey]];
+		$this->setSlugValue($postData, $slugSettings, isset($prevRecord) ? [$prevRecord[$this->primaryKey]] : null);
+
+		if (!$this->validate($postData)) {
+			$errors = array_merge($this->errors(), $errors);
+		}
+
+		// Se valida los datos de la relación temporada-zord (si es método POST)
+		if ($method == 'post') {
+			// Se valida los datos de la relación del Zord con la temporada
+			if (isset($postData['seasonzord'])) {
+				$seasonZordModel = model('App\Models\SeasonZordModel');
+
+				// Se omite la validación del id del Zord
+				$seasonZordModel->setValidationRule('zordId', 'permit_empty');
+				unset($postData['seasonzord']['zordId']);
+
+				$seasonZordErrors = $seasonZordModel->validateRecord($postData['seasonzord'], isset($postFiles['seasonzord']) ? $postFiles['seasonzord'] : [], 'post');
+				if ($seasonZordErrors !== true) {
+					$errors['seasonzord'] = $seasonZordErrors;
+				}
+			}
+		} else {
+			unset($postData['seasonzord']);
+		}
+
+		return count($errors) > 0 ? $errors : true;
 	}
 }

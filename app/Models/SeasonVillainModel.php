@@ -2,18 +2,19 @@
 
 namespace App\Models;
 
-class SeasonVillainModel extends APIModel
-{
-	// Atributos de la clase APIModel
-	protected $primaryKeys = ['serieId', 'seasonNumber', 'villainId'];
-	protected $filterColumns = [];
-	protected $columnValue = '';
+use App\Traits\ModelTrait;
+use CodeIgniter\Model;
 
-	// Atributos de la clase Model
+class SeasonVillainModel extends Model
+{
+	use ModelTrait {
+		insertRecord as insertRecordTrait;
+	}
+
 	protected $table = 'season_villain';
 
-	// Atributos de la clase BaseModel
 	protected $allowedFields = ['serieId', 'seasonNumber', 'villainId'];
+
 	protected $validationRules = [
 		'serieId' => 'required|is_natural_no_zero|exists_id[series.id]',
 		'seasonNumber' => 'required|is_natural_no_zero',
@@ -27,10 +28,46 @@ class SeasonVillainModel extends APIModel
 		]
 	];
 
+	protected function setRecordsCondition($query, $serieId, $seasonNumber)
+	{
+		$this->setTable('view_season_villain');
+
+		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('villainName', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setRecordCondition($serieId, $seasonNumber, $villainId)
+	{
+		$this->where('serieId', $serieId)
+			->where('seasonNumber', $seasonNumber)
+			->where('villainId', $villainId);
+	}
+
 	public function insertRecord(&$record)
 	{
-		// Se elimina la propiedad del Id de la temporada
-		unset($record['seasonId']);
-		return parent::insertRecord($record);
+		$prevRecord = $this->check($record['serieId'], $record['seasonNumber'], $record['villainId']);
+		if (isset($prevRecord)) {
+			return 'There one or more season-villain relationship records';
+		}
+
+		// Se procede a insertar el registro en la base de datos
+		return $this->insertRecordTrait($record);
+	}
+
+	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
+	{
+		$errors = [];
+
+		$this->validateRecordProperties($postData, $method, $prevRecord);
+
+		if (!$this->validate($postData)) {
+			$errors = array_merge($this->errors(), $errors);
+		}
+
+		return count($errors) > 0 ? $errors : true;
 	}
 }

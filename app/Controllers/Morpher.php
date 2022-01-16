@@ -2,57 +2,113 @@
 
 namespace App\Controllers;
 
-use App\Models\RangerModel;
+use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\RESTful\BaseResource;
 
-class Morpher extends APIController
+class Morpher extends BaseResource
 {
-	// Atributos de la clase BaseResource
+	use ResponseTrait;
+
 	protected $modelName = 'App\Models\MorpherModel';
 
-	protected function insertRecord(&$postData, $filesData)
+	/**
+	 * @var \App\Models\MorpherModel
+	 */
+	protected $model;
+
+	protected $helpers = ['app'];
+
+	public function index()
 	{
-		// Se inicializa una transacción sobre la base de datos
-		$this->model->db->transBegin();
+		$filter = $this->request->getGet();
+		set_pagination($filter);
 
-		// Se procede a insertar el registro en la base de datos
-		$morpher = $this->model->insertRecord($postData);
-		if (isset($morpher['error'])) {
-			// Se retorna los mensajes de error de la validación
-			$this->model->db->transRollback();
-			return $morpher['error'];
-		}
-
-		// Se procede a establecer el Id del morpher creado a los respectivos rangers (si aplica)
-		if (isset($postData['rangersId'])) {
-			$rangerModel = new RangerModel();
-			$rangers = $rangerModel->setRangersMorpher($postData['rangersId'], $morpher['primaryKey']);
-			if (isset($rangers['error'])) {
-				// Se retorna los mensajes de error de la validación
-				$this->model->db->transRollback();
-				return $rangers['error'];
-			}
-		}
-
-		// Se finaliza la transacción
-		$this->model->db->transCommit();
-
-		// Se procede a mover los archivos asociados al morpher
-		$this->moveRecordFiles($filesData, $postData);
-
-		// Se retorna TRUE para indicar que la función se ejecutó correctamente
-		return TRUE;
+		$morphers = $this->model->list($filter);
+		return $this->respond($morphers);
 	}
 
-	protected function validateDeleteRecord($id)
+	public function show($id)
 	{
-		$errors = [];
+		$morpher = $this->model->get($id);
+		return $this->respond(['record' => $morpher]);
+	}
 
-		// Se valida los registros de Casting y de transformationRanger asociados al ranger
-		$model = new RangerModel();
-		if ($model->checkRecordsByForeignKey(['morpherId' => $id])) {
-			$errors['ranger'] = "The morpher has one or many rangers records";
+	public function create()
+	{
+		// Datos de entrada de la petición
+		$postData = $this->request->getPost();
+		$postFiles = $this->request->getFiles();
+
+		// Se valida si no existen datos enviados por método POST
+		if (empty($postData) && empty($postFiles)) {
+			return $this->fail('Please define the data to be recorded');
 		}
 
-		return count($errors) ? $errors : TRUE;
+		// Se valida los datos de la petición
+		$validateRecord = $this->model->validateRecord($postData, $postFiles, 'post');
+		if ($validateRecord !== true) {
+			return $this->respond(['errors' => $validateRecord], 400);
+		}
+
+		$result = $this->model->insertRecord($postData);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		// Se "mueve" el archivo subido a la respectiva carpeta
+		move_files($postData);
+
+		// Se elimina la lista de Id de rangers
+		unset($postData['rangersId']);
+
+		return $this->respondCreated($postData);
+	}
+
+	public function update($id)
+	{
+		$morpher = $this->model->get($id);
+
+		// Datos de entrada de la petición
+		$postData = $this->request->getPost();
+		unset($postData['_method']);
+		$postFiles = $this->request->getFiles();
+
+		// Se valida si no existen datos enviados por método POST
+		if (empty($postData) && empty($postFiles)) {
+			return $this->fail('Please define the data to be recorded');
+		}
+
+		// Se obtiene el tipo de petición que se realiza a la función (PUT o PATCH)
+		$request = service('request');
+		$method = $request->getMethod();
+
+		// Se valida los datos de la petición
+		$validateRecord = $this->model->validateRecord($postData, $postFiles, $method, $morpher);
+		if ($validateRecord !== true) {
+			return $this->respond(['errors' => $validateRecord], 400);
+		}
+
+		$result = $this->model->updateRecord($postData, $id);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		// Se "mueve" el archivo subido a la respectiva carpeta
+		move_files($postData);
+
+		return $this->success("Record successfully updated");
+	}
+
+	public function delete($id)
+	{
+		$result = $this->model->deleteRecord($id);
+		if ($result !== true) {
+			// Se retorna un mensaje de error si las validaciones no se cumplen
+			return $this->respond(['errors' => $result], 500);
+		}
+
+		return $this->success("Record successfully deleted");
 	}
 }
