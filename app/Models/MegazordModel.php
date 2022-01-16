@@ -86,6 +86,19 @@ class MegazordModel extends Model
 		return true;
 	}
 
+	protected function checkNestedRecords($id, &$errors)
+	{
+		$seasonMegazordModel = model('App\Models\SeasonMegazordModel');
+		if ($seasonMegazordModel->countByMegazordId($id)) {
+			$errors['season_megazord'] = 'There are nested season-megazord records to megazord';
+		}
+
+		$megazordZordModel = model('App\Models\MegazordZordModel');
+		if ($megazordZordModel->countByMegazordId($id)) {
+			$errors['megazord_zord'] = 'There are nested megazord-zord records to arsenal item';
+		}
+	}
+
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
 	{
 		$errors = $this->validateUploadFiles($postData, $postFiles);

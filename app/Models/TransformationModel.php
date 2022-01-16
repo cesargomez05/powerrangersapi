@@ -35,6 +35,14 @@ class TransformationModel extends Model
 		$this->where('id', $id);
 	}
 
+	protected function checkNestedRecords($id, &$errors)
+	{
+		$transformationRangerModel = model('App\Models\TransformationRangerModel');
+		if ($transformationRangerModel->countByTransformationId($id)) {
+			$errors['transformation_ranger'] = 'There are nested transformation-ranger records to transformation';
+		}
+	}
+
 	public function insertRecord(&$record)
 	{
 		$this->db->transBegin();

@@ -34,6 +34,14 @@ class ModuleModel extends Model
 		$this->where('id', $id);
 	}
 
+	protected function checkNestedRecords($id, &$errors)
+	{
+		$permissionModel = model('App\Models\PermissionModel');
+		if ($permissionModel->countByModuleId($id)) {
+			$errors['permission'] = 'There are nested permission records to module';
+		}
+	}
+
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
 	{
 		$errors = [];

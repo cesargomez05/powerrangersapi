@@ -100,6 +100,12 @@ class Character extends BaseResource
 
 	public function delete($id)
 	{
+		// Se consulta si existe registros dependientes del registro a eliminar
+		$validations = $this->model->validateNestedRecords($id);
+		if (count($validations) > 0) {
+			return $this->respond(['errors' => $validations], 409);
+		}
+
 		$result = $this->model->deleteRecord($id);
 		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen
