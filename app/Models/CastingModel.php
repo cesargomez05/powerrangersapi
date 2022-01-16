@@ -13,8 +13,6 @@ class CastingModel extends Model
 
 	protected $table = 'casting';
 
-	protected $useAutoIncrement = false;
-
 	protected $allowedFields = ['serieId', 'seasonNumber', 'actorId', 'characterId', 'rangerId', 'isTeamUp'];
 
 	protected $validationRules = [

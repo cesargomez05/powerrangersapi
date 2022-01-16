@@ -13,8 +13,6 @@ class SeasonArsenalModel extends Model
 
 	protected $table = 'season_arsenal';
 
-	protected $useAutoIncrement = false;
-
 	protected $allowedFields = ['serieId', 'seasonNumber', 'arsenalId', 'rangerId'];
 
 	protected $validationRules = [

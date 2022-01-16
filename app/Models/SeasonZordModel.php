@@ -13,8 +13,6 @@ class SeasonZordModel extends Model
 
 	protected $table = 'season_zord';
 
-	protected $useAutoIncrement = false;
-
 	protected $allowedFields = ['serieId', 'seasonNumber', 'zordId', 'rangerId'];
 
 	protected $validationRules = [

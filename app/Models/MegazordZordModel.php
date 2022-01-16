@@ -13,8 +13,6 @@ class MegazordZordModel extends Model
 
 	protected $table = 'megazord_zord';
 
-	protected $useAutoIncrement = false;
-
 	protected $allowedFields = ['megazordId', 'zordId'];
 
 	protected $validationRules = [

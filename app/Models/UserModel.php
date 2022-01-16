@@ -13,8 +13,6 @@ class UserModel extends Model
 
 	protected $primaryKey = 'username';
 
-	protected $useAutoIncrement = false;
-
 	protected $allowedFields = ['username', 'password', 'first_name', 'last_name', 'email'];
 
 	protected $validationRules = [

@@ -13,8 +13,6 @@ class SeasonMegazordModel extends Model
 
 	protected $table = 'season_megazord';
 
-	protected $useAutoIncrement = false;
-
 	protected $allowedFields = ['serieId', 'seasonNumber', 'megazordId'];
 
 	protected $validationRules = [

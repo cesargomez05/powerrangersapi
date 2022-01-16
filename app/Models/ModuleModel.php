@@ -11,8 +11,6 @@ class ModuleModel extends Model
 
 	protected $table = 'modules';
 
-	protected $useAutoIncrement = false;
-
 	protected $allowedFields = ['id', 'name'];
 
 	protected $validationRules = [

@@ -14,8 +14,6 @@ class SeasonModel extends Model
 
 	protected $table = 'seasons';
 
-	protected $useAutoIncrement = false;
-
 	protected $allowedFields = ['serieId', 'number', 'year', 'title', 'ageId', 'synopsis'];
 
 	protected $validationRules = [

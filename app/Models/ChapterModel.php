@@ -11,8 +11,6 @@ class ChapterModel extends Model
 
 	protected $table = 'chapters';
 
-	protected $useAutoIncrement = false;
-
 	// Atributos de la clase BaseModel
 	protected $allowedFields = ['serieId', 'seasonNumber', 'number', 'slug', 'title', 'titleSpanish', 'summary'];
 

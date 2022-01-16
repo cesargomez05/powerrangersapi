@@ -8,7 +8,7 @@ use CodeIgniter\Model;
 class TransformationRangerModel extends Model
 {
 	use ModelTrait {
-		list as public listTrait;
+		list as listTrait;
 	}
 
 	protected $table = 'transformation_ranger';
@@ -21,6 +21,23 @@ class TransformationRangerModel extends Model
 		'name' => 'permit_empty|max_length[100]',
 		'photo' => 'permit_empty|max_length[100]'
 	];
+
+	protected function setRecordsCondition($query, $transformationId)
+	{
+		$this->setTable('view_transformation_ranger');
+
+		$this->where('transformationId', $transformationId);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('name', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setRecordCondition($transformationId, $rangerId)
+	{
+		$this->where('transformationId', $transformationId)->where('rangerId', $rangerId);
+	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
 	{

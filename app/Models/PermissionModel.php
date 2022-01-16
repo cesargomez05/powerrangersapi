@@ -13,8 +13,6 @@ class PermissionModel extends Model
 
 	protected $table = 'permissions';
 
-	protected $useAutoIncrement = false;
-
 	protected $allowedFields = ['username', 'moduleId', 'create', 'read', 'update', 'delete'];
 
 	protected $validationRules = [

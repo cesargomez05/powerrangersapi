@@ -52,8 +52,8 @@ class Season extends BaseResource
 			return $this->respond(['errors' => $validateRecord], 400);
 		}
 
-		$season = $this->model->get($postData['serieId'], $postData['number']);
-		if (isset($season)) {
+		$season = $this->model->check($postData['serieId'], $postData['number']);
+		if ($season) {
 			return $this->respond(['error' => 'There one or many season with same serieId and number'], 409);
 		}
 
@@ -93,8 +93,8 @@ class Season extends BaseResource
 		}
 
 		if ($postData['serieId'] != $serieId || $postData['number'] != $number) {
-			$season = $this->model->get($postData['serieId'], $postData['number']);
-			if (isset($season)) {
+			$season = $this->model->check($postData['serieId'], $postData['number']);
+			if ($season) {
 				return $this->respond(['error' => 'There one or many season with same serieId and number'], 409);
 			}
 		}

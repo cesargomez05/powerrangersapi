@@ -50,7 +50,7 @@ trait ModelTrait
 			return $this->errors();
 		}
 
-		if ($recordId !== 0 && $this->useAutoIncrement) {
+		if ($recordId !== 0) {
 			$record[$this->primaryKey] = $recordId;
 		}
 

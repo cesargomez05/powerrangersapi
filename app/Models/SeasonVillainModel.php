@@ -13,8 +13,6 @@ class SeasonVillainModel extends Model
 
 	protected $table = 'season_villain';
 
-	protected $useAutoIncrement = false;
-
 	protected $allowedFields = ['serieId', 'seasonNumber', 'villainId'];
 
 	protected $validationRules = [
