@@ -69,6 +69,6 @@ class SeasonArsenalModel extends Model
 			$errors = array_merge($this->errors(), $errors);
 		}
 
-		return count($errors) > 0 ? $errors : true;
+		return empty($errors) ? true : $errors;
 	}
 }

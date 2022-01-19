@@ -81,6 +81,31 @@ trait ModelTrait
 		return true;
 	}
 
+	public function listPublic($query, ...$slugs)
+	{
+		if (method_exists($this, 'setPublicRecordsCondition')) {
+			array_unshift($slugs, $query);
+			call_user_func_array(array($this, "setPublicRecordsCondition"), $slugs);
+		}
+
+		$response = [];
+		$response['count'] = $this->countAllResults(false);
+		if ($response['count'] < $query['pageSize'] * $query['page']) {
+			$query['page'] = intdiv($response['count'], $query['pageSize']) + 1;
+		}
+		$response['page'] = intval($query['page']);
+		$response['records'] = $this->findAll($query['pageSize'], ($query['page'] - 1) * $query['pageSize']);
+
+		return $response;
+	}
+
+	public function getPublic(...$slugs)
+	{
+		call_user_func_array(array($this, "setPublicRecordCondition"), $slugs);
+		$record = $this->findAll();
+		return count($record) ? $record[0] : null;
+	}
+
 	public function validateId($id, $property = 'id', $label = 'Id')
 	{
 		$validation = \Config\Services::validation(null, false);

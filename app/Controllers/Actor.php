@@ -114,4 +114,19 @@ class Actor extends BaseResource
 
 		return $this->success("Record successfully deleted");
 	}
+
+	public function indexPublic()
+	{
+		$filter = $this->request->getGet();
+		set_pagination($filter);
+
+		$actors = $this->model->listPublic($filter);
+		return $this->respond($actors);
+	}
+
+	public function showPublic($slug)
+	{
+		$actor = $this->model->getPublic($slug);
+		return $this->respond(['record' => $actor]);
+	}
 }

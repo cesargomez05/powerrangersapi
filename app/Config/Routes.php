@@ -271,8 +271,9 @@ $routes->group('permissions', ['filter' => 'auth:permission'], function ($routes
 
 // API
 $routes->group('api', function ($routes) {
-	/*$routes->get('actors', 'Actor::getList');
-	$routes->get('actors/(:segment)', 'Actor::getRecordByURI/$1');
+	$routes->get('actors', 'Actor::indexPublic');
+	$routes->get('actors/(:segment)', 'Actor::showPublic/$1');
+	/*
 	$routes->get('ages', 'Age::getList');
 	$routes->get('ages/(:segment)', 'Age::getRecordByURI/$1');
 	$routes->get('characters', 'Character::getList');

@@ -43,6 +43,22 @@ class ActorModel extends Model
 		}
 	}
 
+	protected function setPublicRecordsCondition($query)
+	{
+		$this->select(['name', 'birthDate', 'deathDate', 'slug AS slugURI', 'photo AS photoURI']);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('name', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setPublicRecordCondition($slug)
+	{
+		$this->select(['slug', 'name', 'birthDate', 'deathDate', 'photo', 'slug AS slugURI', 'photo AS photoURI']);
+		$this->where('slug', $slug);
+	}
+
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
 	{
 		$errors = $this->validateUploadFiles($postData, $postFiles);
@@ -59,6 +75,6 @@ class ActorModel extends Model
 			$errors = array_merge($this->errors(), $errors);
 		}
 
-		return count($errors) > 0 ? $errors : true;
+		return empty($errors) ? true : $errors;
 	}
 }

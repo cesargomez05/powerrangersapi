@@ -107,6 +107,6 @@ class ZordModel extends Model
 			unset($postData['seasonzord']);
 		}
 
-		return count($errors) > 0 ? $errors : true;
+		return empty($errors) ? true : $errors;
 	}
 }

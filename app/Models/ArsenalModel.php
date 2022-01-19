@@ -107,6 +107,6 @@ class ArsenalModel extends Model
 			unset($postData['seasonarsenal']);
 		}
 
-		return count($errors) > 0 ? $errors : true;
+		return empty($errors) ? true : $errors;
 	}
 }

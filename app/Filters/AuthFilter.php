@@ -92,6 +92,7 @@ class AuthFilter implements FilterInterface
 
 	public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
 	{
+		// Not apply action after filter
 	}
 
 	public static function validateOAuth2Authentication(&$username)

@@ -150,14 +150,14 @@ class UserModel extends Model
 						}
 					}
 
-					if (count($permissionsErrors) > 0) {
+					if (!empty($permissionsErrors)) {
 						$errors['permissions'] = $permissionsErrors;
 					}
 				}
 			}
 		}
 
-		return count($errors) > 0 ? $errors : true;
+		return empty($errors) ? true : $errors;
 	}
 
 	public function checkUser($username, $password)

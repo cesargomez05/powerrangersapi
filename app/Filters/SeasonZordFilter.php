@@ -19,6 +19,7 @@ class SeasonZordFilter implements FilterInterface
 
 	public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
 	{
+		// Not apply action after filter
 	}
 
 	public static function checkRecord($serieId, $seasonNumber, $zordId = null)
