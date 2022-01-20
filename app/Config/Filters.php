@@ -19,32 +19,99 @@ class Filters extends BaseConfig
 		'csrf' => CSRF::class,
 		'toolbar' => DebugToolbar::class,
 		'honeypot' => Honeypot::class,
-		// Autenticación en la API
-		'auth' => \App\Filters\AuthFilter::class,
 		// Módulos de la aplicación
-		'actor_filter' => \App\Filters\ActorFilter::class,
-		'age_filter' => \App\Filters\AgeFilter::class,
-		'character_filter' => \App\Filters\CharacterFilter::class,
-		'ranger_filter' => \App\Filters\RangerFilter::class,
-		'serie_filter' => \App\Filters\SerieFilter::class,
-		'season_filter' => \App\Filters\SeasonFilter::class,
-		'chapter_filter' => \App\Filters\ChapterFilter::class,
-		'casting_filter' => \App\Filters\CastingFilter::class,
-		'zord_filter' => \App\Filters\ZordFilter::class,
-		'seasonzord_filter' => \App\Filters\SeasonZordFilter::class,
-		'megazord_filter' => \App\Filters\MegazordFilter::class,
-		'seasonmegazord_filter' => \App\Filters\SeasonMegazordFilter::class,
-		'megazordzord_filter' => \App\Filters\MegazordZordFilter::class,
-		'transformation_filter' => \App\Filters\TransformationFilter::class,
-		'transformationranger_filter' => \App\Filters\TransformationRangerFilter::class,
-		'morpher_filter' => \App\Filters\MorpherFilter::class,
-		'arsenal_filter' => \App\Filters\ArsenalFilter::class,
-		'seasonarsenal_filter' => \App\Filters\SeasonArsenalFilter::class,
-		'villain_filter' => \App\Filters\VillainFilter::class,
-		'seasonvillain_filter' => \App\Filters\SeasonVillainFilter::class,
-		'module_filter' => \App\Filters\ModuleFilter::class,
-		'user_filter' => \App\Filters\UserFilter::class,
-		'permission_filter' => \App\Filters\PermissionFilter::class
+		'actor_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\ActorFilter::class
+		],
+		'age_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\AgeFilter::class
+		],
+		'character_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\CharacterFilter::class
+		],
+		'ranger_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\RangerFilter::class
+		],
+		'serie_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\SerieFilter::class
+		],
+		'season_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\SeasonFilter::class
+		],
+		'chapter_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\ChapterFilter::class
+		],
+		'casting_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\CastingFilter::class
+		],
+		'zord_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\ZordFilter::class
+		],
+		'seasonzord_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\SeasonZordFilter::class
+		],
+		'megazord_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\MegazordFilter::class
+		],
+		'seasonmegazord_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\SeasonMegazordFilter::class
+		],
+		'megazordzord_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\MegazordZordFilter::class
+		],
+		'transformation_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\TransformationFilter::class
+		],
+		'transformationranger_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\TransformationRangerFilter::class
+		],
+		'morpher_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\MorpherFilter::class
+		],
+		'arsenal_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\ArsenalFilter::class
+		],
+		'seasonarsenal_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\SeasonArsenalFilter::class
+		],
+		'villain_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\VillainFilter::class
+		],
+		'seasonvillain_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\SeasonVillainFilter::class
+		],
+		'module_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\ModuleFilter::class
+		],
+		'user_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\UserFilter::class
+		],
+		'permission_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\PermissionFilter::class
+		]
 	];
 
 	/**
