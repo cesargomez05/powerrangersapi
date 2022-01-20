@@ -245,30 +245,6 @@ $routes->group('permissions', ['filter' => 'permission_filter:permission'], func
 	$routes->delete('(:segment)/(:segment)', 'Permission::delete/$1/$2');
 });
 
-// API
-$routes->group('api', function ($routes) {
-	$routes->get('actors', 'Actor::indexPublic');
-	$routes->get('actors/(:segment)', 'Actor::showPublic/$1');
-	$routes->get('ages', 'Age::indexPublic');
-	$routes->get('ages/(:segment)', 'Age::showPublic/$1');
-	$routes->get('characters', 'Character::indexPublic');
-	$routes->get('characters/(:segment)', 'Character::showPublic/$1');
-	$routes->get('rangers', 'Ranger::indexPublic');
-	$routes->get('rangers/(:segment)', 'Ranger::showPublic/$1');
-	$routes->get('series', 'Serie::indexPublic');
-	$routes->get('series/(:segment)', 'Serie::showPublic/$1');
-	$routes->get('seasons/(:segment)', 'Serie::indexPublic/$1');
-	$routes->get('seasons/(:segment)/(:segment)', 'Serie::showPublic/$1/$2');
-	$routes->get('chapters/(:segment)/(:segment)/(:segment)', 'Serie::showPublic/$1/$2/$3');
-	$routes->get('casting/(:segment)/(:segment)', 'Casting::showPublic/$1/$2');
-	$routes->get('zords', 'Zord::indexPublic');
-	$routes->get('zords/(:segment)', 'Zord::showPublic/$1');
-	$routes->get('megazords', 'Megazord::indexPublic');
-	$routes->get('megazords/(:segment)', 'Megazord::showPublic/$1');
-	$routes->get('transformations', 'Transformation::indexPublic');
-	$routes->get('transformations/(:segment)', 'Transformation::showPublic/$1');
-});
-
 /*
  * --------------------------------------------------------------------
  * Additional Routing
