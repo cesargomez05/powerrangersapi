@@ -17,6 +17,10 @@ class UserModel extends Model
 
 	protected $allowedFields = ['username', 'password', 'first_name', 'last_name', 'email'];
 
+	protected $nestedModelClasses = [
+		'permissionModel' => 'App\Models\PermissionModel'
+	];
+
 	protected $validationRules = [
 		'username' => 'required|max_length[80]|is_unique[oauth_users.username,username,{_username}]',
 		'password' => 'required|min_length[8]|max_length[20]|validate_password',
@@ -70,7 +74,7 @@ class UserModel extends Model
 		}
 
 		if (isset($record['permissions']) && count($record['permissions']) > 0) {
-			$permissionModel = model('App\Models\PermissionModel');
+			$permissionModel = model($this->nestedModelClasses['permissionModel']);
 			$permissionResult = $permissionModel->insertPermissions($record['username'], $record['permissions']);
 			if ($permissionResult === false) {
 				$this->db->transRollback();
@@ -85,7 +89,7 @@ class UserModel extends Model
 
 	protected function checkNestedRecords($id, &$errors)
 	{
-		$permissionModel = model('App\Models\PermissionModel');
+		$permissionModel = model($this->nestedModelClasses['permissionModel']);
 		if ($permissionModel->countByUserId($id)) {
 			$errors['permission'] = 'There are nested permission records to user';
 		}
@@ -125,34 +129,32 @@ class UserModel extends Model
 			}
 		}
 
-		if ($method == 'post') {
-			if (isset($postData['permissions'])) {
-				if (!is_array($postData['permissions'])) {
-					$errors = array_merge(['permissions' => 'The permissions value is not a array'], $errors);
-				} else {
-					$permissionModel = model('App\Models\PermissionModel');
-					$permissionModel->setValidationRule('username', 'permit_empty');
+		if ($method == 'post' && isset($postData['permissions'])) {
+			if (!is_array($postData['permissions'])) {
+				$errors = array_merge(['permissions' => 'The permissions value is not a array'], $errors);
+			} else {
+				$permissionModel = model($this->nestedModelClasses['permissionModel']);
+				$permissionModel->setValidationRule('username', 'permit_empty');
 
-					$permissionsErrors = [];
-					$modulesId = [];
+				$permissionsErrors = [];
+				$modulesId = [];
 
-					foreach ($postData['permissions'] as $i => $permission) {
-						$permissionErrors = $permissionModel->validateRecord($permission, [], 'post');
-						if ($permissionErrors !== true) {
-							$permissionsErrors[$i] = $permissionErrors;
+				foreach ($postData['permissions'] as $i => $permission) {
+					$permissionErrors = $permissionModel->validateRecord($permission, [], 'post');
+					if ($permissionErrors !== true) {
+						$permissionsErrors[$i] = $permissionErrors;
+					} else {
+						$moduleId = $permission['moduleId'];
+						if (in_array($moduleId, $modulesId)) {
+							$permissionsErrors[$i] = ['moduleId' => 'The module id is used by other record'];
 						} else {
-							$moduleId = $permission['moduleId'];
-							if (in_array($moduleId, $modulesId)) {
-								$permissionsErrors[$i] = ['moduleId' => 'The module id is used by other record'];
-							} else {
-								$modulesId[] = $moduleId;
-							}
+							$modulesId[] = $moduleId;
 						}
 					}
+				}
 
-					if (!empty($permissionsErrors)) {
-						$errors['permissions'] = $permissionsErrors;
-					}
+				if (!empty($permissionsErrors)) {
+					$errors['permissions'] = $permissionsErrors;
 				}
 			}
 		}

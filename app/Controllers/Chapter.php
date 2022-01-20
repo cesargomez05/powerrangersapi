@@ -2,12 +2,13 @@
 
 namespace App\Controllers;
 
+use App\Traits\ControllerTrait;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\RESTful\BaseResource;
 
 class Chapter extends BaseResource
 {
-	use ResponseTrait;
+	use ResponseTrait, ControllerTrait;
 
 	protected $modelName = 'App\Models\ChapterModel';
 
@@ -17,21 +18,6 @@ class Chapter extends BaseResource
 	protected $model;
 
 	protected $helpers = ['app'];
-
-	public function index($serieId, $seasonNumber)
-	{
-		$filter = $this->request->getGet();
-		set_pagination($filter);
-
-		$chapters = $this->model->list($filter, $serieId, $seasonNumber);
-		return $this->respond($chapters);
-	}
-
-	public function show($serieId, $seasonNumber, $number)
-	{
-		$chapter = $this->model->get($serieId, $seasonNumber, $number);
-		return $this->respond(['record' => $chapter]);
-	}
 
 	public function create($serieId, $seasonNumber)
 	{
@@ -108,16 +94,5 @@ class Chapter extends BaseResource
 		}
 
 		return $this->success("Record successfully updated");
-	}
-
-	public function delete($serieId, $seasonNumber, $number)
-	{
-		$result = $this->model->deleteRecord($serieId, $seasonNumber, $number);
-		if ($result !== true) {
-			// Se retorna un mensaje de error si las validaciones no se cumplen
-			return $this->respond(['errors' => $result], 500);
-		}
-
-		return $this->success("Record successfully deleted");
 	}
 }

@@ -2,12 +2,13 @@
 
 namespace App\Controllers;
 
+use App\Traits\ControllerTrait;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\RESTful\BaseResource;
 
 class Season extends BaseResource
 {
-	use ResponseTrait;
+	use ResponseTrait, ControllerTrait;
 
 	protected $modelName = 'App\Models\SeasonModel';
 
@@ -17,21 +18,6 @@ class Season extends BaseResource
 	protected $model;
 
 	protected $helpers = ['app'];
-
-	public function index($serieId)
-	{
-		$filter = $this->request->getGet();
-		set_pagination($filter);
-
-		$seasons = $this->model->list($filter, $serieId);
-		return $this->respond($seasons);
-	}
-
-	public function show($serieId, $number)
-	{
-		$season = $this->model->get($serieId, $number);
-		return $this->respond(['record' => $season]);
-	}
 
 	public function create($serieId)
 	{
@@ -106,22 +92,5 @@ class Season extends BaseResource
 		}
 
 		return $this->success("Record successfully updated");
-	}
-
-	public function delete($serieId, $number)
-	{
-		// Se consulta si existe registros dependientes del registro a eliminar
-		$validations = $this->model->validateNestedRecords($serieId, $number);
-		if (count($validations) > 0) {
-			return $this->respond(['errors' => $validations], 409);
-		}
-
-		$result = $this->model->deleteRecord($serieId, $number);
-		if ($result !== true) {
-			// Se retorna un mensaje de error si las validaciones no se cumplen
-			return $this->respond(['errors' => $result], 500);
-		}
-
-		return $this->success("Record successfully deleted");
 	}
 }

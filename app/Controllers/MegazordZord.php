@@ -2,12 +2,13 @@
 
 namespace App\Controllers;
 
+use App\Traits\ControllerTrait;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\RESTful\BaseResource;
 
 class MegazordZord extends BaseResource
 {
-	use ResponseTrait;
+	use ResponseTrait, ControllerTrait;
 
 	protected $modelName = 'App\Models\MegazordZordModel';
 
@@ -17,15 +18,6 @@ class MegazordZord extends BaseResource
 	protected $model;
 
 	protected $helpers = ['app'];
-
-	public function index($megazordId)
-	{
-		$filter = $this->request->getGet();
-		set_pagination($filter);
-
-		$megazordZords = $this->model->list($filter, $megazordId);
-		return $this->respond($megazordZords);
-	}
 
 	public function create($megazordId)
 	{
@@ -53,16 +45,5 @@ class MegazordZord extends BaseResource
 		}
 
 		return $this->success("Record successfully created", 201);
-	}
-
-	public function delete($megazordId, $zordId)
-	{
-		$result = $this->model->deleteRecord($megazordId, $zordId);
-		if ($result !== true) {
-			// Se retorna un mensaje de error si las validaciones no se cumplen
-			return $this->respond(['errors' => $result], 500);
-		}
-
-		return $this->success("Record successfully deleted");
 	}
 }

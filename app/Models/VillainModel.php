@@ -15,6 +15,10 @@ class VillainModel extends Model
 
 	protected $allowedFields = ['slug', 'name', 'description', 'photo'];
 
+	protected $nestedModelClasses = [
+		'seasonVillainModel' => 'App\Models\SeasonVillainModel'
+	];
+
 	protected $validationRules = [
 		'slug' => 'required_with[name]|max_length[100]',
 		'name' => 'required|max_length[100]',
@@ -38,7 +42,7 @@ class VillainModel extends Model
 
 	protected function checkNestedRecords($id, &$errors)
 	{
-		$seasonVillainModel = model('App\Models\SeasonVillainModel');
+		$seasonVillainModel = model($this->nestedModelClasses['seasonVillainModel']);
 		if ($seasonVillainModel->countByVillainId($id)) {
 			$errors['season_villain'] = 'There are nested season-villain records to villain';
 		}
@@ -59,7 +63,7 @@ class VillainModel extends Model
 		if (isset($record['seasonvillain'])) {
 			$record['seasonvillain']['villainId'] = $record[$this->primaryKey];
 
-			$seasonVillainModel = model('App\Models\SeasonVillainModel');
+			$seasonVillainModel = model($this->nestedModelClasses['seasonVillainModel']);
 			$seasonVillainResult = $seasonVillainModel->insertRecord($record['seasonvillain']);
 			if ($seasonVillainResult !== true) {
 				$this->db->transRollback();
@@ -92,7 +96,7 @@ class VillainModel extends Model
 		if ($method == 'post') {
 			// Se valida los datos de la relación del Zord con la temporada
 			if (isset($postData['seasonvillain'])) {
-				$seasonVillainModel = model('App\Models\SeasonVillainModel');
+				$seasonVillainModel = model($this->nestedModelClasses['seasonVillainModel']);
 
 				// Se omite la validación del id del villano
 				$seasonVillainModel->setValidationRule('villainId', 'permit_empty');

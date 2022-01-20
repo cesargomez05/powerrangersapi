@@ -15,6 +15,10 @@ class ArsenalModel extends Model
 
 	protected $allowedFields = ['slug', 'name', 'description', 'photo'];
 
+	protected $nestedModelClasses = [
+		'seasonArsenalModel' => 'App\Models\SeasonArsenalModel'
+	];
+
 	protected $validationRules = [
 		'slug' => 'required_with[name]|max_length[100]',
 		'name' => 'required|max_length[100]',
@@ -38,7 +42,7 @@ class ArsenalModel extends Model
 
 	protected function checkNestedRecords($id, &$errors)
 	{
-		$seasonArsenalModel = model('App\Models\SeasonArsenalModel');
+		$seasonArsenalModel = model($this->nestedModelClasses['seasonArsenalModel']);
 		if ($seasonArsenalModel->countByArsenalId($id)) {
 			$errors['season_arsenal'] = 'There are nested season-arsenal records to arsenal item';
 		}
@@ -59,7 +63,7 @@ class ArsenalModel extends Model
 		if (isset($record['seasonarsenal'])) {
 			$record['seasonarsenal']['arsenalId'] = $record[$this->primaryKey];
 
-			$seasonArsenalModel = model('App\Models\SeasonArsenalModel');
+			$seasonArsenalModel = model($this->nestedModelClasses['seasonArsenalModel']);
 			$seasonArsenalResult = $seasonArsenalModel->insertRecord($record['seasonarsenal']);
 			if ($seasonArsenalResult !== true) {
 				$this->db->transRollback();
@@ -92,7 +96,7 @@ class ArsenalModel extends Model
 		if ($method == 'post') {
 			// Se valida los datos de la relación del Arsenal con la temporada
 			if (isset($postData['seasonarsenal'])) {
-				$seasonArsenalModel = model('App\Models\SeasonArsenalModel');
+				$seasonArsenalModel = model($this->nestedModelClasses['seasonArsenalModel']);
 
 				// Se omite la validación del id del arsenal
 				$seasonArsenalModel->setValidationRule('arsenalId', 'permit_empty');

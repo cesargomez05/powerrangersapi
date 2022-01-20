@@ -2,12 +2,13 @@
 
 namespace App\Controllers;
 
+use App\Traits\ControllerTrait;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\RESTful\BaseResource;
 
 class Module extends BaseResource
 {
-	use ResponseTrait;
+	use ResponseTrait, ControllerTrait;
 
 	protected $modelName = 'App\Models\ModuleModel';
 
@@ -17,21 +18,6 @@ class Module extends BaseResource
 	protected $model;
 
 	protected $helpers = ['app'];
-
-	public function index()
-	{
-		$filter = $this->request->getGet();
-		set_pagination($filter);
-
-		$modules = $this->model->list($filter);
-		return $this->respond($modules);
-	}
-
-	public function show($id)
-	{
-		$module = $this->model->get($id);
-		return $this->respond(['record' => $module]);
-	}
 
 	public function create()
 	{
@@ -91,22 +77,5 @@ class Module extends BaseResource
 		}
 
 		return $this->success("Record successfully updated");
-	}
-
-	public function delete($id)
-	{
-		// Se consulta si existe registros dependientes del registro a eliminar
-		$validations = $this->model->validateNestedRecords($id);
-		if (count($validations) > 0) {
-			return $this->respond(['errors' => $validations], 409);
-		}
-
-		$result = $this->model->deleteRecord($id);
-		if ($result !== true) {
-			// Se retorna un mensaje de error si las validaciones no se cumplen
-			return $this->respond(['errors' => $result], 500);
-		}
-
-		return $this->success("Record successfully deleted");
 	}
 }

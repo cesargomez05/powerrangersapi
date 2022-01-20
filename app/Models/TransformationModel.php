@@ -15,6 +15,10 @@ class TransformationModel extends Model
 
 	protected $allowedFields = ['slug', 'name', 'description'];
 
+	protected $nestedModelClasses = [
+		'transformationRangerModel' => 'App\Models\TransformationRangerModel'
+	];
+
 	protected $validationRules = [
 		'slug' => 'required_with[name]|max_length[100]',
 		'name' => 'required|max_length[100]',
@@ -37,7 +41,7 @@ class TransformationModel extends Model
 
 	protected function checkNestedRecords($id, &$errors)
 	{
-		$transformationRangerModel = model('App\Models\TransformationRangerModel');
+		$transformationRangerModel = model($this->nestedModelClasses['transformationRangerModel']);
 		if ($transformationRangerModel->countByTransformationId($id)) {
 			$errors['transformation_ranger'] = 'There are nested transformation-ranger records to transformation';
 		}
@@ -55,7 +59,7 @@ class TransformationModel extends Model
 		}
 
 		if (isset($record['rangers']) && count($record['rangers']) > 0) {
-			$transformationRangerModel = model('App\Models\TransformationRangerModel');
+			$transformationRangerModel = model($this->nestedModelClasses['transformationRangerModel']);
 			$transformationRangerResult = $transformationRangerModel->insertTransformationRangers($record[$this->primaryKey], $record['rangers']);
 			if ($transformationRangerResult === false) {
 				$this->db->transRollback();
@@ -89,7 +93,7 @@ class TransformationModel extends Model
 			$rangersErrors = [];
 			$rangersId = [];
 
-			$transformationRangerModel = model('App\Models\TransformationRangerModel');
+			$transformationRangerModel = model($this->nestedModelClasses['transformationRangerModel']);
 			$transformationRangerModel->setValidationRule('transformationId', 'permit_empty');
 			unset($postData['transformationId']);
 

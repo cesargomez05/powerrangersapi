@@ -15,6 +15,10 @@ class ZordModel extends Model
 
 	protected $allowedFields = ['slug', 'name', 'description', 'photo'];
 
+	protected $nestedModelClasses = [
+		'seasonZordModel' => 'App\Models\SeasonZordModel'
+	];
+
 	protected $validationRules = [
 		'slug' => 'required_with[name]|max_length[100]',
 		'name' => 'required|max_length[100]',
@@ -38,7 +42,7 @@ class ZordModel extends Model
 
 	protected function checkNestedRecords($id, &$errors)
 	{
-		$seasonZordModel = model('App\Models\SeasonZordModel');
+		$seasonZordModel = model($this->nestedModelClasses['seasonZordModel']);
 		if ($seasonZordModel->countByZordId($id)) {
 			$errors['season_zord'] = 'There are nested season-zord records to zord';
 		}
@@ -59,7 +63,7 @@ class ZordModel extends Model
 		if (isset($record['seasonzord'])) {
 			$record['seasonzord']['zordId'] = $record[$this->primaryKey];
 
-			$seasonZordModel = model('App\Models\SeasonZordModel');
+			$seasonZordModel = model($this->nestedModelClasses['seasonZordModel']);
 			$seasonZordResult = $seasonZordModel->insertRecord($record['seasonzord']);
 			if ($seasonZordResult !== true) {
 				$this->db->transRollback();
@@ -92,7 +96,7 @@ class ZordModel extends Model
 		if ($method == 'post') {
 			// Se valida los datos de la relación del Zord con la temporada
 			if (isset($postData['seasonzord'])) {
-				$seasonZordModel = model('App\Models\SeasonZordModel');
+				$seasonZordModel = model($this->nestedModelClasses['seasonZordModel']);
 
 				// Se omite la validación del id del Zord
 				$seasonZordModel->setValidationRule('zordId', 'permit_empty');

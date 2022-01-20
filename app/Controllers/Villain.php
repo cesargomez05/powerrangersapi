@@ -2,12 +2,13 @@
 
 namespace App\Controllers;
 
+use App\Traits\ControllerTrait;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\RESTful\BaseResource;
 
 class Villain extends BaseResource
 {
-	use ResponseTrait;
+	use ResponseTrait, ControllerTrait;
 
 	protected $modelName = 'App\Models\VillainModel';
 
@@ -17,21 +18,6 @@ class Villain extends BaseResource
 	protected $model;
 
 	protected $helpers = ['app'];
-
-	public function index()
-	{
-		$filter = $this->request->getGet();
-		set_pagination($filter);
-
-		$villains = $this->model->list($filter);
-		return $this->respond($villains);
-	}
-
-	public function show($id)
-	{
-		$villain = $this->model->get($id);
-		return $this->respond(['record' => $villain]);
-	}
 
 	public function create()
 	{
@@ -98,22 +84,5 @@ class Villain extends BaseResource
 		move_files($postData);
 
 		return $this->success("Record successfully updated");
-	}
-
-	public function delete($id)
-	{
-		// Se consulta si existe registros dependientes del registro a eliminar
-		$validations = $this->model->validateNestedRecords($id);
-		if (count($validations) > 0) {
-			return $this->respond(['errors' => $validations], 409);
-		}
-
-		$result = $this->model->deleteRecord($id);
-		if ($result !== true) {
-			// Se retorna un mensaje de error si las validaciones no se cumplen
-			return $this->respond(['errors' => $result], 500);
-		}
-
-		return $this->success("Record successfully deleted");
 	}
 }

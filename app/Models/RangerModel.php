@@ -16,6 +16,10 @@ class RangerModel extends Model
 
 	protected $allowedFields = ['slug', 'name', 'description', 'photo', 'morpherId'];
 
+	protected $nestedModelClasses = [
+		'morpherModel' => 'App\Models\MorpherModel'
+	];
+
 	protected $validationRules = [
 		'slug' => 'required_with[name]|max_length[100]',
 		'name' => 'required|max_length[100]',
@@ -65,7 +69,7 @@ class RangerModel extends Model
 		}
 
 		if (isset($record['morpher'])) {
-			$morpherModel = model('App\Models\MorpherModel');
+			$morpherModel = model($this->nestedModelClasses['morpherModel']);
 
 			$morpherResult = $morpherModel->insertRecord($record['morpher'], true);
 			if ($morpherResult !== true) {
@@ -95,7 +99,7 @@ class RangerModel extends Model
 		$this->db->transBegin();
 
 		if (isset($record['morpher'])) {
-			$morpherModel = model('App\Models\MorpherModel');
+			$morpherModel = model($this->nestedModelClasses['morpherModel']);
 
 			$morpherResult = $morpherModel->insertRecord($record['morpher']);
 			if ($morpherResult !== true) {
@@ -140,7 +144,7 @@ class RangerModel extends Model
 			unset($postData['morpherId']);
 			unset($postData['morpher']['rangersId']);
 
-			$morpherModel = model('App\Models\MorpherModel');
+			$morpherModel = model($this->nestedModelClasses['morpherModel']);
 			$morpherErrors = $morpherModel->validateRecord($postData['morpher'], isset($postFiles['morpher']) ? $postFiles['morpher'] : [], 'post');
 			if ($morpherErrors !== true) {
 				$errors['morpher'] = $morpherErrors;

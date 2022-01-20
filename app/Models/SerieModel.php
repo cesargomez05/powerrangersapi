@@ -15,6 +15,10 @@ class SerieModel extends Model
 
 	protected $allowedFields = ['slug', 'title'];
 
+	protected $nestedModelClasses = [
+		'seasonModel' => 'App\Models\SeasonModel'
+	];
+
 	protected $validationRules = [
 		'slug' => 'required_with[title]|max_length[50]|is_unique[series.slug,id,{_id}]',
 		'title' => 'required|max_length[50]'
@@ -36,7 +40,7 @@ class SerieModel extends Model
 
 	protected function checkNestedRecords($id, &$errors)
 	{
-		$seasonModel = model('App\Models\SeasonModel');
+		$seasonModel = model($this->nestedModelClasses['seasonModel']);
 		if ($seasonModel->countBySerieId($id)) {
 			$errors['season'] = 'There are nested season records to serie';
 		}
@@ -56,7 +60,7 @@ class SerieModel extends Model
 		// Se establece el Id de la serie creada en los datos de la temporada
 		$record['season']['serieId'] = $record[$this->primaryKey];
 
-		$seasonModel = model('App\Models\SeasonModel');
+		$seasonModel = model($this->nestedModelClasses['seasonModel']);
 		$seasonResult = $seasonModel->insertRecord($record['season'], true);
 		if ($seasonResult !== true) {
 			$this->db->transRollback();
@@ -77,7 +81,7 @@ class SerieModel extends Model
 		// Se valida los datos de la temporada (si es método POST)
 		if ($method == 'post') {
 			if (isset($postData['season'])) {
-				$seasonModel = model('App\Models\SeasonModel');
+				$seasonModel = model($this->nestedModelClasses['seasonModel']);
 
 				// Se omite la validación del id de la temporada asociada a la serie a crear
 				$seasonModel->setValidationRule('serieId', 'permit_empty');

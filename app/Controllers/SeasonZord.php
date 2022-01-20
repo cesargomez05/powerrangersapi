@@ -2,12 +2,13 @@
 
 namespace App\Controllers;
 
+use App\Traits\ControllerTrait;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\RESTful\BaseResource;
 
 class SeasonZord extends BaseResource
 {
-	use ResponseTrait;
+	use ResponseTrait, ControllerTrait;
 
 	protected $modelName = 'App\Models\SeasonZordModel';
 
@@ -17,15 +18,6 @@ class SeasonZord extends BaseResource
 	protected $model;
 
 	protected $helpers = ['app'];
-
-	public function index($serieId, $seasonNumber)
-	{
-		$filter = $this->request->getGet();
-		set_pagination($filter);
-
-		$seasonZords = $this->model->list($filter, $serieId, $seasonNumber);
-		return $this->respond($seasonZords);
-	}
 
 	public function create($serieId, $seasonNumber)
 	{
@@ -54,16 +46,5 @@ class SeasonZord extends BaseResource
 		}
 
 		return $this->success("Record successfully created", 201);
-	}
-
-	public function delete($serieId, $seasonNumber, $zordId)
-	{
-		$result = $this->model->deleteRecord($serieId, $seasonNumber, $zordId);
-		if ($result !== true) {
-			// Se retorna un mensaje de error si las validaciones no se cumplen
-			return $this->respond(['errors' => $result], 500);
-		}
-
-		return $this->success("Record successfully deleted");
 	}
 }

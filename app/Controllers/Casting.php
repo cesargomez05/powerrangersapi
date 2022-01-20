@@ -2,12 +2,13 @@
 
 namespace App\Controllers;
 
+use App\Traits\ControllerTrait;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\RESTful\BaseResource;
 
 class Casting extends BaseResource
 {
-	use ResponseTrait;
+	use ResponseTrait, ControllerTrait;
 
 	protected $modelName = 'App\Models\CastingModel';
 
@@ -17,15 +18,6 @@ class Casting extends BaseResource
 	protected $model;
 
 	protected $helpers = ['app'];
-
-	public function index($serieId, $seasonNumber)
-	{
-		$filter = $this->request->getGet();
-		set_pagination($filter);
-
-		$casting = $this->model->list($filter, $serieId, $seasonNumber);
-		return $this->respond($casting);
-	}
 
 	public function create($serieId, $seasonNumber)
 	{
@@ -59,16 +51,5 @@ class Casting extends BaseResource
 		move_files($postData['ranger']['morpher']);
 
 		return $this->success("Record successfully created", 201);
-	}
-
-	public function delete($serieId, $seasonNumber, $actorId, $characterId, $rangerId = null)
-	{
-		$result = $this->model->deleteRecord($serieId, $seasonNumber, $actorId, $characterId, $rangerId);
-		if ($result !== true) {
-			// Se retorna un mensaje de error si las validaciones no se cumplen
-			return $this->respond(['errors' => $result], 500);
-		}
-
-		return $this->success("Record successfully deleted");
 	}
 }

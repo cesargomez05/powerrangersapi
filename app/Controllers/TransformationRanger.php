@@ -2,12 +2,13 @@
 
 namespace App\Controllers;
 
+use App\Traits\ControllerTrait;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\RESTful\BaseResource;
 
 class TransformationRanger extends BaseResource
 {
-	use ResponseTrait;
+	use ResponseTrait, ControllerTrait;
 
 	protected $modelName = 'App\Models\TransformationRangerModel';
 
@@ -17,21 +18,6 @@ class TransformationRanger extends BaseResource
 	protected $model;
 
 	protected $helpers = ['app'];
-
-	public function index($transformationId)
-	{
-		$filter = $this->request->getGet();
-		set_pagination($filter);
-
-		$transformationRangers = $this->model->list($filter, $transformationId);
-		return $this->respond($transformationRangers);
-	}
-
-	public function show($transformationId, $rangerId)
-	{
-		$transformationRanger = $this->model->get($transformationId, $rangerId);
-		return $this->respond(['record' => $transformationRanger]);
-	}
 
 	public function create($transformationId)
 	{
@@ -104,16 +90,5 @@ class TransformationRanger extends BaseResource
 		}
 
 		return $this->success("Record successfully updated");
-	}
-
-	public function delete($transformationId, $rangerId)
-	{
-		$result = $this->model->deleteRecord($transformationId, $rangerId);
-		if ($result !== true) {
-			// Se retorna un mensaje de error si las validaciones no se cumplen
-			return $this->respond(['errors' => $result], 500);
-		}
-
-		return $this->success("Record successfully deleted");
 	}
 }

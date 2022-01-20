@@ -2,12 +2,13 @@
 
 namespace App\Controllers;
 
+use App\Traits\ControllerTrait;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\RESTful\BaseResource;
 
 class Permission extends BaseResource
 {
-	use ResponseTrait;
+	use ResponseTrait, ControllerTrait;
 
 	protected $modelName = 'App\Models\PermissionModel';
 
@@ -17,15 +18,6 @@ class Permission extends BaseResource
 	protected $model;
 
 	protected $helpers = ['app'];
-
-	public function index($userId)
-	{
-		$filter = $this->request->getGet();
-		set_pagination($filter);
-
-		$userPermissions = $this->model->list($filter, $userId);
-		return $this->respond($userPermissions);
-	}
 
 	public function create($userId)
 	{
@@ -53,16 +45,5 @@ class Permission extends BaseResource
 		}
 
 		return $this->success("Record successfully created", 201);
-	}
-
-	public function delete($userId, $moduleId)
-	{
-		$result = $this->model->deleteRecord($userId, $moduleId);
-		if ($result !== true) {
-			// Se retorna un mensaje de error si las validaciones no se cumplen
-			return $this->respond(['errors' => $result], 500);
-		}
-
-		return $this->success("Record successfully deleted");
 	}
 }

@@ -29,7 +29,7 @@ class ApiRules
 	 *
 	 * @return boolean
 	 */
-	public function exists_id(string $str = null, string $fields): bool
+	public function exists_id(string $str, string $fields, array &$data): bool
 	{
 		// Se obtiene el valor de la tabla y del campo
 		sscanf($fields, '%[^.].%[^.]', $table, $field);

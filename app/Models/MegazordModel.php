@@ -15,6 +15,10 @@ class MegazordModel extends Model
 
 	protected $allowedFields = ['slug', 'name', 'description', 'photo'];
 
+	protected $nestedModelClasses = [
+		'seasonMegazordModel' => 'App\Models\SeasonMegazordModel'
+	];
+
 	protected $validationRules = [
 		'slug' => 'required_with[name]|max_length[100]',
 		'name' => 'required|max_length[100]',
@@ -58,7 +62,7 @@ class MegazordModel extends Model
 		if (isset($record['seasonmegazord'])) {
 			$record['seasonmegazord']['megazordId'] = $record[$this->primaryKey];
 
-			$seasonMegazordModel = model('App\Models\SeasonMegazordModel');
+			$seasonMegazordModel = model($this->nestedModelClasses['seasonMegazordModel']);
 			$seasonMegazordResult = $seasonMegazordModel->insertRecord($record['seasonmegazord']);
 			if ($seasonMegazordResult !== true) {
 				$this->db->transRollback();
@@ -88,7 +92,7 @@ class MegazordModel extends Model
 
 	protected function checkNestedRecords($id, &$errors)
 	{
-		$seasonMegazordModel = model('App\Models\SeasonMegazordModel');
+		$seasonMegazordModel = model($this->nestedModelClasses['seasonMegazordModel']);
 		if ($seasonMegazordModel->countByMegazordId($id)) {
 			$errors['season_megazord'] = 'There are nested season-megazord records to megazord';
 		}
@@ -116,7 +120,7 @@ class MegazordModel extends Model
 
 			// Se valida los datos de la relación del Zord con la temporada
 			if (isset($postData['seasonmegazord'])) {
-				$seasonMegazordModel = model('App\Models\SeasonMegazordModel');
+				$seasonMegazordModel = model($this->nestedModelClasses['seasonMegazordModel']);
 
 				// Se omite la validación del id del Zord
 				$seasonMegazordModel->setValidationRule('megazordId', 'permit_empty');
