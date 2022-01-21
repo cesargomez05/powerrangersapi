@@ -21,6 +21,8 @@ class ActorModel extends Model
 		'photo' => 'permit_empty|max_length[100]'
 	];
 
+	protected $returnType = \App\Entities\Actor::class;
+
 	protected function setRecordsCondition($query)
 	{
 		if (isset($query['q']) && !empty($query['q'])) {
@@ -55,8 +57,13 @@ class ActorModel extends Model
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['slug', 'name', 'birthDate', 'deathDate', 'photo', 'slug AS slugURI', 'photo AS photoURI']);
+		$this->select(['name', 'birthDate', 'deathDate', 'slug AS slugURI', 'photo AS photoURI']);
 		$this->where('slug', $slug);
+	}
+
+	protected function addRecordAttributes($actor, $slug)
+	{
+		$actor->casting = [];
 	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)

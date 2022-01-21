@@ -245,6 +245,14 @@ $routes->group('permissions', ['filter' => 'permission_filter:permission'], func
 	$routes->delete('(:segment)/(:segment)', 'Permission::delete/$1/$2');
 });
 
+// API
+$routes->group('api', function ($routes) {
+	$routes->get('actors', 'Actor::indexPublic');
+	$routes->get('actors/(:segment)', 'Actor::showPublic/$1');
+	$routes->get('ages', 'Age::indexPublic');
+	$routes->get('ages/(:segment)', 'Age::showPublic/$1');
+});
+
 /*
  * --------------------------------------------------------------------
  * Additional Routing

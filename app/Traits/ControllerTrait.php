@@ -38,4 +38,23 @@ trait ControllerTrait
 
 		return $this->success("Record successfully deleted");
 	}
+
+	public function indexPublic(...$slugs)
+	{
+		$filter = $this->request->getGet();
+		set_pagination($filter);
+
+		array_unshift($slugs, $filter);
+		$records = call_user_func_array(array($this->model, "listPublic"), $slugs);
+		return $this->respond($records);
+	}
+
+	public function showPublic(...$slugs)
+	{
+		$record = call_user_func_array(array($this->model, "getPublic"), $slugs);
+		if (!isset($record)) {
+			return $this->failNotFound('Record not found');
+		}
+		return $this->respond($record);
+	}
 }

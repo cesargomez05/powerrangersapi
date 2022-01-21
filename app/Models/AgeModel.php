@@ -18,6 +18,8 @@ class AgeModel extends Model
 		'name' => 'required|max_length[20]'
 	];
 
+	protected $returnType = \App\Entities\Age::class;
+
 	protected function setRecordsCondition($query)
 	{
 		if (isset($query['q']) && !empty($query['q'])) {
@@ -38,6 +40,27 @@ class AgeModel extends Model
 		if ($seasonModel->countByAgeId($id)) {
 			$errors['season'] = 'There are nested season records to age';
 		}
+	}
+
+	protected function setPublicRecordsCondition($query)
+	{
+		$this->select(['name', 'slug AS slugURI']);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('name', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setPublicRecordCondition($slug)
+	{
+		$this->select(['name', 'slug AS slugURI']);
+		$this->where('slug', $slug);
+	}
+
+	protected function addRecordAttributes($age, $slug)
+	{
+		$age->seasons = [];
 	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)

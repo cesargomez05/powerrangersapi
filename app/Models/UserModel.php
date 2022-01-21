@@ -123,7 +123,7 @@ class UserModel extends Model
 		// Se valida si no hubo error de validación en el campo de contraseña, para establecer el respectivo valor encriptado
 		if (!isset($errors['password'])) {
 			if (isset($postData['password'])) {
-				$postData['password'] = sha1($postData['password']);
+				$postData['password'] = password_hash($postData['password'], PASSWORD_BCRYPT);
 			} else {
 				unset($postData['password']);
 			}
@@ -166,16 +166,13 @@ class UserModel extends Model
 	{
 		// Se establece la consulta para obtener el Id del usuario cuyo username y contraseña correspondan al usuario autenticado
 		$builder = $this->builder();
-		$builder->select($this->primaryKey);
+		$builder->select(['password']);
 		$builder->where('username', $username);
-		if (isset($password) && !empty($password)) {
-			$builder->where('password', sha1($password));
-		}
 
 		// Se ejecuta la consulta y se valida si esta retornó algun resultado
 		$query = $builder->get();
 		$row = $query->getRow();
-		if ($row !== NULL) {
+		if ($row !== NULL && password_verify($password, $row->password)) {
 			return $row;
 		}
 		return false;

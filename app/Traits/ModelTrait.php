@@ -102,8 +102,11 @@ trait ModelTrait
 	public function getPublic(...$slugs)
 	{
 		call_user_func_array(array($this, "setPublicRecordCondition"), $slugs);
-		$record = $this->findAll();
-		return count($record) ? $record[0] : null;
+		$record = $this->first();
+		if (isset($record) && method_exists($this, 'addRecordAttributes')) {
+			call_user_func_array(array($this, "addRecordAttributes"), array_merge([&$record], $slugs));
+		}
+		return $record;
 	}
 
 	public function validateId($id, $property = 'id', $label = 'Id')
