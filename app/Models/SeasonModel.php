@@ -90,11 +90,6 @@ class SeasonModel extends Model
 		$this->where('number', $number);
 	}
 
-	protected function addRecordAttributes($season, $slug)
-	{
-		$season->casting = [];
-	}
-
 	public function insertRecord(&$record, $subTransaction = false)
 	{
 		if (!$subTransaction) {
