@@ -28,6 +28,8 @@ class RangerModel extends Model
 		'morpherId' => 'permit_empty|is_natural_no_zero|exists_id[morphers.id]'
 	];
 
+	protected $returnType = \App\Entities\Ranger::class;
+
 	protected function setRecordsCondition($query)
 	{
 		if (isset($query['q']) && !empty($query['q'])) {
@@ -60,6 +62,30 @@ class RangerModel extends Model
 		if ($transformationRangerModel->countByRangerId($id)) {
 			$errors['transformation_ranger'] = 'There are nested transformation-ranger records to ranger';
 		}
+	}
+
+	protected function setPublicRecordsCondition($query)
+	{
+		$this->select(['name', 'description', 'slug AS slugURI', 'photo AS photoURI']);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('name', $query['q'], 'both');
+			$this->orLike('fullName', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setPublicRecordCondition($slug)
+	{
+		$this->select(['name', 'description', 'photo AS photoURI']);
+		$this->where('slug', $slug);
+	}
+
+	protected function addRecordAttributes($ranger, $slug)
+	{
+		$ranger->arsenal = [];
+		$ranger->morpher = [];
+		$ranger->transformations = [];
 	}
 
 	public function insertRecord(&$record, $subTransaction = false)

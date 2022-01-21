@@ -24,6 +24,8 @@ class ChapterModel extends Model
 		'summary' => 'permit_empty'
 	];
 
+	protected $returnType = \App\Entities\Chapter::class;
+
 	protected function setRecordsCondition($query, $serieId, $seasonNumber)
 	{
 		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber);
@@ -38,6 +40,28 @@ class ChapterModel extends Model
 	protected function setRecordCondition($serieId, $seasonNumber, $number)
 	{
 		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber)->where('number', $number);
+	}
+
+	protected function setPublicRecordsCondition($query, $serieSlug, $seasonNumber)
+	{
+		$this->setTable('chapters_view');
+		$this->select(['number', 'title', 'titleSpanish', 'summary', 'CONCAT(serieSlug,\'/\',seasonNumber,\'/\',number) as slugURI']);
+		$this->where('serieSlug', $serieSlug);
+		$this->where('seasonNumber', $seasonNumber);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('title', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setPublicRecordCondition($serieSlug, $seasonNumber, $number)
+	{
+		$this->setTable('chapters_view');
+		$this->select(['number', 'title', 'titleSpanish', 'summary']);
+		$this->where('serieSlug', $serieSlug);
+		$this->where('seasonNumber', $seasonNumber);
+		$this->where('number', $number);
 	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)

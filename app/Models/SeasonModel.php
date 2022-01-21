@@ -25,6 +25,8 @@ class SeasonModel extends Model
 		'ageId' => 'required|is_natural_no_zero|exists_id[ages.id]'
 	];
 
+	protected $returnType = \App\Entities\Season::class;
+
 	protected function setRecordsCondition($query, $serieId)
 	{
 		$this->where('serieId', $serieId);
@@ -66,6 +68,31 @@ class SeasonModel extends Model
 		if ($seasonZordModel->countBySeasonId($serieId, $seasonNumber)) {
 			$errors['season_zord'] = 'There are nested season-zord records to season';
 		}
+	}
+
+	protected function setPublicRecordsCondition($query, $serieSlug)
+	{
+		$this->setTable('seasons_view');
+		$this->select(['number', 'year', 'title', 'synopsis', 'CONCAT(serieSlug,\'/\',number) as slugURI']);
+		$this->where('serieSlug', $serieSlug);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('title', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setPublicRecordCondition($serieSlug, $number)
+	{
+		$this->setTable('seasons_view');
+		$this->select(['number', 'year', 'title', 'synopsis']);
+		$this->where('serieSlug', $serieSlug);
+		$this->where('number', $number);
+	}
+
+	protected function addRecordAttributes($season, $slug)
+	{
+		$season->casting = [];
 	}
 
 	public function insertRecord(&$record, $subTransaction = false)

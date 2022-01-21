@@ -24,6 +24,8 @@ class SerieModel extends Model
 		'title' => 'required|max_length[50]'
 	];
 
+	protected $returnType = \App\Entities\Serie::class;
+
 	protected function setRecordsCondition($query)
 	{
 		if (isset($query['q']) && !empty($query['q'])) {
@@ -44,6 +46,27 @@ class SerieModel extends Model
 		if ($seasonModel->countBySerieId($id)) {
 			$errors['season'] = 'There are nested season records to serie';
 		}
+	}
+
+	protected function setPublicRecordsCondition($query)
+	{
+		$this->select(['title', 'slug AS slugURI']);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('title', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setPublicRecordCondition($slug)
+	{
+		$this->select(['title']);
+		$this->where('slug', $slug);
+	}
+
+	protected function addRecordAttributes($serie, $slug)
+	{
+		$serie->seasons = [];
 	}
 
 	public function insertRecord(&$record)

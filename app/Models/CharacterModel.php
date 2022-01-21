@@ -21,6 +21,8 @@ class CharacterModel extends Model
 		'photo' => 'permit_empty|max_length[100]'
 	];
 
+	protected $returnType = \App\Entities\Character::class;
+
 	protected function setRecordsCondition($query)
 	{
 		if (isset($query['q']) && !empty($query['q'])) {
@@ -42,6 +44,28 @@ class CharacterModel extends Model
 		if ($castingModel->countByCharacterId($id)) {
 			$errors['casting'] = 'There are nested casting records to character';
 		}
+	}
+
+	protected function setPublicRecordsCondition($query)
+	{
+		$this->select(['name', 'fullName', 'description', 'slug AS slugURI', 'photo AS photoURI']);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('name', $query['q'], 'both');
+			$this->orLike('fullName', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setPublicRecordCondition($slug)
+	{
+		$this->select(['name', 'fullName', 'description', 'photo AS photoURI']);
+		$this->where('slug', $slug);
+	}
+
+	protected function addRecordAttributes($character, $slug)
+	{
+		$character->casting = [];
 	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)

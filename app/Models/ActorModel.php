@@ -57,7 +57,7 @@ class ActorModel extends Model
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['name', 'birthDate', 'deathDate', 'slug AS slugURI', 'photo AS photoURI']);
+		$this->select(['name', 'birthDate', 'deathDate', 'photo AS photoURI']);
 		$this->where('slug', $slug);
 	}
 
