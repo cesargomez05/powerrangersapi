@@ -15,16 +15,7 @@ trait ModelTrait
 			array_unshift($ids, $query);
 			call_user_func_array(array($this, "setRecordsCondition"), $ids);
 		}
-
-		$response = [];
-		$response['count'] = $this->countAllResults(false);
-		if ($response['count'] < $query['pageSize'] * $query['page']) {
-			$query['page'] = intdiv($response['count'], $query['pageSize']) + 1;
-		}
-		$response['page'] = intval($query['page']);
-		$response['records'] = $this->findAll($query['pageSize'], ($query['page'] - 1) * $query['pageSize']);
-
-		return $response;
+		return $this->getResponse($query);
 	}
 
 	public function check(...$ids)
@@ -87,16 +78,7 @@ trait ModelTrait
 			array_unshift($slugs, $query);
 			call_user_func_array(array($this, "setPublicRecordsCondition"), $slugs);
 		}
-
-		$response = [];
-		$response['count'] = $this->countAllResults(false);
-		if ($response['count'] < $query['pageSize'] * $query['page']) {
-			$query['page'] = intdiv($response['count'], $query['pageSize']) + 1;
-		}
-		$response['page'] = intval($query['page']);
-		$response['records'] = $this->findAll($query['pageSize'], ($query['page'] - 1) * $query['pageSize']);
-
-		return $response;
+		return $this->getResponse($query);
 	}
 
 	public function getPublic(...$slugs)
@@ -207,6 +189,19 @@ trait ModelTrait
 	{
 		$this->where('zordId', $zordId);
 		return $this->countAllResults() > 0;
+	}
+
+	private function getResponse($query)
+	{
+		$response = [];
+		$response['count'] = $this->countAllResults(false);
+		if ($response['count'] < $query['pageSize'] * $query['page']) {
+			$query['page'] = intdiv($response['count'], $query['pageSize']) + 1;
+		}
+		$response['page'] = intval($query['page']);
+		$response['records'] = $this->findAll($query['pageSize'], ($query['page'] - 1) * $query['pageSize']);
+
+		return $response;
 	}
 
 	private function validateRecordProperties(&$postData, $method, $prevRecord = null)

@@ -4,5 +4,5 @@ namespace App\Entities;
 
 class Serie extends APIEntity
 {
-    protected $resource = 'series';
+	protected $resource = 'series';
 }

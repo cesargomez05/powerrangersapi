@@ -26,6 +26,8 @@ class ArsenalModel extends Model
 		'photo' => 'permit_empty|max_length[25]'
 	];
 
+	protected $returnType = \App\Entities\Arsenal::class;
+
 	protected function setRecordsCondition($query)
 	{
 		if (isset($query['q']) && !empty($query['q'])) {
@@ -46,6 +48,22 @@ class ArsenalModel extends Model
 		if ($seasonArsenalModel->countByArsenalId($id)) {
 			$errors['season_arsenal'] = 'There are nested season-arsenal records to arsenal item';
 		}
+	}
+
+	protected function setPublicRecordsCondition($query)
+	{
+		$this->select(['name', 'description', 'slug AS slugURI', 'photo AS photoURI']);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('name', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setPublicRecordCondition($slug)
+	{
+		$this->select(['name', 'description', 'photo AS photoURI']);
+		$this->where('slug', $slug);
 	}
 
 	public function insertRecord(&$record)

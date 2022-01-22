@@ -31,6 +31,8 @@ class CastingModel extends Model
 		]
 	];
 
+	protected $returnType = \App\Entities\Casting::class;
+
 	protected function setRecordsCondition($query, $serieId, $seasonNumber)
 	{
 		$this->setTable('view_casting');
@@ -56,6 +58,39 @@ class CastingModel extends Model
 		} else {
 			$this->where('rangerId IS NULL');
 		}
+	}
+
+	protected function setPublicRecordsCondition($query, $serieSlug, $seasonNumber)
+	{
+		$this->setTable('casting_view');
+		$this->select(['actorName', 'actorSlug actorSlugURI', 'characterName', 'characterSlug characterSlugURI', 'rangerName', 'rangerSlug rangerSlugURI']);
+		$this->where('serieSlug', $serieSlug);
+		$this->where('seasonNumber', $seasonNumber);
+		$this->where('isTeamUp', 0);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('actorName', $query['q'], 'both');
+			$this->orLike('characterName', $query['q'], 'both');
+			$this->orLike('rangerName', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	public function listTeamUpPublic($query, $serieSlug, $seasonNumber)
+	{
+		$this->setTable('casting_view');
+		$this->select(['actorName', 'actorSlug actorSlugURI', 'characterName', 'characterSlug characterSlugURI', 'rangerName', 'rangerSlug rangerSlugURI']);
+		$this->where('serieSlug', $serieSlug);
+		$this->where('seasonNumber', $seasonNumber);
+		$this->where('isTeamUp', 1);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('actorName', $query['q'], 'both');
+			$this->orLike('characterName', $query['q'], 'both');
+			$this->orLike('rangerName', $query['q'], 'both');
+			$this->groupEnd();
+		}
+		return $this->getResponse($query);
 	}
 
 	public function insertRecord(&$record)

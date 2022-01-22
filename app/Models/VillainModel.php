@@ -26,6 +26,8 @@ class VillainModel extends Model
 		'photo' => 'permit_empty|max_length[100]'
 	];
 
+	protected $returnType = \App\Entities\Villain::class;
+
 	protected function setRecordsCondition($query)
 	{
 		if (isset($query['q']) && !empty($query['q'])) {
@@ -46,6 +48,22 @@ class VillainModel extends Model
 		if ($seasonVillainModel->countByVillainId($id)) {
 			$errors['season_villain'] = 'There are nested season-villain records to villain';
 		}
+	}
+
+	protected function setPublicRecordsCondition($query)
+	{
+		$this->select(['name', 'description', 'slug AS slugURI', 'photo AS photoURI']);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('name', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setPublicRecordCondition($slug)
+	{
+		$this->select(['name', 'description', 'photo AS photoURI']);
+		$this->where('slug', $slug);
 	}
 
 	public function insertRecord(&$record)

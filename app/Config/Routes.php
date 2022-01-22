@@ -261,6 +261,20 @@ $routes->group('api', function ($routes) {
 	$routes->get('seasons/(:segment)/(:segment)', 'Season::showPublic/$1/$2');
 	$routes->get('chapters/(:segment)/(:segment)', 'Chapter::indexPublic/$1/$2');
 	$routes->get('chapters/(:segment)/(:segment)/(:segment)', 'Chapter::showPublic/$1/$2/$3');
+	$routes->get('casting/(:segment)/(:segment)', 'Casting::indexPublic/$1/$2');
+	$routes->get('teamup/(:segment)/(:segment)', 'Casting::indexTeamUpPublic/$1/$2');
+	$routes->get('zords', 'Zord::indexPublic');
+	$routes->get('zords/(:segment)', 'Zord::showPublic/$1');
+	$routes->get('megazords', 'Megazord::indexPublic');
+	$routes->get('megazords/(:segment)', 'Megazord::showPublic/$1');
+	$routes->get('transformations', 'Transformation::indexPublic');
+	$routes->get('transformations/(:segment)', 'Transformation::showPublic/$1');
+	$routes->get('morphers', 'Morpher::indexPublic');
+	$routes->get('morphers/(:segment)', 'Morpher::showPublic/$1');
+	$routes->get('arsenal', 'Arsenal::indexPublic');
+	$routes->get('arsenal/(:segment)', 'Arsenal::showPublic/$1');
+	$routes->get('villains', 'Villain::indexPublic');
+	$routes->get('villains/(:segment)', 'Villain::showPublic/$1');
 });
 
 /*

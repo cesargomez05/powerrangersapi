@@ -25,6 +25,8 @@ class TransformationModel extends Model
 		'description' => 'permit_empty'
 	];
 
+	protected $returnType = \App\Entities\Transformation::class;
+
 	protected function setRecordsCondition($query)
 	{
 		if (isset($query['q']) && !empty($query['q'])) {
@@ -70,6 +72,27 @@ class TransformationModel extends Model
 		$this->db->transCommit();
 
 		return true;
+	}
+
+	protected function setPublicRecordsCondition($query)
+	{
+		$this->select(['name', 'description', 'slug AS slugURI']);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('name', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setPublicRecordCondition($slug)
+	{
+		$this->select(['name', 'description']);
+		$this->where('slug', $slug);
+	}
+
+	protected function addRecordAttributes($actor, $slug)
+	{
+		$actor->rangers = [];
 	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)

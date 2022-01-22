@@ -29,6 +29,8 @@ class MorpherModel extends Model
 		]
 	];
 
+	protected $returnType = \App\Entities\Morpher::class;
+
 	protected function setRecordsCondition($query)
 	{
 		if (isset($query['q']) && !empty($query['q'])) {
@@ -49,6 +51,27 @@ class MorpherModel extends Model
 		if ($rangerModel->countByMorpherId($id)) {
 			$errors['ranger'] = 'There are nested ranger records to morpher';
 		}
+	}
+
+	protected function setPublicRecordsCondition($query)
+	{
+		$this->select(['name', 'description', 'slug AS slugURI', 'photo AS photoURI']);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('name', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setPublicRecordCondition($slug)
+	{
+		$this->select(['name', 'description', 'photo AS photoURI']);
+		$this->where('slug', $slug);
+	}
+
+	protected function addRecordAttributes($actor, $slug)
+	{
+		$actor->rangers = [];
 	}
 
 	public function insertRecord(&$record, $subTransaction = false)

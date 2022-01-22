@@ -26,6 +26,8 @@ class ZordModel extends Model
 		'photo' => 'permit_empty|max_length[100]'
 	];
 
+	protected $returnType = \App\Entities\Zord::class;
+
 	protected function setRecordsCondition($query)
 	{
 		if (isset($query['q']) && !empty($query['q'])) {
@@ -46,6 +48,28 @@ class ZordModel extends Model
 		if ($seasonZordModel->countByZordId($id)) {
 			$errors['season_zord'] = 'There are nested season-zord records to zord';
 		}
+	}
+
+	protected function setPublicRecordsCondition($query)
+	{
+		$this->select(['name', 'description', 'slug AS slugURI', 'photo AS photoURI']);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('name', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setPublicRecordCondition($slug)
+	{
+		$this->select(['name', 'description', 'photo AS photoURI']);
+		$this->where('slug', $slug);
+	}
+
+	protected function addRecordAttributes($actor, $slug)
+	{
+		$actor->seasons = [];
+		$actor->megazords = [];
 	}
 
 	public function insertRecord(&$record)

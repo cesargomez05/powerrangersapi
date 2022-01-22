@@ -52,4 +52,13 @@ class Casting extends BaseResource
 
 		return $this->success("Record successfully created", 201);
 	}
+
+	public function indexTeamUpPublic($serieSlug, $seasonNumber)
+	{
+		$filter = $this->request->getGet();
+		set_pagination($filter);
+
+		$records = $this->model->listTeamUpPublic($filter, $serieSlug, $seasonNumber);
+		return $this->respond($records);
+	}
 }

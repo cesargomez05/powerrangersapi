@@ -33,6 +33,8 @@ class MegazordModel extends Model
 		]
 	];
 
+	protected $returnType = \App\Entities\Megazord::class;
+
 	protected function setRecordsCondition($query)
 	{
 		if (isset($query['q']) && !empty($query['q'])) {
@@ -101,6 +103,28 @@ class MegazordModel extends Model
 		if ($megazordZordModel->countByMegazordId($id)) {
 			$errors['megazord_zord'] = 'There are nested megazord-zord records to arsenal item';
 		}
+	}
+
+	protected function setPublicRecordsCondition($query)
+	{
+		$this->select(['name', 'description', 'slug AS slugURI', 'photo AS photoURI']);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('name', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setPublicRecordCondition($slug)
+	{
+		$this->select(['name', 'description', 'photo AS photoURI']);
+		$this->where('slug', $slug);
+	}
+
+	protected function addRecordAttributes($actor, $slug)
+	{
+		$actor->seasons = [];
+		$actor->zords = [];
 	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
