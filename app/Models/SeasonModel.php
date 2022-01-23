@@ -73,7 +73,7 @@ class SeasonModel extends Model
 	protected function setPublicRecordsCondition($query, $serieSlug)
 	{
 		$this->setTable('seasons_view');
-		$this->select(['number', 'year', 'title', 'synopsis', 'CONCAT(serieSlug,\'/\',number) as slugURI']);
+		$this->select(['number', 'year', 'title', 'CONCAT(serieSlug,\'/\',number) slugURI']);
 		$this->where('serieSlug', $serieSlug);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
@@ -88,6 +88,12 @@ class SeasonModel extends Model
 		$this->select(['number', 'year', 'title', 'synopsis']);
 		$this->where('serieSlug', $serieSlug);
 		$this->where('number', $number);
+	}
+
+	protected function addRecordAttributes($season, $serieSlug, $slug)
+	{
+		$chapterModel = model('App\Models\ChapterModel');
+		$season->chapters = $chapterModel->countBySeason($serieSlug, $slug);
 	}
 
 	public function insertRecord(&$record, $subTransaction = false)
@@ -145,5 +151,20 @@ class SeasonModel extends Model
 		}
 
 		return empty($errors) ? true : $errors;
+	}
+
+	public function listByAge($ageSlug)
+	{
+		$this->setTable('seasons_view');
+		$this->select(['title', 'number', 'year', 'CONCAT(serieSlug,\'/\',number) slugURI']);
+		$this->where('ageSlug', $ageSlug);
+		return $this->findAll();
+	}
+
+	public function countBySerie($serieSlug)
+	{
+		$this->setTable('seasons_view');
+		$this->where('serieSlug', $serieSlug);
+		return $this->countAllResults();
 	}
 }

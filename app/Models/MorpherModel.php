@@ -55,7 +55,7 @@ class MorpherModel extends Model
 
 	protected function setPublicRecordsCondition($query)
 	{
-		$this->select(['name', 'description', 'slug AS slugURI', 'photo AS photoURI']);
+		$this->select(['name', 'slug slugURI', 'photo photoURI']);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('name', $query['q'], 'both');
@@ -65,13 +65,16 @@ class MorpherModel extends Model
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['name', 'description', 'photo AS photoURI']);
+		$this->select(['id', 'name', 'description', 'photo photoURI']);
 		$this->where('slug', $slug);
 	}
 
-	protected function addRecordAttributes($actor, $slug)
+	protected function addRecordAttributes($morpher, $slug)
 	{
-		$actor->rangers = [];
+		$rangerModel = model('App\Models\RangerModel');
+		$morpher->rangers = $rangerModel->listByMorpher($morpher->id);
+
+		unset($morpher->id);
 	}
 
 	public function insertRecord(&$record, $subTransaction = false)
@@ -125,5 +128,12 @@ class MorpherModel extends Model
 		}
 
 		return empty($errors) ? true : $errors;
+	}
+
+	public function getByRanger($morpherId)
+	{
+		$this->select(['name', 'slug slugURI', 'photo photoURI']);
+		$this->where('id', $morpherId);
+		return $this->first();
 	}
 }

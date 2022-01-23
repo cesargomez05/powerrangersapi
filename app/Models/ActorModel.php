@@ -47,7 +47,7 @@ class ActorModel extends Model
 
 	protected function setPublicRecordsCondition($query)
 	{
-		$this->select(['name', 'birthDate', 'deathDate', 'slug AS slugURI', 'photo AS photoURI']);
+		$this->select(['name', 'slug slugURI', 'photo photoURI']);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('name', $query['q'], 'both');
@@ -57,13 +57,14 @@ class ActorModel extends Model
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['name', 'birthDate', 'deathDate', 'photo AS photoURI']);
+		$this->select(['name', 'birthDate', 'deathDate', 'photo photoURI']);
 		$this->where('slug', $slug);
 	}
 
 	protected function addRecordAttributes($actor, $slug)
 	{
-		$actor->casting = [];
+		$castingModel = model('App\Models\CastingModel');
+		$actor->casting = $castingModel->listByActor($slug);
 	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)

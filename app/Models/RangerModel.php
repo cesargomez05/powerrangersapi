@@ -66,26 +66,35 @@ class RangerModel extends Model
 
 	protected function setPublicRecordsCondition($query)
 	{
-		$this->select(['name', 'description', 'slug AS slugURI', 'photo AS photoURI']);
+		$this->select(['name', 'slug slugURI', 'photo photoURI']);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('name', $query['q'], 'both');
-			$this->orLike('fullName', $query['q'], 'both');
 			$this->groupEnd();
 		}
 	}
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['name', 'description', 'photo AS photoURI']);
+		$this->select(['name', 'description', 'photo photoURI', 'morpherId morpher']);
 		$this->where('slug', $slug);
 	}
 
 	protected function addRecordAttributes($ranger, $slug)
 	{
-		$ranger->arsenal = [];
-		$ranger->morpher = [];
-		$ranger->transformations = [];
+		$seasonArsenalModel = model('App\Models\SeasonArsenalModel');
+		$ranger->arsenal = $seasonArsenalModel->listByRanger($slug);
+
+		// Se adiciona la información del Morpher (si aplica)
+		if (isset($ranger->morpher)) {
+			$morpherModel = model('App\Models\MorpherModel');
+			$ranger->morpher = $morpherModel->getByRanger($ranger->morpher);
+		} else {
+			$ranger->morpher = null;
+		}
+
+		$transformationRangerModel = model('App\Models\TransformationRangerModel');
+		$ranger->transformations = $transformationRangerModel->listByRanger($slug);
 	}
 
 	public function insertRecord(&$record, $subTransaction = false)
@@ -178,5 +187,12 @@ class RangerModel extends Model
 		}
 
 		return empty($errors) ? true : $errors;
+	}
+
+	public function listByMorpher($morpherId)
+	{
+		$this->select(['name', 'slug slugURI']);
+		$this->where('morpherId', $morpherId);
+		return $this->findAll();
 	}
 }

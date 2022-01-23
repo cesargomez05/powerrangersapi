@@ -4,7 +4,12 @@ namespace App\Entities;
 
 class Casting extends APIEntity
 {
-	protected $resource = 'casting';
+	public function getSerieSlugURI()
+	{
+		if (isset($this->attributes['serieSlugURI']) && strlen($this->attributes['serieSlugURI'])) {
+			return base_url('api/series/' . $this->attributes['serieSlugURI']);
+		}
+	}
 
 	public function getActorSlugURI()
 	{
@@ -17,13 +22,6 @@ class Casting extends APIEntity
 	{
 		if (isset($this->attributes['characterSlugURI']) && strlen($this->attributes['characterSlugURI'])) {
 			return base_url('api/characters/' . $this->attributes['characterSlugURI']);
-		}
-	}
-
-	public function getRangerSlugURI()
-	{
-		if (isset($this->attributes['rangerSlugURI']) && strlen($this->attributes['rangerSlugURI'])) {
-			return base_url('api/rangers/' . $this->attributes['rangerSlugURI']);
 		}
 	}
 }

@@ -70,7 +70,7 @@ class PermissionModel extends Model
 	{
 		// Se ejecuta la consulta del permiso
 		$builder = $this->builder();
-		$builder->select("$permission as available");
+		$builder->select("$permission available");
 		$builder->where('username', $username);
 		$builder->where('moduleId', $moduleId);
 

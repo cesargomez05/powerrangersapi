@@ -50,7 +50,7 @@ class SerieModel extends Model
 
 	protected function setPublicRecordsCondition($query)
 	{
-		$this->select(['title', 'slug AS slugURI']);
+		$this->select(['title', 'slug slugURI']);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('title', $query['q'], 'both');
@@ -66,7 +66,8 @@ class SerieModel extends Model
 
 	protected function addRecordAttributes($serie, $slug)
 	{
-		$serie->seasons = [];
+		$seasonModel = model('App\Models\SeasonModel');
+		$serie->seasons = $seasonModel->countBySerie($slug);
 	}
 
 	public function insertRecord(&$record)

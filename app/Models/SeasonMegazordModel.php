@@ -28,6 +28,8 @@ class SeasonMegazordModel extends Model
 		]
 	];
 
+	protected $returnType = \App\Entities\SeasonMegazord::class;
+
 	protected function setRecordsCondition($query, $serieId, $seasonNumber)
 	{
 		$this->setTable('view_season_megazord');
@@ -69,5 +71,13 @@ class SeasonMegazordModel extends Model
 		}
 
 		return empty($errors) ? true : $errors;
+	}
+
+	public function listByMegazord($megazordSlug)
+	{
+		$this->setTable('season_megazord_view');
+		$this->select(['serieTitle', 'seasonNumber', 'CONCAT(serieSlug,\'/\',seasonNumber) seasonSlugURI']);
+		$this->where('megazordSlug', $megazordSlug);
+		return $this->findAll();
 	}
 }

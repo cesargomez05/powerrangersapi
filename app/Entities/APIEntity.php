@@ -19,4 +19,18 @@ class APIEntity extends Entity
 			return base_url('images/' . $this->attributes['photoURI']);
 		}
 	}
+
+	public function getSeasonSlugURI()
+	{
+		if (isset($this->attributes['seasonSlugURI']) && strlen($this->attributes['seasonSlugURI'])) {
+			return base_url('api/seasons/' . $this->attributes['seasonSlugURI']);
+		}
+	}
+
+	public function getRangerSlugURI()
+	{
+		if (isset($this->attributes['rangerSlugURI']) && strlen($this->attributes['rangerSlugURI'])) {
+			return base_url('api/rangers/' . $this->attributes['rangerSlugURI']);
+		}
+	}
 }

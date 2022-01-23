@@ -28,6 +28,8 @@ class SeasonVillainModel extends Model
 		]
 	];
 
+	protected $returnType = \App\Entities\SeasonVillain::class;
+
 	protected function setRecordsCondition($query, $serieId, $seasonNumber)
 	{
 		$this->setTable('view_season_villain');
@@ -69,5 +71,13 @@ class SeasonVillainModel extends Model
 		}
 
 		return empty($errors) ? true : $errors;
+	}
+
+	public function listByVillain($villainSlug)
+	{
+		$this->setTable('season_villain_view');
+		$this->select(['serieTitle', 'seasonNumber', 'CONCAT(serieSlug,\'/\',seasonNumber) seasonSlugURI']);
+		$this->where('villainSlug', $villainSlug);
+		return $this->findAll();
 	}
 }

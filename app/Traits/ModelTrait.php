@@ -27,8 +27,7 @@ trait ModelTrait
 	public function get(...$ids)
 	{
 		call_user_func_array(array($this, "setRecordCondition"), $ids);
-		$record = $this->findAll();
-		return count($record) ? $record[0] : null;
+		return $this->first();
 	}
 
 	public function insertRecord(&$record)

@@ -29,6 +29,8 @@ class SeasonArsenalModel extends Model
 		]
 	];
 
+	protected $returnType = \App\Entities\SeasonArsenal::class;
+
 	protected function setRecordsCondition($query, $serieId, $seasonNumber)
 	{
 		$this->setTable('view_season_arsenal');
@@ -70,5 +72,13 @@ class SeasonArsenalModel extends Model
 		}
 
 		return empty($errors) ? true : $errors;
+	}
+
+	public function listByRanger($rangerSlug)
+	{
+		$this->setTable('season_arsenal_view');
+		$this->select(['arsenalName', 'arsenalSlug arsenalSlugURI']);
+		$this->where('rangerSlug', $rangerSlug);
+		return $this->findAll();
 	}
 }

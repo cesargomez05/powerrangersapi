@@ -29,6 +29,8 @@ class SeasonZordModel extends Model
 		]
 	];
 
+	protected $returnType = \App\Entities\SeasonZord::class;
+
 	protected function setRecordsCondition($query, $serieId, $seasonNumber)
 	{
 		$this->setTable('view_season_zord');
@@ -70,5 +72,13 @@ class SeasonZordModel extends Model
 		}
 
 		return empty($errors) ? true : $errors;
+	}
+
+	public function listByZord($zordSlug)
+	{
+		$this->setTable('season_zord_view');
+		$this->select(['serieTitle', 'seasonNumber', 'CONCAT(serieSlug,\'/\',seasonNumber) seasonSlugURI']);
+		$this->where('zordSlug', $zordSlug);
+		return $this->findAll();
 	}
 }

@@ -52,7 +52,7 @@ class ZordModel extends Model
 
 	protected function setPublicRecordsCondition($query)
 	{
-		$this->select(['name', 'description', 'slug AS slugURI', 'photo AS photoURI']);
+		$this->select(['name', 'slug slugURI', 'photo photoURI']);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('name', $query['q'], 'both');
@@ -62,14 +62,16 @@ class ZordModel extends Model
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['name', 'description', 'photo AS photoURI']);
+		$this->select(['name', 'description', 'photo photoURI']);
 		$this->where('slug', $slug);
 	}
 
-	protected function addRecordAttributes($actor, $slug)
+	protected function addRecordAttributes($zord, $slug)
 	{
-		$actor->seasons = [];
-		$actor->megazords = [];
+		$seasonZordModel = model('App\Models\SeasonZordModel');
+		$zord->seasons = $seasonZordModel->listByZord($slug);
+		$megazordZordModel = model('App\Models\MegazordZordModel');
+		$zord->megazords = $megazordZordModel->listByZord($slug);
 	}
 
 	public function insertRecord(&$record)

@@ -45,7 +45,7 @@ class ChapterModel extends Model
 	protected function setPublicRecordsCondition($query, $serieSlug, $seasonNumber)
 	{
 		$this->setTable('chapters_view');
-		$this->select(['number', 'title', 'titleSpanish', 'summary', 'CONCAT(serieSlug,\'/\',seasonNumber,\'/\',number) as slugURI']);
+		$this->select(['number', 'title', 'titleSpanish', 'CONCAT(serieSlug,\'/\',seasonNumber,\'/\',number) slugURI']);
 		$this->where('serieSlug', $serieSlug);
 		$this->where('seasonNumber', $seasonNumber);
 		if (isset($query['q']) && !empty($query['q'])) {
@@ -78,5 +78,13 @@ class ChapterModel extends Model
 		}
 
 		return empty($errors) ? true : $errors;
+	}
+
+	public function countBySeason($serieSlug, $seasonNumber)
+	{
+		$this->setTable('chapters_view');
+		$this->where('serieSlug', $serieSlug);
+		$this->where('seasonNumber', $seasonNumber);
+		return $this->countAllResults();
 	}
 }

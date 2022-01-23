@@ -193,4 +193,20 @@ class CastingModel extends Model
 
 		return empty($errors) ? true : $errors;
 	}
+
+	public function listByActor($actorSlug)
+	{
+		$this->setTable('casting_view');
+		$this->select(['serieTitle', 'serieSlug serieSlugURI', 'seasonNumber', 'CONCAT(serieSlug,\'/\',seasonNumber) seasonSlugURI', 'characterName', 'characterSlug characterSlugURI', 'rangerName', 'rangerSlug rangerSlugURI']);
+		$this->where('actorSlug', $actorSlug);
+		return $this->findAll();
+	}
+
+	public function listByCharacter($characterSlug)
+	{
+		$this->setTable('casting_view');
+		$this->select(['serieTitle', 'serieSlug serieSlugURI', 'seasonNumber', 'CONCAT(serieSlug,\'/\',seasonNumber) seasonSlugURI', 'actorName', 'actorSlug characterSlugURI', 'rangerName', 'rangerSlug rangerSlugURI']);
+		$this->where('characterSlug', $characterSlug);
+		return $this->findAll();
+	}
 }

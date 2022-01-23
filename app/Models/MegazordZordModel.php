@@ -7,7 +7,7 @@ use CodeIgniter\Model;
 
 class MegazordZordModel extends Model
 {
-	use ModelTrait{
+	use ModelTrait {
 		insertRecord as insertRecordTrait;
 	}
 
@@ -19,6 +19,8 @@ class MegazordZordModel extends Model
 		'megazordId' => 'required|is_natural_no_zero|exists_id[zords.id]',
 		'zordId' => 'required|is_natural_no_zero|exists_id[zords.id]'
 	];
+
+	protected $returnType = \App\Entities\MegazordZord::class;
 
 	protected function setRecordsCondition($query, $megazordId)
 	{
@@ -74,5 +76,21 @@ class MegazordZordModel extends Model
 		}, $zordsId);
 
 		return $this->insertBatch($megazordZords);
+	}
+
+	public function listByMegazord($megazordSlug)
+	{
+		$this->setTable('megazord_zord_view');
+		$this->select(['zordName', 'zordSlug zordSlugURI']);
+		$this->where('megazordSlug', $megazordSlug);
+		return $this->findAll();
+	}
+
+	public function listByZord($zordSlug)
+	{
+		$this->setTable('megazord_zord_view');
+		$this->select(['megazordName', 'megazordSlug megazordSlugURI']);
+		$this->where('zordSlug', $zordSlug);
+		return $this->findAll();
 	}
 }

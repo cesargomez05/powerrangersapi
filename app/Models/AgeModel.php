@@ -44,7 +44,7 @@ class AgeModel extends Model
 
 	protected function setPublicRecordsCondition($query)
 	{
-		$this->select(['name', 'slug AS slugURI']);
+		$this->select(['name', 'slug slugURI']);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('name', $query['q'], 'both');
@@ -60,7 +60,8 @@ class AgeModel extends Model
 
 	protected function addRecordAttributes($age, $slug)
 	{
-		$age->seasons = [];
+		$seasonModel = model('App\Models\SeasonModel');
+		$age->seasons = $seasonModel->listByAge($slug);
 	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)

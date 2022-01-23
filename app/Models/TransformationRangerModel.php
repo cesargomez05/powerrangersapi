@@ -13,7 +13,7 @@ class TransformationRangerModel extends Model
 
 	protected $table = 'transformation_ranger';
 
-	protected $allowedFields = ['transformationId', 'rangerId', 'name', 'photo'];
+	protected $allowedFields = ['transformationId', 'rangerId', 'name', 'description', 'photo'];
 
 	protected $validationRules = [
 		'transformationId' => 'required|is_natural_no_zero|exists_id[actors.id]',
@@ -21,6 +21,8 @@ class TransformationRangerModel extends Model
 		'name' => 'permit_empty|max_length[100]',
 		'photo' => 'permit_empty|max_length[100]'
 	];
+
+	protected $returnType = \App\Entities\TransformationRanger::class;
 
 	protected function setRecordsCondition($query, $transformationId)
 	{
@@ -64,5 +66,21 @@ class TransformationRangerModel extends Model
 		}
 
 		return $this->insertBatch($rangers);
+	}
+
+	public function listByTransformation($transformationSlug)
+	{
+		$this->setTable('transformation_ranger_view');
+		$this->select(['rangerName', 'rangerSlug rangerSlugURI', 'transformationName', 'photo photoURI']);
+		$this->where('transformationSlug', $transformationSlug);
+		return $this->findAll();
+	}
+
+	public function listByRanger($rangerSlug)
+	{
+		$this->setTable('transformation_ranger_view');
+		$this->select(['transformationName', 'transformationSlug transformationSlugURI', 'photo photoURI']);
+		$this->where('rangerSlug', $rangerSlug);
+		return $this->findAll();
 	}
 }
