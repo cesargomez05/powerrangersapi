@@ -71,7 +71,7 @@ class TransformationRangerModel extends Model
 	public function listByTransformation($transformationSlug)
 	{
 		$this->setTable('transformation_ranger_view');
-		$this->select(['rangerName', 'rangerSlug rangerSlugURI', 'transformationName', 'photo photoURI']);
+		$this->select(['rangerName', 'rangerSlug rangerSlugURI', 'transformationName', 'description', 'photo photoURI']);
 		$this->where('transformationSlug', $transformationSlug);
 		return $this->findAll();
 	}
@@ -79,7 +79,7 @@ class TransformationRangerModel extends Model
 	public function listByRanger($rangerSlug)
 	{
 		$this->setTable('transformation_ranger_view');
-		$this->select(['transformationName', 'transformationSlug transformationSlugURI', 'photo photoURI']);
+		$this->select(['transformationName', 'transformationSlug transformationSlugURI', 'description', 'photo photoURI']);
 		$this->where('rangerSlug', $rangerSlug);
 		return $this->findAll();
 	}
