@@ -52,7 +52,7 @@ class Transformation extends BaseResource
 
 	public function update($id)
 	{
-		$transformation = $this->model->get($id);
+		$transformation = $this->model->get($id)->toArray();
 
 		// Datos de entrada de la petición
 		$postData = $this->request->getPost();

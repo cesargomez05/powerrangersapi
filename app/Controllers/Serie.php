@@ -49,7 +49,7 @@ class Serie extends BaseResource
 
 	public function update($id)
 	{
-		$serie = $this->model->get($id);
+		$serie = $this->model->get($id)->toArray();
 
 		// Datos de entrada de la petición
 		$postData = $this->request->getPost();

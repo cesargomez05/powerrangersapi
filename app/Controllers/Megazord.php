@@ -53,7 +53,7 @@ class Megazord extends BaseResource
 
 	public function update($id)
 	{
-		$megazord = $this->model->get($id);
+		$megazord = $this->model->get($id)->toArray();
 
 		// Datos de entrada de la petición
 		$postData = $this->request->getPost();

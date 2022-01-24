@@ -52,7 +52,7 @@ class Villain extends BaseResource
 
 	public function update($id)
 	{
-		$villain = $this->model->get($id);
+		$villain = $this->model->get($id)->toArray();
 
 		// Datos de entrada de la petición
 		$postData = $this->request->getPost();

@@ -52,7 +52,7 @@ class Ranger extends BaseResource
 
 	public function update($id)
 	{
-		$ranger = $this->model->get($id);
+		$ranger = $this->model->get($id)->toArray();
 
 		// Datos de entrada de la petición
 		$postData = $this->request->getPost();
@@ -63,6 +63,11 @@ class Ranger extends BaseResource
 		if (empty($postData) && empty($postFiles)) {
 			return $this->fail('Please define the data to be recorded');
 		}
+
+		// Se elimina las propiedades asociadas al morpher en la actualización de datos del ranger
+		unset($postData['morpherId']);
+		unset($postData['morpher']);
+		unset($postFiles['morpher']);
 
 		// Se obtiene el tipo de petición que se realiza a la función (PUT o PATCH)
 		$request = service('request');

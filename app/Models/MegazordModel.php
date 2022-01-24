@@ -23,7 +23,7 @@ class MegazordModel extends Model
 		'slug' => 'required_with[name]|max_length[100]',
 		'name' => 'required|max_length[100]',
 		'description' => 'permit_empty',
-		'photo' => 'permit_empty|max_length[100]'
+		'photo' => 'permit_empty|max_length[25]'
 	];
 
 	protected $validationMessages = [

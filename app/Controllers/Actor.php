@@ -50,7 +50,7 @@ class Actor extends BaseResource
 
 	public function update($id)
 	{
-		$actor = $this->model->get($id);
+		$actor = $this->model->get($id)->toArray();
 
 		// Datos de entrada de la petición
 		$postData = $this->request->getPost();

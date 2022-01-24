@@ -47,9 +47,9 @@ class MorpherModel extends Model
 
 	protected function checkNestedRecords($id, &$errors)
 	{
-		$rangerModel = model('App\Models\RangerModel');
-		if ($rangerModel->countByMorpherId($id)) {
-			$errors['ranger'] = 'There are nested ranger records to morpher';
+		$rangerMorpherModel = model('App\Models\RangerMorpherModel');
+		if ($rangerMorpherModel->countByMorpherId($id)) {
+			$errors['ranger_morpher'] = 'There are nested ranger-morpher records to ranger';
 		}
 	}
 
@@ -65,16 +65,14 @@ class MorpherModel extends Model
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['id', 'name', 'description', 'photo photoURI']);
+		$this->select(['name', 'description', 'photo photoURI']);
 		$this->where('slug', $slug);
 	}
 
 	protected function addRecordAttributes($morpher, $slug)
 	{
-		$rangerModel = model('App\Models\RangerModel');
-		$morpher->rangers = $rangerModel->listByMorpher($morpher->id);
-
-		unset($morpher->id);
+		$rangerMorpherModel = model('App\Models\RangerMorpherModel');
+		$morpher->rangers = $rangerMorpherModel->listByMorpher($slug);
 	}
 
 	public function insertRecord(&$record, $subTransaction = false)
@@ -90,13 +88,12 @@ class MorpherModel extends Model
 		}
 
 		if (isset($record['rangersId'])) {
-			$rangersId = explode(',', $record['rangersId']);
+			$rangerMorpherModel = model('App\Models\RangerMorpherModel');
 
-			$rangerModel = model('App\Models\RangerModel');
-			$result = $rangerModel->builder()->whereIn('id', $rangersId)->update(['morpherId' => $record[$this->primaryKey]]);
-			if ($result !== true) {
+			$rangerMorpherResult = $rangerMorpherModel->insertRangerMorpher($record['id'], $record['rangersId']);
+			if ($rangerMorpherResult === false) {
 				$this->db->transRollback();
-				return $rangerModel->errors();
+				return $rangerMorpherModel->errors();
 			}
 		}
 
@@ -128,12 +125,5 @@ class MorpherModel extends Model
 		}
 
 		return empty($errors) ? true : $errors;
-	}
-
-	public function getByRanger($morpherId)
-	{
-		$this->select(['name', 'slug slugURI', 'photo photoURI']);
-		$this->where('id', $morpherId);
-		return $this->first();
 	}
 }

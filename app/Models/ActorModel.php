@@ -18,7 +18,7 @@ class ActorModel extends Model
 		'name' => 'required|max_length[50]',
 		'birthDate' => 'permit_empty|valid_date[Y-m-d]',
 		'deathDate' => 'permit_empty|valid_date[Y-m-d]',
-		'photo' => 'permit_empty|max_length[100]'
+		'photo' => 'permit_empty|max_length[25]'
 	];
 
 	protected $returnType = \App\Entities\Actor::class;

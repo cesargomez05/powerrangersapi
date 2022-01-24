@@ -53,7 +53,7 @@ class Morpher extends BaseResource
 
 	public function update($id)
 	{
-		$morpher = $this->model->get($id);
+		$morpher = $this->model->get($id)->toArray();
 
 		// Datos de entrada de la petición
 		$postData = $this->request->getPost();
@@ -68,6 +68,9 @@ class Morpher extends BaseResource
 		// Se obtiene el tipo de petición que se realiza a la función (PUT o PATCH)
 		$request = service('request');
 		$method = $request->getMethod();
+
+		// Se elimina la lista de rangers en la actualización de información del morpher
+		unset($postData['rangersId']);
 
 		// Se valida los datos de la petición
 		$validateRecord = $this->model->validateRecord($postData, $postFiles, $method, $morpher);

@@ -18,7 +18,7 @@ class CharacterModel extends Model
 		'name' => 'required|max_length[50]',
 		'fullName' => 'permit_empty|max_length[150]',
 		'description' => 'permit_empty',
-		'photo' => 'permit_empty|max_length[100]'
+		'photo' => 'permit_empty|max_length[25]'
 	];
 
 	protected $returnType = \App\Entities\Character::class;

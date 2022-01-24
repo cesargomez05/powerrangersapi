@@ -76,6 +76,12 @@ $routes->group('rangers', ['filter' => 'ranger_filter:ranger'], function ($route
 	$routes->delete('(:segment)', 'Ranger::delete/$1');
 });
 
+$routes->group('rangermorpher', ['filter' => 'ranger_morpher_filter:ranger'], function ($routes) {
+	$routes->get('(:segment)', 'RangerMorpher::show/$1');
+	$routes->post('(:segment)', 'RangerMorpher::create/$1');
+	$routes->delete('(:segment)', 'RangerMorpher::delete/$1');
+});
+
 // Series
 $routes->group('series', ['filter' => 'serie_filter:serie'], function ($routes) {
 	$routes->get('', 'Serie::index');

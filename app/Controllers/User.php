@@ -50,7 +50,7 @@ class User extends BaseResource
 
 	public function update($id)
 	{
-		$user = $this->model->get($id);
+		$user = $this->model->get($id)->toArray();
 
 		// Datos de entrada de la petición
 		$postData = $this->request->getPost();

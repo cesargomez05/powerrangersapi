@@ -52,7 +52,7 @@ class Zord extends BaseResource
 
 	public function update($id)
 	{
-		$zord = $this->model->get($id);
+		$zord = $this->model->get($id)->toArray();
 
 		// Datos de entrada de la petición
 		$postData = $this->request->getPost();

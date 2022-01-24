@@ -36,6 +36,10 @@ class Filters extends BaseConfig
 			\App\Filters\AuthFilter::class,
 			\App\Filters\RangerFilter::class
 		],
+		'ranger_morpher_filter' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\RangerMorpherFilter::class
+		],
 		'serie_filter' => [
 			\App\Filters\AuthFilter::class,
 			\App\Filters\SerieFilter::class

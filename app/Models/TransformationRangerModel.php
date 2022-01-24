@@ -19,7 +19,7 @@ class TransformationRangerModel extends Model
 		'transformationId' => 'required|is_natural_no_zero|exists_id[actors.id]',
 		'rangerId' => 'required|is_natural_no_zero|exists_id[characters.id]',
 		'name' => 'permit_empty|max_length[100]',
-		'photo' => 'permit_empty|max_length[100]'
+		'photo' => 'permit_empty|max_length[25]'
 	];
 
 	protected $returnType = \App\Entities\TransformationRanger::class;

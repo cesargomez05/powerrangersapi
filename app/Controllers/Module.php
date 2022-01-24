@@ -47,7 +47,7 @@ class Module extends BaseResource
 
 	public function update($id)
 	{
-		$module = $this->model->get($id);
+		$module = $this->model->get($id)->toArray();
 
 		// Datos de entrada de la petición
 		$postData = $this->request->getPost();

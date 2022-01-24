@@ -52,7 +52,7 @@ class Arsenal extends BaseResource
 
 	public function update($id)
 	{
-		$arsenalItem = $this->model->get($id);
+		$arsenalItem = $this->model->get($id)->toArray();
 
 		// Datos de entrada de la petición
 		$postData = $this->request->getPost();
