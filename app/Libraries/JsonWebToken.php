@@ -24,8 +24,7 @@ class JsonWebToken
 			"username" => $username
 		);
 
-		$token = JWT::encode($payload, $this->key, $this->alg);
-		return $token;
+		return JWT::encode($payload, $this->key, $this->alg);
 	}
 
 	public function decryptToken($token, &$username)

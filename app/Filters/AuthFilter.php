@@ -103,14 +103,14 @@ class AuthFilter implements FilterInterface
 
 		// Se valida si se definió un nombre de usuario
 		if (!$username) {
-			return AuthFilter::throwError(400, 'The username is required');
+			return self::throwError(ResponseInterface::HTTP_BAD_REQUEST, 'The username is required');
 		}
 
 		// Se consulta el usuario
 		$userModel = new UserModel();
 		$user = $userModel->checkUser($username, $password);
 		if (!$user) {
-			return AuthFilter::throwError(401, 'Invalid credentials');
+			return self::throwError(ResponseInterface::HTTP_UNAUTHORIZED, 'Invalid credentials');
 		}
 	}
 
@@ -120,7 +120,7 @@ class AuthFilter implements FilterInterface
 			$jsonWebToken = new JsonWebToken();
 			$jsonWebToken->decryptToken($token, $username);
 		} catch (\Exception $ex) {
-			AuthFilter::throwError(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR, 'Invalid JWT value');
+			self::throwError(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR, 'Invalid JWT value');
 		}
 	}
 
