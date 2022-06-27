@@ -68,12 +68,16 @@ class AuthFilter implements FilterInterface
 				if (isset($result)) {
 					return $result;
 				}
-			} elseif ((bool) preg_match('/^Bearer/', $_SERVER['HTTP_AUTHORIZATION'])) {
-				// Se valida la autenticación con OAuth2
-				self::validateOAuth2Authentication($username);
-			} else {
+			} elseif ((bool) preg_match('/^Bearer (.+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
 				// Se valida la autenticación con JWT (JSON Web Token)
-				self::validateJWTAuthentication($_SERVER['HTTP_AUTHORIZATION'], $username);
+				$result = self::validateJWTAuthentication($matches[1], $username);
+				if (isset($result)) {
+					return $result;
+				}
+			}
+
+			if (!isset($username)) {
+				return self::throwError(ResponseInterface::HTTP_UNAUTHORIZED, 'Access not authorized');
 			}
 
 			// Se consulta los permisos asociados al usuario autenticado y recurso
@@ -120,7 +124,7 @@ class AuthFilter implements FilterInterface
 			$jsonWebToken = new JsonWebToken();
 			$jsonWebToken->decryptToken($token, $username);
 		} catch (\Exception $ex) {
-			self::throwError(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR, 'Invalid JWT value');
+			return self::throwError(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR, 'Invalid JWT value');
 		}
 	}
 

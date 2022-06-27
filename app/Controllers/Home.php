@@ -26,7 +26,10 @@ class Home extends BaseController
 	public function getJwt()
 	{
 		// Se ejecuta la autenticación Basic para validar el usuario que se autentica
-		AuthFilter::validateBasicAuthentication($username);
+		$result = AuthFilter::validateBasicAuthentication($username);
+		if (isset($result)) {
+			return $result;
+		}
 
 		// Se genera el token de acceso para el usuario autenticado
 		$jsonWebToken = new JsonWebToken();

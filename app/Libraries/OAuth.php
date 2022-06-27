@@ -20,19 +20,15 @@ class OAuth
 			'password' => getenv('database.default.password')
 		]);
 		$this->server = new \OAuth2\Server($this->storage);
-		// Usuario y contraseña
+		$this->server->addGrantType(new \OAuth2\GrantType\ClientCredentials($this->storage, ['allow_credentials_in_request_body' => false]));
+		$this->server->addGrantType(new \OAuth2\GrantType\AuthorizationCode($this->storage));
 		$this->server->addGrantType(new \OAuth2\GrantType\UserCredentials($this->storage));
-		//$this->server->addGrantType(new \OAuth2\GrantType\RefreshToken($this->storage));
-		//$this->server->addGrantType(new \OAuth2\GrantType\ClientCredentials($this->storage));
+		$this->server->addGrantType(new \OAuth2\GrantType\RefreshToken($this->storage, ['always_issue_new_refresh_token' => true]));
 	}
 
 	public function generateOAuth2(&$code, &$body)
 	{
-		$request = new Request();
-
-		$respond = $this->server->handleTokenRequest(
-			$request->createFromGlobals()
-		);
+		$respond = $this->server->handleTokenRequest(Request::createFromGlobals());
 
 		$code = $respond->getStatusCode();
 		$body = $respond->getResponseBody();

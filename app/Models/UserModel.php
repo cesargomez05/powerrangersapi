@@ -172,7 +172,7 @@ class UserModel extends Model
 		// Se ejecuta la consulta y se valida si esta retornó algun resultado
 		$query = $builder->get();
 		$row = $query->getRow();
-		if ($row !== NULL && password_verify($password, $row->password)) {
+		if ($row !== NULL && sha1($password) == $row->password) {
 			return $row;
 		}
 		return false;
