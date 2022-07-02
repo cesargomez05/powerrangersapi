@@ -1,5 +1,5 @@
 RewriteEngine On
-RewriteBase /sisgo
+RewriteBase /public
 #RewriteBase /
 #RewriteCond $1 !^(index\.php|assets|plugins|user_guide|robots|license|w3layouts-License\.txt)
 #RewriteRule ^(.*)$ ./index.php?/$1 [L]
