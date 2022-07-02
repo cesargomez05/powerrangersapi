@@ -1,0 +1,13 @@
+RewriteEngine On
+RewriteBase /sisgo
+#RewriteBase /
+#RewriteCond $1 !^(index\.php|assets|plugins|user_guide|robots|license|w3layouts-License\.txt)
+#RewriteRule ^(.*)$ ./index.php?/$1 [L]
+
+# Configuración para especificar caché de navegador
+<IfModule mod_expires.c>
+<filesmatch "\.(jpg|JPG|gif|GIF|png|PNG|css|js|woff)$">
+ExpiresActive on
+ExpiresDefault "access plus 10 day"
+</filesmatch>
+</IfModule>
