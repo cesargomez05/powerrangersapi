@@ -36,7 +36,7 @@ class AgeFilter implements FilterInterface
 
 		$exists = $model->check($ageId);
 		if (!$exists) {
-			return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Actor not found']);
+			return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Age not found']);
 		}
 	}
 }
