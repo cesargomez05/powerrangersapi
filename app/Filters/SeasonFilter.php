@@ -2,25 +2,14 @@
 
 namespace App\Filters;
 
+use App\Traits\FilterTrait;
 use CodeIgniter\Filters\FilterInterface;
-use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
 
 class SeasonFilter implements FilterInterface
 {
-	public function before(RequestInterface $request, $arguments = null)
-	{
-		$uri = $request->getUri();
-		$segments = $uri->getSegments();
-		array_shift($segments);
-		return call_user_func_array([$this, 'checkRecord'], $segments);
-	}
-
-	public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
-	{
-		// Not apply action after filter
-	}
+	use FilterTrait;
 
 	public static function checkRecord($serieId, $number = null)
 	{
@@ -29,9 +18,11 @@ class SeasonFilter implements FilterInterface
 			return $serieValidation;
 		}
 
+		$model = model('App\Models\SeasonModel');
+		$model->setPublic(self::isPublic());
+
 		if (isset($number)) {
 			$response = Services::response();
-			$model = model('App\Models\SeasonModel');
 
 			$validationId = $model->validateId($number, 'number', 'Season number');
 			if ($validationId !== true) {

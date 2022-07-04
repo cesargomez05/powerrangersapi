@@ -2,41 +2,34 @@
 
 namespace App\Filters;
 
+use App\Traits\FilterTrait;
 use CodeIgniter\Filters\FilterInterface;
-use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
 
 class ActorFilter implements FilterInterface
 {
-	public function before(RequestInterface $request, $arguments = null)
+	use FilterTrait;
+
+	public static function checkRecord($actorId = null)
 	{
-		$uri = $request->getUri();
-		$actorId = $uri->getSegment(2);
+		$isPublic = self::isPublic();
+
+		$model = model('App\Models\ActorModel');
+		$model->setPublic($isPublic);
 
 		if (!empty($actorId)) {
-			return self::checkRecord($actorId);
-		}
-	}
+			$response = Services::response();
 
-	public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
-	{
-		// Not apply action after filter
-	}
+			$validationId = $model->validateId($actorId, $isPublic ? 'actorSlug' : 'actorId', $isPublic ? 'Actor slug' : 'Actor id');
+			if ($validationId !== true) {
+				return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
+			}
 
-	public static function checkRecord($actorId)
-	{
-		$response = Services::response();
-		$model = model('App\Models\ActorModel');
-
-		$validationId = $model->validateId($actorId, 'actorId', 'Actor id');
-		if ($validationId !== true) {
-			return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
-		}
-
-		$exists = $model->check($actorId);
-		if (!$exists) {
-			return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Actor not found']);
+			$exists = $model->check($actorId);
+			if (!$exists) {
+				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Actor not found']);
+			}
 		}
 	}
 }

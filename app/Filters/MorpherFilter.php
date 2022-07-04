@@ -2,41 +2,34 @@
 
 namespace App\Filters;
 
+use App\Traits\FilterTrait;
 use CodeIgniter\Filters\FilterInterface;
-use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
 
 class MorpherFilter implements FilterInterface
 {
-	public function before(RequestInterface $request, $arguments = null)
+	use FilterTrait;
+
+	public static function checkRecord($morpherId = null)
 	{
-		$uri = $request->getUri();
-		$morpherId = $uri->getSegment(2);
+		$isPublic = self::isPublic();
+
+		$model = model('App\Models\MorpherModel');
+		$model->setPublic($isPublic);
 
 		if (!empty($morpherId)) {
-			return self::checkRecord($morpherId);
-		}
-	}
+			$response = Services::response();
 
-	public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
-	{
-		// Not apply action after filter
-	}
+			$validationId = $model->validateId($morpherId, 'morpherId', 'Morpher id');
+			if ($validationId !== true) {
+				return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
+			}
 
-	public static function checkRecord($morpherId)
-	{
-		$response = Services::response();
-		$model = model('App\Models\MorpherModel');
-
-		$validationId = $model->validateId($morpherId, 'morpherId', 'Morpher id');
-		if ($validationId !== true) {
-			return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['error' => $validationId]);
-		}
-
-		$exists = $model->check($morpherId);
-		if (!$exists) {
-			return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Morpher not found']);
+			$exists = $model->check($morpherId);
+			if (!$exists) {
+				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Morpher not found']);
+			}
 		}
 	}
 }

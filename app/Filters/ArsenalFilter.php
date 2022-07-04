@@ -2,41 +2,34 @@
 
 namespace App\Filters;
 
+use App\Traits\FilterTrait;
 use CodeIgniter\Filters\FilterInterface;
-use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
 
 class ArsenalFilter implements FilterInterface
 {
-	public function before(RequestInterface $request, $arguments = null)
+	use FilterTrait;
+
+	public static function checkRecord($arsenalId = null)
 	{
-		$uri = $request->getUri();
-		$arsenalId = $uri->getSegment(2);
+		$isPublic = self::isPublic();
+
+		$model = model('App\Models\ArsenalModel');
+		$model->setPublic($isPublic);
 
 		if (!empty($arsenalId)) {
-			return self::checkRecord($arsenalId);
-		}
-	}
+			$response = Services::response();
 
-	public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
-	{
-		// Not apply action after filter
-	}
+			$validationId = $model->validateId($arsenalId, $isPublic ? 'arsenalSlug' : 'arsenalId', $isPublic ? 'Arsenal slug' : 'Arsenal id');
+			if ($validationId !== true) {
+				return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
+			}
 
-	public static function checkRecord($arsenalId)
-	{
-		$response = Services::response();
-		$model = model('App\Models\ArsenalModel');
-
-		$validationId = $model->validateId($arsenalId, 'arsenalId', 'Arsenal id');
-		if ($validationId !== true) {
-			return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['error' => $validationId]);
-		}
-
-		$exists = $model->check($arsenalId);
-		if (!$exists) {
-			return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Arsenal not found']);
+			$exists = $model->check($arsenalId);
+			if (!$exists) {
+				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Arsenal not found']);
+			}
 		}
 	}
 }

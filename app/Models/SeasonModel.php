@@ -85,7 +85,7 @@ class SeasonModel extends Model
 	protected function setPublicRecordCondition($serieSlug, $number)
 	{
 		$this->setTable('seasons_view');
-		$this->select(['number', 'year', 'title', 'ageName', 'synopsis', 'CONCAT(serieSlug,\'/\',number) chapterSlugURI','CONCAT(serieSlug,\'/\',number) castingSlugURI']);
+		$this->select(['number', 'year', 'title', 'ageName', 'synopsis', 'CONCAT(serieSlug,\'/\',number) chapterSlugURI', 'CONCAT(serieSlug,\'/\',number) castingSlugURI', 'CONCAT(serieSlug,\'/\',number) teamupSlugURI']);
 		$this->where('serieSlug', $serieSlug);
 		$this->where('number', $number);
 	}

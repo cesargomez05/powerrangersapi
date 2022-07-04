@@ -2,41 +2,34 @@
 
 namespace App\Filters;
 
+use App\Traits\FilterTrait;
 use CodeIgniter\Filters\FilterInterface;
-use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
 
 class SerieFilter implements FilterInterface
 {
-	public function before(RequestInterface $request, $arguments = null)
+	use FilterTrait;
+
+	public static function checkRecord($serieId = null)
 	{
-		$uri = $request->getUri();
-		$serieId = $uri->getSegment(2);
+		$isPublic = self::isPublic();
+
+		$model = model('App\Models\SerieModel');
+		$model->setPublic($isPublic);
 
 		if (!empty($serieId)) {
-			return self::checkRecord($serieId);
-		}
-	}
+			$response = Services::response();
 
-	public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
-	{
-		// Not apply action after filter
-	}
+			$validationId = $model->validateId($serieId, $isPublic ? 'serieSlug' : 'serieId', $isPublic ? 'Serie slug' : 'Serie id');
+			if ($validationId !== true) {
+				return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
+			}
 
-	public static function checkRecord($serieId)
-	{
-		$response = Services::response();
-		$model = model('App\Models\SerieModel');
-
-		$validationId = $model->validateId($serieId, 'serieId', 'Serie id');
-		if ($validationId !== true) {
-			return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
-		}
-
-		$exists = $model->check($serieId);
-		if (!$exists) {
-			return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Serie not found']);
+			$exists = $model->check($serieId);
+			if (!$exists) {
+				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Serie not found']);
+			}
 		}
 	}
 }

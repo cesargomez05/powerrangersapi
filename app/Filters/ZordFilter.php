@@ -2,41 +2,34 @@
 
 namespace App\Filters;
 
+use App\Traits\FilterTrait;
 use CodeIgniter\Filters\FilterInterface;
-use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
 
 class ZordFilter implements FilterInterface
 {
-	public function before(RequestInterface $request, $arguments = null)
+	use FilterTrait;
+
+	public static function checkRecord($zordId = null)
 	{
-		$uri = $request->getUri();
-		$zordId = $uri->getSegment(2);
+		$isPublic = self::isPublic();
+
+		$model = model('App\Models\ZordModel');
+		$model->setPublic($isPublic);
 
 		if (!empty($zordId)) {
-			return self::checkRecord($zordId);
-		}
-	}
+			$response = Services::response();
 
-	public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
-	{
-		// Not apply action after filter
-	}
+			$validationId = $model->validateId($zordId, $isPublic ? 'zordSlug' : 'zordId', $isPublic ? 'Zord slug' : 'Zord id');
+			if ($validationId !== true) {
+				return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
+			}
 
-	public static function checkRecord($zordId)
-	{
-		$response = Services::response();
-		$model = model('App\Models\ZordModel');
-
-		$validationId = $model->validateId($zordId, 'zordId', 'Zord id');
-		if ($validationId !== true) {
-			return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
-		}
-
-		$exists = $model->check($zordId);
-		if (!$exists) {
-			return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Zord not found']);
+			$exists = $model->check($zordId);
+			if (!$exists) {
+				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Zord not found']);
+			}
 		}
 	}
 }

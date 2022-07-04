@@ -2,41 +2,34 @@
 
 namespace App\Filters;
 
+use App\Traits\FilterTrait;
 use CodeIgniter\Filters\FilterInterface;
-use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
 
 class CharacterFilter implements FilterInterface
 {
-	public function before(RequestInterface $request, $arguments = null)
+	use FilterTrait;
+
+	public static function checkRecord($characterId = null)
 	{
-		$uri = $request->getUri();
-		$characterId = $uri->getSegment(2);
+		$isPublic = self::isPublic();
+
+		$model = model('App\Models\CharacterModel');
+		$model->setPublic($isPublic);
 
 		if (!empty($characterId)) {
-			return self::checkRecord($characterId);
-		}
-	}
+			$response = Services::response();
 
-	public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
-	{
-		// Not apply action after filter
-	}
+			$validationId = $model->validateId($characterId, $isPublic ? 'characterSlug' : 'characterId', $isPublic ? 'Character slug' : 'Character id');
+			if ($validationId !== true) {
+				return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
+			}
 
-	public static function checkRecord($characterId)
-	{
-		$response = Services::response();
-		$model = model('App\Models\CharacterModel');
-
-		$validationId = $model->validateId($characterId, 'characterId', 'Character id');
-		if ($validationId !== true) {
-			return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
-		}
-
-		$exists = $model->check($characterId);
-		if (!$exists) {
-			return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Character not found']);
+			$exists = $model->check($characterId);
+			if (!$exists) {
+				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Character not found']);
+			}
 		}
 	}
 }

@@ -2,41 +2,34 @@
 
 namespace App\Filters;
 
+use App\Traits\FilterTrait;
 use CodeIgniter\Filters\FilterInterface;
-use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
 
 class RangerFilter implements FilterInterface
 {
-	public function before(RequestInterface $request, $arguments = null)
+	use FilterTrait;
+
+	public static function checkRecord($rangerId = null)
 	{
-		$uri = $request->getUri();
-		$rangerId = $uri->getSegment(2);
+		$isPublic = self::isPublic();
+
+		$model = model('App\Models\RangerModel');
+		$model->setPublic($isPublic);
 
 		if (!empty($rangerId)) {
-			return self::checkRecord($rangerId);
-		}
-	}
+			$response = Services::response();
 
-	public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
-	{
-		// Not apply action after filter
-	}
+			$validationId = $model->validateId($rangerId, $isPublic ? 'rangerSlug' : 'rangerId', $isPublic ? 'Ranger slug' : 'Ranger id');
+			if ($validationId !== true) {
+				return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
+			}
 
-	public static function checkRecord($rangerId)
-	{
-		$response = Services::response();
-		$model = model('App\Models\RangerModel');
-
-		$validationId = $model->validateId($rangerId, 'rangerId', 'Ranger id');
-		if ($validationId !== true) {
-			return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
-		}
-
-		$exists = $model->check($rangerId);
-		if (!$exists) {
-			return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Ranger not found']);
+			$exists = $model->check($rangerId);
+			if (!$exists) {
+				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Ranger not found']);
+			}
 		}
 	}
 }

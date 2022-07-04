@@ -18,13 +18,14 @@ class AuthFilter implements FilterInterface
 	public function before(RequestInterface $request, $arguments = null)
 	{
 		// Se valida el método con el que es invocado el API Rest, para saber la acción a validar
+		$method = $request->getMethod();
 		$permission = [
 			'get' => 'read',
 			'post' => 'create',
 			'put' => 'update',
 			'patch' => 'update',
 			'delete' => 'delete'
-		][$request->getMethod()];
+		][$method];
 		if (!isset($permission)) {
 			return self::throwError(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR, 'Method not available');
 		}
@@ -56,34 +57,46 @@ class AuthFilter implements FilterInterface
 				return self::throwError(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR, 'Resource not found');
 			}
 
-			// Se valida que exista algún tipo de autorización
-			if (!isset($_SERVER['HTTP_AUTHORIZATION'])) {
-				return self::throwError(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR, 'Authorization type not found');
-			}
+			// Validación de si se definió (true) o no (false) un tipo de autenticación
+			$hasAuthenticationOption = isset($_SERVER['HTTP_AUTHORIZATION']);
 
-			// Se valida a través de la propiedad '$_SERVER['HTTP_AUTHORIZATION']' el tipo de autorización
-			if ((bool) preg_match('/^Basic/', $_SERVER['HTTP_AUTHORIZATION'])) {
-				// Se valida la autenticación Basic (usuario y contraseña)
-				$result = self::validateBasicAuthentication($username);
-				if (isset($result)) {
-					return $result;
+			$session = Services::session();
+			$session->remove('type');
+
+			// Se valida si se definió un tipo de autenticación
+			if ($hasAuthenticationOption) {
+				// Se valida a través de la propiedad '$_SERVER['HTTP_AUTHORIZATION']' el tipo de autorización
+				if ((bool) preg_match('/^Basic/', $_SERVER['HTTP_AUTHORIZATION'])) {
+					// Se valida la autenticación Basic (usuario y contraseña)
+					$result = self::validateBasicAuthentication($username);
+					if (isset($result)) {
+						return $result;
+					}
+				} elseif ((bool) preg_match('/^Bearer (.+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
+					// Se valida la autenticación con JWT (JSON Web Token)
+					$result = self::validateJWTAuthentication($matches[1], $username);
+					if (isset($result)) {
+						return $result;
+					}
 				}
-			} elseif ((bool) preg_match('/^Bearer (.+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
-				// Se valida la autenticación con JWT (JSON Web Token)
-				$result = self::validateJWTAuthentication($matches[1], $username);
-				if (isset($result)) {
-					return $result;
+
+				if (!isset($username)) {
+					return self::throwError(ResponseInterface::HTTP_UNAUTHORIZED, 'Access not authorized');
 				}
-			}
 
-			if (!isset($username)) {
-				return self::throwError(ResponseInterface::HTTP_UNAUTHORIZED, 'Access not authorized');
-			}
+				// Se consulta los permisos asociados al usuario autenticado y recurso
+				$permissionModel = new PermissionModel();
+				if (!$permissionModel->checkPermissions($username, $moduleId, $permission)) {
+					return self::throwError(ResponseInterface::HTTP_FORBIDDEN, 'Cannot have permissions for ' . $permission . ' records in this resource');
+				}
+			} else {
+				// Se verifica si el tipo de la petición no corresponde a un tipo GET
+				if ($method !== 'get') {
+					return self::throwError(ResponseInterface::HTTP_UNAUTHORIZED, 'Action not authorized');
+				}
 
-			// Se consulta los permisos asociados al usuario autenticado y recurso
-			$permissionModel = new PermissionModel();
-			if (!$permissionModel->checkPermissions($username, $moduleId, $permission)) {
-				return self::throwError(ResponseInterface::HTTP_FORBIDDEN, 'Cannot have permissions for ' . $permission . ' records in this resource');
+				$session->set(['type' => 'public']);
+				$session->markAsFlashdata('type');
 			}
 		}
 	}
@@ -93,13 +106,13 @@ class AuthFilter implements FilterInterface
 		// Not apply action after filter
 	}
 
-	public static function validateOAuth2Authentication(&$username)
+	protected static function validateOAuth2Authentication(&$username)
 	{
 		$oauth = new OAuth();
 		$oauth->validateOAuth2($username);
 	}
 
-	public static function validateBasicAuthentication(&$username)
+	protected static function validateBasicAuthentication(&$username)
 	{
 		// Usuario y contraseña de autenticación
 		$username = isset($_SERVER['PHP_AUTH_USER']) ? $_SERVER['PHP_AUTH_USER'] : '';
@@ -118,7 +131,7 @@ class AuthFilter implements FilterInterface
 		}
 	}
 
-	public static function validateJWTAuthentication($token, &$username)
+	protected static function validateJWTAuthentication($token, &$username)
 	{
 		try {
 			$jsonWebToken = new JsonWebToken();

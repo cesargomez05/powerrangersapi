@@ -41,6 +41,13 @@ class APIEntity extends Entity
 		}
 	}
 
+	public function getTeamupSlugURI()
+	{
+		if (isset($this->attributes['teamupSlugURI']) && strlen($this->attributes['teamupSlugURI'])) {
+			return base_url('api/teamup/' . $this->attributes['castingSlugURI']);
+		}
+	}
+
 	public function getRangerSlugURI()
 	{
 		if (isset($this->attributes['rangerSlugURI']) && strlen($this->attributes['rangerSlugURI'])) {

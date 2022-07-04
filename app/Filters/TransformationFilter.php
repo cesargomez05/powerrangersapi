@@ -2,41 +2,34 @@
 
 namespace App\Filters;
 
+use App\Traits\FilterTrait;
 use CodeIgniter\Filters\FilterInterface;
-use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Services;
 
 class TransformationFilter implements FilterInterface
 {
-	public function before(RequestInterface $request, $arguments = null)
+	use FilterTrait;
+
+	public static function checkRecord($transformationId = null)
 	{
-		$uri = $request->getUri();
-		$transformationId = $uri->getSegment(2);
+		$isPublic = self::isPublic();
+
+		$model = model('App\Models\TransformationModel');
+		$model->setPublic($isPublic);
 
 		if (!empty($transformationId)) {
-			return self::checkRecord($transformationId);
-		}
-	}
+			$response = Services::response();
 
-	public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
-	{
-		// Not apply action after filter
-	}
+			$validationId = $model->validateId($transformationId, 'transformationId', 'Transformation id');
+			if ($validationId !== true) {
+				return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
+			}
 
-	public static function checkRecord($transformationId)
-	{
-		$response = Services::response();
-		$model = model('App\Models\TransformationModel');
-
-		$validationId = $model->validateId($transformationId, 'transformationId', 'Transformation id');
-		if ($validationId !== true) {
-			return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['error' => $validationId]);
-		}
-
-		$exists = $model->check($transformationId);
-		if (!$exists) {
-			return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Transformation not found']);
+			$exists = $model->check($transformationId);
+			if (!$exists) {
+				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Transformation not found']);
+			}
 		}
 	}
 }

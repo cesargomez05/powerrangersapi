@@ -4,6 +4,13 @@ namespace App\Traits;
 
 trait ModelTrait
 {
+	protected $isPublic;
+
+	public function setPublic($isPublic)
+	{
+		$this->isPublic = $isPublic;
+	}
+
 	/**
 	 * Obtiene la lista de registros.
 	 * @param array $query Parámetros de consulta de los registros.
@@ -11,23 +18,33 @@ trait ModelTrait
 	 */
 	public function list($query, ...$ids)
 	{
-		if (method_exists($this, 'setRecordsCondition')) {
+		$methodName = $this->isPublic ? 'setPublicRecordsCondition' : 'setRecordsCondition';
+		if (method_exists($this, $methodName)) {
 			array_unshift($ids, $query);
-			call_user_func_array(array($this, "setRecordsCondition"), $ids);
+			call_user_func_array(array($this, $methodName), $ids);
 		}
 		return $this->getResponse($query);
 	}
 
 	public function check(...$ids)
 	{
-		call_user_func_array(array($this, "setRecordCondition"), $ids);
+		$methodName = $this->isPublic ? 'setPublicRecordCondition' : 'setRecordCondition';
+		call_user_func_array(array($this, $methodName), $ids);
 		return $this->countAllResults() > 0;
 	}
 
 	public function get(...$ids)
 	{
-		call_user_func_array(array($this, "setRecordCondition"), $ids);
-		return $this->first();
+		$methodName = $this->isPublic ? 'setPublicRecordCondition' : 'setRecordCondition';
+		call_user_func_array(array($this, $methodName), $ids);
+
+		$record = $this->first();
+
+		if ($this->isPublic && isset($record) && method_exists($this, 'addRecordAttributes')) {
+			call_user_func_array(array($this, "addRecordAttributes"), array_merge([&$record], $ids));
+		}
+
+		return $record;
 	}
 
 	public function insertRecord(&$record)
@@ -71,25 +88,6 @@ trait ModelTrait
 		return true;
 	}
 
-	public function listPublic($query, ...$slugs)
-	{
-		if (method_exists($this, 'setPublicRecordsCondition')) {
-			array_unshift($slugs, $query);
-			call_user_func_array(array($this, "setPublicRecordsCondition"), $slugs);
-		}
-		return $this->getResponse($query);
-	}
-
-	public function getPublic(...$slugs)
-	{
-		call_user_func_array(array($this, "setPublicRecordCondition"), $slugs);
-		$record = $this->first();
-		if (isset($record) && method_exists($this, 'addRecordAttributes')) {
-			call_user_func_array(array($this, "addRecordAttributes"), array_merge([&$record], $slugs));
-		}
-		return $record;
-	}
-
 	public function validateId($id, $property = 'id', $label = 'Id')
 	{
 		$validation = \Config\Services::validation(null, false);
@@ -103,7 +101,7 @@ trait ModelTrait
 
 	public function getRulesId()
 	{
-		return $this->rulesId ?? 'required|is_natural_no_zero';
+		return $this->isPublic ? 'required|regex_match[[a-zA-Z0-9_]+]' : $this->rulesId ?? 'required|is_natural_no_zero';
 	}
 
 	public function countByActorId($actorId): bool
