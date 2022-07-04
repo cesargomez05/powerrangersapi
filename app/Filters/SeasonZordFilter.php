@@ -13,7 +13,7 @@ class SeasonZordFilter implements FilterInterface
 
 	public static function checkRecord($serieId, $seasonNumber, $zordId = null)
 	{
-		$validation = SeasonFilter::checkRecord($serieId, $seasonNumber);
+		$validation = SeasonFilter::checkRecord($serieId, $seasonNumber, 'Season');
 		if (isset($validation)) {
 			return $validation;
 		}
@@ -22,7 +22,7 @@ class SeasonZordFilter implements FilterInterface
 		$model->setPublic(self::isPublic());
 
 		if (isset($zordId)) {
-			$validation = ZordFilter::checkRecord($zordId);
+			$validation = ZordFilter::checkRecord($zordId, 'Zord');
 			if (isset($validation)) {
 				return $validation;
 			}

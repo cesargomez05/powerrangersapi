@@ -11,9 +11,9 @@ class SeasonFilter implements FilterInterface
 {
 	use FilterTrait;
 
-	public static function checkRecord($serieId, $number = null)
+	public static function checkRecord($serieId, $number = null, $module = null)
 	{
-		$serieValidation = SerieFilter::checkRecord($serieId);
+		$serieValidation = SerieFilter::checkRecord($serieId, 'Serie');
 		if (isset($serieValidation)) {
 			return $serieValidation;
 		}
@@ -24,7 +24,7 @@ class SeasonFilter implements FilterInterface
 		if (isset($number)) {
 			$response = Services::response();
 
-			$validationId = $model->validateId($number, 'number', 'Season number');
+			$validationId = $model->validateId($number, $module, 'Number', 'Number');
 			if ($validationId !== true) {
 				return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
 			}

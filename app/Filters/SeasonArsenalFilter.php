@@ -13,7 +13,7 @@ class SeasonArsenalFilter implements FilterInterface
 
 	public static function checkRecord($serieId, $seasonNumber, $arsenalId = null)
 	{
-		$validation = SeasonFilter::checkRecord($serieId, $seasonNumber);
+		$validation = SeasonFilter::checkRecord($serieId, $seasonNumber, 'Season');
 		if (isset($validation)) {
 			return $validation;
 		}
@@ -22,7 +22,7 @@ class SeasonArsenalFilter implements FilterInterface
 		$model->setPublic(self::isPublic());
 
 		if (isset($arsenalId)) {
-			$validation = ArsenalFilter::checkRecord($arsenalId);
+			$validation = ArsenalFilter::checkRecord($arsenalId, 'Arsenal');
 			if (isset($validation)) {
 				return $validation;
 			}

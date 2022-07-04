@@ -9,7 +9,6 @@ class SeasonModel extends Model
 {
 	use ModelTrait {
 		insertRecord as insertRecordTrait;
-		validateId as public validateIdTrait;
 	}
 
 	protected $table = 'seasons';

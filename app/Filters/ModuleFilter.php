@@ -11,17 +11,15 @@ class ModuleFilter implements FilterInterface
 {
 	use FilterTrait;
 
-	public static function checkRecord($moduleId = null)
+	public static function checkRecord($moduleId = null, $module = null)
 	{
-		$isPublic = self::isPublic();
-
 		$model = model('App\Models\ModuleModel');
-		$model->setPublic($isPublic);
+		$model->setPublic(self::isPublic());
 
 		if (!empty($moduleId)) {
 			$response = Services::response();
 
-			$validationId = $model->validateId($moduleId, 'moduleId', 'Module id');
+			$validationId = $model->validateId($moduleId, $module);
 			if ($validationId !== true) {
 				return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
 			}

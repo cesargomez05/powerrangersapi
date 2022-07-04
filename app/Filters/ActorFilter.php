@@ -11,17 +11,15 @@ class ActorFilter implements FilterInterface
 {
 	use FilterTrait;
 
-	public static function checkRecord($actorId = null)
+	public static function checkRecord($actorId = null, $module = null)
 	{
-		$isPublic = self::isPublic();
-
 		$model = model('App\Models\ActorModel');
-		$model->setPublic($isPublic);
+		$model->setPublic(self::isPublic());
 
 		if (!empty($actorId)) {
 			$response = Services::response();
 
-			$validationId = $model->validateId($actorId, $isPublic ? 'actorSlug' : 'actorId', $isPublic ? 'Actor slug' : 'Actor id');
+			$validationId = $model->validateId($actorId, $module);
 			if ($validationId !== true) {
 				return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
 			}

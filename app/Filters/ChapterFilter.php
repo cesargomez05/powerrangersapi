@@ -13,7 +13,7 @@ class ChapterFilter implements FilterInterface
 
 	public static function checkRecord($serieId, $seasonNumber, $number = null)
 	{
-		$seasonValidation = SeasonFilter::checkRecord($serieId, $seasonNumber);
+		$seasonValidation = SeasonFilter::checkRecord($serieId, $seasonNumber, 'Season');
 		if (isset($seasonValidation)) {
 			return $seasonValidation;
 		}
@@ -24,7 +24,7 @@ class ChapterFilter implements FilterInterface
 		if (isset($number)) {
 			$response = Services::response();
 
-			$validationId = $model->validateId($number, 'number', 'Chapter number');
+			$validationId = $model->validateId($number, null, 'Number', 'Number');
 			if ($validationId !== true) {
 				return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
 			}

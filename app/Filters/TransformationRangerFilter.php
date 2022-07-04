@@ -13,7 +13,7 @@ class TransformationRangerFilter implements FilterInterface
 
 	public static function checkRecord($transformationId, $rangerId = null)
 	{
-		$validation = TransformationFilter::checkRecord($transformationId);
+		$validation = TransformationFilter::checkRecord($transformationId, 'Transformation');
 		if (isset($validation)) {
 			return $validation;
 		}
@@ -22,7 +22,7 @@ class TransformationRangerFilter implements FilterInterface
 		$model->setPublic(self::isPublic());
 
 		if (isset($rangerId)) {
-			$validation = RangerFilter::checkRecord($rangerId);
+			$validation = RangerFilter::checkRecord($rangerId, 'Ranger');
 			if (isset($validation)) {
 				return $validation;
 			}

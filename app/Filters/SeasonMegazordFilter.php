@@ -13,7 +13,7 @@ class SeasonMegazordFilter implements FilterInterface
 
 	public static function checkRecord($serieId, $seasonNumber, $megazordId = null)
 	{
-		$validation = SeasonFilter::checkRecord($serieId, $seasonNumber);
+		$validation = SeasonFilter::checkRecord($serieId, $seasonNumber, 'Season');
 		if (isset($validation)) {
 			return $validation;
 		}
@@ -22,7 +22,7 @@ class SeasonMegazordFilter implements FilterInterface
 		$model->setPublic(self::isPublic());
 
 		if (isset($megazordId)) {
-			$validation = MegazordFilter::checkRecord($megazordId);
+			$validation = MegazordFilter::checkRecord($megazordId, 'Megazord');
 			if (isset($validation)) {
 				return $validation;
 			}

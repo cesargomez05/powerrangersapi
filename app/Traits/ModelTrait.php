@@ -88,8 +88,16 @@ trait ModelTrait
 		return true;
 	}
 
-	public function validateId($id, $property = 'id', $label = 'Id')
+	public function validateId($id, $module = '', $propertyKey = 'Id', $publicPropertyKey = 'Slug')
 	{
+		if ($module) {
+			$property = strtolower($module) . ($this->isPublic ? $publicPropertyKey : $propertyKey);
+		} else {
+			$property = strtolower($this->isPublic ? $publicPropertyKey : $propertyKey);
+		}
+
+		$label = strtolower(($module ? $module . ' ' : '') . ($this->isPublic ? $publicPropertyKey : $propertyKey));
+
 		$validation = \Config\Services::validation(null, false);
 		$validation->setRule($property, $label, $this->getRulesId());
 		if ($validation->run([$property => $id])) {
@@ -101,7 +109,7 @@ trait ModelTrait
 
 	public function getRulesId()
 	{
-		return $this->isPublic ? 'required|regex_match[[a-zA-Z0-9_]+]' : $this->rulesId ?? 'required|is_natural_no_zero';
+		return $this->isPublic ? 'required|regex_match[^[a-zA-Z0-9_]+$]' : $this->rulesId ?? 'required|is_natural_no_zero';
 	}
 
 	public function countByActorId($actorId): bool

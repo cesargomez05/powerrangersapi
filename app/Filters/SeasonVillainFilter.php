@@ -13,7 +13,7 @@ class SeasonVillainFilter implements FilterInterface
 
 	public static function checkRecord($serieId, $seasonNumber, $villainId = null)
 	{
-		$validation = SeasonFilter::checkRecord($serieId, $seasonNumber);
+		$validation = SeasonFilter::checkRecord($serieId, $seasonNumber, 'Season');
 		if (isset($validation)) {
 			return $validation;
 		}
@@ -22,7 +22,7 @@ class SeasonVillainFilter implements FilterInterface
 		$model->setPublic(self::isPublic());
 
 		if (isset($villainId)) {
-			$validation = VillainFilter::checkRecord($villainId);
+			$validation = VillainFilter::checkRecord($villainId, 'Villain');
 			if (isset($validation)) {
 				return $validation;
 			}

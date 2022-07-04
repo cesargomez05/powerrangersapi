@@ -11,9 +11,9 @@ class RangerMorpherFilter implements FilterInterface
 {
 	use FilterTrait;
 
-	public static function checkRecord($rangerId, $requestType)
+	public static function checkRecord($rangerId, $requestType = null)
 	{
-		$rangerValidation = RangerFilter::checkRecord($rangerId);
+		$rangerValidation = RangerFilter::checkRecord($rangerId, 'Ranger');
 		if (isset($rangerValidation)) {
 			return $rangerValidation;
 		}

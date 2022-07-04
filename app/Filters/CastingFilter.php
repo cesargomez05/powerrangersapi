@@ -13,7 +13,7 @@ class CastingFilter implements FilterInterface
 
 	public static function checkRecord($serieId, $seasonNumber, $actorId = null, $characterId = null, $rangerId = null)
 	{
-		$validation = SeasonFilter::checkRecord($serieId, $seasonNumber);
+		$validation = SeasonFilter::checkRecord($serieId, $seasonNumber, 'Season');
 		if (isset($validation)) {
 			return $validation;
 		}
@@ -22,18 +22,18 @@ class CastingFilter implements FilterInterface
 		$model->setPublic(self::isPublic());
 
 		if (isset($actorId) && isset($characterId)) {
-			$validation = ActorFilter::checkRecord($actorId);
+			$validation = ActorFilter::checkRecord($actorId, 'Actor');
 			if (isset($validation)) {
 				return $validation;
 			}
 
-			$validation = CharacterFilter::checkRecord($characterId);
+			$validation = CharacterFilter::checkRecord($characterId, 'Character');
 			if (isset($validation)) {
 				return $validation;
 			}
 
 			if (isset($rangerId)) {
-				$validation = RangerFilter::checkRecord($rangerId);
+				$validation = RangerFilter::checkRecord($rangerId, 'Ranger');
 				if (isset($validation)) {
 					return $validation;
 				}

@@ -11,17 +11,15 @@ class ZordFilter implements FilterInterface
 {
 	use FilterTrait;
 
-	public static function checkRecord($zordId = null)
+	public static function checkRecord($zordId = null, $module = null)
 	{
-		$isPublic = self::isPublic();
-
 		$model = model('App\Models\ZordModel');
-		$model->setPublic($isPublic);
+		$model->setPublic(self::isPublic());
 
 		if (!empty($zordId)) {
 			$response = Services::response();
 
-			$validationId = $model->validateId($zordId, $isPublic ? 'zordSlug' : 'zordId', $isPublic ? 'Zord slug' : 'Zord id');
+			$validationId = $model->validateId($zordId, $module);
 			if ($validationId !== true) {
 				return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
 			}

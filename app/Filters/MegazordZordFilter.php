@@ -13,7 +13,7 @@ class MegazordZordFilter implements FilterInterface
 
 	public static function checkRecord($megazordId, $zordId = null)
 	{
-		$validation = MegazordFilter::checkRecord($megazordId);
+		$validation = MegazordFilter::checkRecord($megazordId, 'Megazord');
 		if (isset($validation)) {
 			return $validation;
 		}
@@ -22,7 +22,7 @@ class MegazordZordFilter implements FilterInterface
 		$model->setPublic(self::isPublic());
 
 		if (isset($zordId)) {
-			$validation = ZordFilter::checkRecord($zordId);
+			$validation = ZordFilter::checkRecord($zordId, 'Zord');
 			if (isset($validation)) {
 				return $validation;
 			}

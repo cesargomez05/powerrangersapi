@@ -11,17 +11,15 @@ class RangerFilter implements FilterInterface
 {
 	use FilterTrait;
 
-	public static function checkRecord($rangerId = null)
+	public static function checkRecord($rangerId = null, $module = null)
 	{
-		$isPublic = self::isPublic();
-
 		$model = model('App\Models\RangerModel');
-		$model->setPublic($isPublic);
+		$model->setPublic(self::isPublic());
 
 		if (!empty($rangerId)) {
 			$response = Services::response();
 
-			$validationId = $model->validateId($rangerId, $isPublic ? 'rangerSlug' : 'rangerId', $isPublic ? 'Ranger slug' : 'Ranger id');
+			$validationId = $model->validateId($rangerId, $module);
 			if ($validationId !== true) {
 				return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
 			}

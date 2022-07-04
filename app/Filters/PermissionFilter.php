@@ -11,9 +11,9 @@ class PermissionFilter implements FilterInterface
 {
 	use FilterTrait;
 
-	public static function checkRecord($userId, $moduleId = null)
+	public static function checkRecord($userId, $moduleId = null, $module = null)
 	{
-		$validation = UserFilter::checkRecord($userId);
+		$validation = UserFilter::checkRecord($userId, 'User');
 		if (isset($validation)) {
 			return $validation;
 		}
@@ -22,7 +22,7 @@ class PermissionFilter implements FilterInterface
 		$model->setPublic(self::isPublic());
 
 		if (isset($moduleId)) {
-			$validation = ModuleFilter::checkRecord($moduleId);
+			$validation = ModuleFilter::checkRecord($moduleId, 'Module');
 			if (isset($validation)) {
 				return $validation;
 			}
