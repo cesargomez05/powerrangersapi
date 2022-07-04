@@ -27,6 +27,20 @@ class APIEntity extends Entity
 		}
 	}
 
+	public function getChapterSlugURI()
+	{
+		if (isset($this->attributes['chapterSlugURI']) && strlen($this->attributes['chapterSlugURI'])) {
+			return base_url('api/chapters/' . $this->attributes['chapterSlugURI']);
+		}
+	}
+
+	public function getCastingSlugURI()
+	{
+		if (isset($this->attributes['castingSlugURI']) && strlen($this->attributes['castingSlugURI'])) {
+			return base_url('api/casting/' . $this->attributes['castingSlugURI']);
+		}
+	}
+
 	public function getRangerSlugURI()
 	{
 		if (isset($this->attributes['rangerSlugURI']) && strlen($this->attributes['rangerSlugURI'])) {

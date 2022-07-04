@@ -60,7 +60,7 @@ class SerieModel extends Model
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['title']);
+		$this->select(['title', 'slug seasonSlugURI']);
 		$this->where('slug', $slug);
 	}
 
