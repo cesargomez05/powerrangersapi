@@ -28,6 +28,7 @@ class SerieModel extends Model
 
 	protected function setRecordsCondition($query)
 	{
+		$this->select(['id URI', 'title']);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('title', $query['q'], 'both');
@@ -37,6 +38,7 @@ class SerieModel extends Model
 
 	protected function setRecordCondition($id)
 	{
+		$this->select(['*']);
 		$this->where('id', $id);
 	}
 
@@ -50,7 +52,7 @@ class SerieModel extends Model
 
 	protected function setPublicRecordsCondition($query)
 	{
-		$this->select(['title', 'slug slugURI']);
+		$this->select(['slug URI', 'title']);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('title', $query['q'], 'both');
@@ -60,7 +62,7 @@ class SerieModel extends Model
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['title', 'slug seasonSlugURI']);
+		$this->select(['title', 'slug seasonURI']);
 		$this->where('slug', $slug);
 	}
 

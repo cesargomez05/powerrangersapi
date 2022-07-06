@@ -56,6 +56,10 @@ class Filters extends BaseConfig
 			\App\Filters\AuthFilter::class,
 			\App\Filters\CastingFilter::class
 		],
+		'casting_filter_by' => [
+			\App\Filters\AuthFilter::class,
+			\App\Filters\CastingByFilter::class
+		],
 		'zord_filter' => [
 			\App\Filters\AuthFilter::class,
 			\App\Filters\ZordFilter::class

@@ -101,6 +101,11 @@ $routesTree = [
 		$routes->delete('(:segment)/(:segment)/(:segment)/(:segment)', 'Casting::delete/$1/$2/$3/$4');
 		$routes->delete('(:segment)/(:segment)/(:segment)/(:segment)/(:segment)', 'Casting::delete/$1/$2/$3/$4/$5');
 	},
+	'castingby' => function ($routes) {
+		$routes->get('actor/(:segment)', 'Casting::listByActor/$1');
+		$routes->get('character/(:segment)', 'Casting::listByCharacter/$1');
+		$routes->get('ranger/(:segment)', 'Casting::listByRanger/$1');
+	},
 	'teamup' => function ($routes) {
 		$routes->get('(:segment)/(:segment)', 'Casting::indexTeamUpPublic/$1/$2');
 	},
@@ -223,6 +228,7 @@ $routes->group('api', function ($routes) use ($routesTree) {
 	$routes->group('seasons', ['filter' => 'season_filter:season'], $routesTree['seasons']);
 	$routes->group('chapters', ['filter' => 'chapter_filter:chapter'], $routesTree['chapters']);
 	$routes->group('casting', ['filter' => 'casting_filter:casting'], $routesTree['casting']);
+	$routes->group('castingby', ['filter' => 'casting_filter_by:casting'], $routesTree['castingby']);
 	$routes->group('teamup', ['filter' => 'casting_filter:casting'], $routesTree['teamup']);
 	$routes->group('zords', ['filter' => 'zord_filter:zord'], $routesTree['zords']);
 	$routes->group('seasonzord', ['filter' => 'seasonzord_filter:zord'], $routesTree['seasonzord']);

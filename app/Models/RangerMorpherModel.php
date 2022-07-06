@@ -57,16 +57,8 @@ class RangerMorpherModel extends Model
 	public function getByRanger($rangerSlug)
 	{
 		$this->setTable('ranger_morpher_view');
-		$this->select(['morpherName', 'morpherSlug morpherSlugURI', 'photo photoURI']);
+		$this->select(['morpherName', 'morpherSlug morpherURI', 'photo photoURI']);
 		$this->where('rangerSlug', $rangerSlug);
 		return $this->first();
-	}
-
-	public function listByMorpher($morpherSlug)
-	{
-		$this->setTable('ranger_morpher_view');
-		$this->select(['rangerName', 'rangerSlug rangerSlugURI', 'photo photoURI']);
-		$this->where('morpherSlug', $morpherSlug);
-		return $this->findAll();
 	}
 }

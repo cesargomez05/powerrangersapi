@@ -27,7 +27,7 @@ class TransformationRangerModel extends Model
 	protected function setRecordsCondition($query, $transformationId)
 	{
 		$this->setTable('view_transformation_ranger');
-
+		$this->select(['CONCAT(transformationId,\'/\',rangerId) URI', 'name']);
 		$this->where('transformationId', $transformationId);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
@@ -38,6 +38,7 @@ class TransformationRangerModel extends Model
 
 	protected function setRecordCondition($transformationId, $rangerId)
 	{
+		$this->select(['name', 'description', 'photo', 'photo photoURI']);
 		$this->where('transformationId', $transformationId)->where('rangerId', $rangerId);
 	}
 
@@ -66,21 +67,5 @@ class TransformationRangerModel extends Model
 		}
 
 		return $this->insertBatch($rangers);
-	}
-
-	public function listByTransformation($transformationSlug)
-	{
-		$this->setTable('transformation_ranger_view');
-		$this->select(['rangerName', 'rangerSlug rangerSlugURI', 'transformationName', 'description', 'photo photoURI']);
-		$this->where('transformationSlug', $transformationSlug);
-		return $this->findAll();
-	}
-
-	public function listByRanger($rangerSlug)
-	{
-		$this->setTable('transformation_ranger_view');
-		$this->select(['transformationName', 'transformationSlug transformationSlugURI', 'description', 'photo photoURI']);
-		$this->where('rangerSlug', $rangerSlug);
-		return $this->findAll();
 	}
 }

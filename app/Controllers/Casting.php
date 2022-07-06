@@ -61,4 +61,31 @@ class Casting extends BaseResource
 		$records = $this->model->listTeamUpPublic($filter, $serieSlug, $seasonNumber);
 		return $this->respond($records);
 	}
+
+	public function listByActor($actorSlug)
+	{
+		$filter = $this->request->getGet();
+		set_pagination($filter);
+
+		$records = $this->model->listByActor($filter, $actorSlug);
+		return $this->respond($records);
+	}
+
+	public function listByCharacter($characterSlug)
+	{
+		$filter = $this->request->getGet();
+		set_pagination($filter);
+
+		$records = $this->model->listByCharacter($filter, $characterSlug);
+		return $this->respond($records);
+	}
+
+	public function listByRanger($rangerSlug)
+	{
+		$filter = $this->request->getGet();
+		set_pagination($filter);
+
+		$records = $this->model->listByRanger($filter, $rangerSlug);
+		return $this->respond($records);
+	}
 }

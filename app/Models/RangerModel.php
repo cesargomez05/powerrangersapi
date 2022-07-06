@@ -32,6 +32,7 @@ class RangerModel extends Model
 
 	protected function setRecordsCondition($query)
 	{
+		$this->select(['id URI', 'name', 'photo photoURI']);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('name', $query['q'], 'both');
@@ -41,6 +42,7 @@ class RangerModel extends Model
 
 	protected function setRecordCondition($id)
 	{
+		$this->select(['*', 'photo photoURI']);
 		$this->where('id', $id);
 	}
 
@@ -70,7 +72,7 @@ class RangerModel extends Model
 
 	protected function setPublicRecordsCondition($query)
 	{
-		$this->select(['name', 'slug slugURI', 'photo photoURI']);
+		$this->select(['slug URI', 'name', 'photo photoURI']);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('name', $query['q'], 'both');
@@ -86,14 +88,8 @@ class RangerModel extends Model
 
 	protected function addRecordAttributes($ranger, $slug)
 	{
-		$seasonArsenalModel = model('App\Models\SeasonArsenalModel');
-		$ranger->arsenal = $seasonArsenalModel->listByRanger($slug);
-
 		$rangerMorpherModel = model('App\Models\RangerMorpherModel');
 		$ranger->morpher = $rangerMorpherModel->getByRanger($slug);
-
-		$transformationRangerModel = model('App\Models\TransformationRangerModel');
-		$ranger->transformations = $transformationRangerModel->listByRanger($slug);
 	}
 
 	public function insertRecord(&$record, $subTransaction = false)

@@ -25,6 +25,7 @@ class ActorModel extends Model
 
 	protected function setRecordsCondition($query)
 	{
+		$this->select(['id URI', 'name', 'photo photoURI']);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('name', $query['q'], 'both');
@@ -34,6 +35,7 @@ class ActorModel extends Model
 
 	protected function setRecordCondition($id)
 	{
+		$this->select(['*', 'photo photoURI']);
 		$this->where('id', $id);
 	}
 
@@ -47,7 +49,7 @@ class ActorModel extends Model
 
 	protected function setPublicRecordsCondition($query)
 	{
-		$this->select(['name', 'slug slugURI', 'photo photoURI']);
+		$this->select(['slug URI', 'name', 'photo photoURI']);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('name', $query['q'], 'both');
@@ -57,14 +59,8 @@ class ActorModel extends Model
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['name', 'birthDate', 'deathDate', 'photo photoURI']);
+		$this->select(['name', 'birthDate', 'deathDate', 'photo photoURI', 'slug actorCastingURI']);
 		$this->where('slug', $slug);
-	}
-
-	protected function addRecordAttributes($actor, $slug)
-	{
-		$castingModel = model('App\Models\CastingModel');
-		$actor->casting = $castingModel->listByActor($slug);
 	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)

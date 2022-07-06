@@ -28,6 +28,7 @@ class ChapterModel extends Model
 
 	protected function setRecordsCondition($query, $serieId, $seasonNumber)
 	{
+		$this->select(['CONCAT(serieId,\'/\',seasonNumber,\'/\',number) URI', 'number', 'title', 'titleSpanish']);
 		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
@@ -45,7 +46,7 @@ class ChapterModel extends Model
 	protected function setPublicRecordsCondition($query, $serieSlug, $seasonNumber)
 	{
 		$this->setTable('chapters_view');
-		$this->select(['number', 'title', 'titleSpanish', 'CONCAT(serieSlug,\'/\',seasonNumber,\'/\',number) slugURI']);
+		$this->select(['CONCAT(serieSlug,\'/\',seasonNumber,\'/\',number) URI', 'number', 'title', 'titleSpanish']);
 		$this->where('serieSlug', $serieSlug);
 		$this->where('seasonNumber', $seasonNumber);
 		if (isset($query['q']) && !empty($query['q'])) {

@@ -28,6 +28,7 @@ class SeasonModel extends Model
 
 	protected function setRecordsCondition($query, $serieId)
 	{
+		$this->select(['CONCAT(serieId,\'/\',number) URI', 'number', 'title']);
 		$this->where('serieId', $serieId);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
@@ -38,6 +39,7 @@ class SeasonModel extends Model
 
 	protected function setRecordCondition($serieId, $number)
 	{
+		$this->select(['*']);
 		$this->where('serieId', $serieId)->where('number', $number);
 	}
 
@@ -72,7 +74,7 @@ class SeasonModel extends Model
 	protected function setPublicRecordsCondition($query, $serieSlug)
 	{
 		$this->setTable('seasons_view');
-		$this->select(['number', 'year', 'title', 'CONCAT(serieSlug,\'/\',number) slugURI']);
+		$this->select(['CONCAT(serieSlug,\'/\',number) URI', 'number', 'title']);
 		$this->where('serieSlug', $serieSlug);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
@@ -84,7 +86,16 @@ class SeasonModel extends Model
 	protected function setPublicRecordCondition($serieSlug, $number)
 	{
 		$this->setTable('seasons_view');
-		$this->select(['number', 'year', 'title', 'ageName', 'synopsis', 'CONCAT(serieSlug,\'/\',number) chapterSlugURI', 'CONCAT(serieSlug,\'/\',number) castingSlugURI', 'CONCAT(serieSlug,\'/\',number) teamupSlugURI']);
+		$this->select([
+			'number', 'year', 'title', 'ageName', 'synopsis',
+			'CONCAT(serieSlug,\'/\',number) chapterURI',
+			'CONCAT(serieSlug,\'/\',number) castingURI',
+			'CONCAT(serieSlug,\'/\',number) teamupURI',
+			'CONCAT(serieSlug,\'/\',number) seasonZordURI',
+			'CONCAT(serieSlug,\'/\',number) seasonMegazordURI',
+			'CONCAT(serieSlug,\'/\',number) seasonArsenalURI',
+			'CONCAT(serieSlug,\'/\',number) seasonVillainURI'
+		]);
 		$this->where('serieSlug', $serieSlug);
 		$this->where('number', $number);
 	}
@@ -150,14 +161,6 @@ class SeasonModel extends Model
 		}
 
 		return empty($errors) ? true : $errors;
-	}
-
-	public function listByAge($ageSlug)
-	{
-		$this->setTable('seasons_view');
-		$this->select(['title', 'number', 'year', 'CONCAT(serieSlug,\'/\',number) slugURI']);
-		$this->where('ageSlug', $ageSlug);
-		return $this->findAll();
 	}
 
 	public function countBySerie($serieSlug)

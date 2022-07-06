@@ -25,7 +25,7 @@ class MegazordZordModel extends Model
 	protected function setRecordsCondition($query, $megazordId)
 	{
 		$this->setTable('view_megazord_zord');
-
+		$this->select(['zordId zordURI', 'zordName']);
 		$this->where('megazordId', $megazordId);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
@@ -36,8 +36,19 @@ class MegazordZordModel extends Model
 
 	protected function setRecordCondition($megazordId, $zordId)
 	{
-		$this->where('megazordId', $megazordId)
-			->where('zordId', $zordId);
+		$this->where('megazordId', $megazordId)->where('zordId', $zordId);
+	}
+
+	protected function setPublicRecordsCondition($query, $megazordSlug)
+	{
+		$this->setTable('megazord_zord_view');
+		$this->select(['zordSlug zordURI', 'zordName']);
+		$this->where('megazordSlug', $megazordSlug);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('zordName', $query['q'], 'both');
+			$this->groupEnd();
+		}
 	}
 
 	public function insertRecord(&$record)
@@ -76,21 +87,5 @@ class MegazordZordModel extends Model
 		}, $zordsId);
 
 		return $this->insertBatch($megazordZords);
-	}
-
-	public function listByMegazord($megazordSlug)
-	{
-		$this->setTable('megazord_zord_view');
-		$this->select(['zordName', 'zordSlug zordSlugURI']);
-		$this->where('megazordSlug', $megazordSlug);
-		return $this->findAll();
-	}
-
-	public function listByZord($zordSlug)
-	{
-		$this->setTable('megazord_zord_view');
-		$this->select(['megazordName', 'megazordSlug megazordSlugURI']);
-		$this->where('zordSlug', $zordSlug);
-		return $this->findAll();
 	}
 }

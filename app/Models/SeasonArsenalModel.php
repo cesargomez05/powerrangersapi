@@ -34,7 +34,7 @@ class SeasonArsenalModel extends Model
 	protected function setRecordsCondition($query, $serieId, $seasonNumber)
 	{
 		$this->setTable('view_season_arsenal');
-
+		$this->select(['arsenalId arsenalURI', 'arsenalName', 'rangerId rangerURI', 'rangerName']);
 		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
@@ -45,9 +45,20 @@ class SeasonArsenalModel extends Model
 
 	protected function setRecordCondition($serieId, $seasonNumber, $arsenalId)
 	{
-		$this->where('serieId', $serieId)
-			->where('seasonNumber', $seasonNumber)
-			->where('arsenalId', $arsenalId);
+		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber)->where('arsenalId', $arsenalId);
+	}
+
+	protected function setPublicRecordsCondition($query, $serieSlug, $seasonNumber)
+	{
+		$this->setTable('season_arsenal_view');
+		$this->select(['arsenalName', 'rangerName', 'arsenalSlug arsenalURI', 'rangerSlug rangerURI']);
+		$this->where('serieSlug', $serieSlug);
+		$this->where('seasonNumber', $seasonNumber);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('arsenalName', $query['q'], 'both');
+			$this->groupEnd();
+		}
 	}
 
 	public function insertRecord(&$record)
@@ -72,13 +83,5 @@ class SeasonArsenalModel extends Model
 		}
 
 		return empty($errors) ? true : $errors;
-	}
-
-	public function listByRanger($rangerSlug)
-	{
-		$this->setTable('season_arsenal_view');
-		$this->select(['arsenalName', 'arsenalSlug arsenalSlugURI']);
-		$this->where('rangerSlug', $rangerSlug);
-		return $this->findAll();
 	}
 }

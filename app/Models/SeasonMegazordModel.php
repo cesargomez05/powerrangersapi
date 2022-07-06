@@ -33,7 +33,7 @@ class SeasonMegazordModel extends Model
 	protected function setRecordsCondition($query, $serieId, $seasonNumber)
 	{
 		$this->setTable('view_season_megazord');
-
+		$this->select(['megazordId megazordURI', 'megazordName']);
 		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
@@ -44,9 +44,20 @@ class SeasonMegazordModel extends Model
 
 	protected function setRecordCondition($serieId, $seasonNumber, $megazordId)
 	{
-		$this->where('serieId', $serieId)
-			->where('seasonNumber', $seasonNumber)
-			->where('megazordId', $megazordId);
+		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber)->where('megazordId', $megazordId);
+	}
+
+	protected function setPublicRecordsCondition($query, $serieSlug, $seasonNumber)
+	{
+		$this->setTable('season_megazord_view');
+		$this->select(['megazordSlug megazordURI', 'megazordName']);
+		$this->where('serieSlug', $serieSlug);
+		$this->where('seasonNumber', $seasonNumber);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('megazordName', $query['q'], 'both');
+			$this->groupEnd();
+		}
 	}
 
 	public function insertRecord(&$record)
@@ -71,13 +82,5 @@ class SeasonMegazordModel extends Model
 		}
 
 		return empty($errors) ? true : $errors;
-	}
-
-	public function listByMegazord($megazordSlug)
-	{
-		$this->setTable('season_megazord_view');
-		$this->select(['serieTitle', 'seasonNumber', 'CONCAT(serieSlug,\'/\',seasonNumber) seasonSlugURI']);
-		$this->where('megazordSlug', $megazordSlug);
-		return $this->findAll();
 	}
 }

@@ -30,6 +30,7 @@ class ArsenalModel extends Model
 
 	protected function setRecordsCondition($query)
 	{
+		$this->select(['id URI', 'name', 'photo photoURI']);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('name', $query['q'], 'both');
@@ -39,6 +40,7 @@ class ArsenalModel extends Model
 
 	protected function setRecordCondition($id)
 	{
+		$this->select(['*', 'photo photoURI']);
 		$this->where('id', $id);
 	}
 
@@ -52,7 +54,7 @@ class ArsenalModel extends Model
 
 	protected function setPublicRecordsCondition($query)
 	{
-		$this->select(['name', 'slug slugURI', 'photo photoURI']);
+		$this->select(['slug URI', 'name', 'photo photoURI']);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('name', $query['q'], 'both');

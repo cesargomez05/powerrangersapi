@@ -6,10 +6,10 @@ use CodeIgniter\Entity\Entity;
 
 class APIEntity extends Entity
 {
-	public function getSlugURI()
+	public function getURI()
 	{
-		if (isset($this->attributes['slugURI']) && strlen($this->attributes['slugURI'])) {
-			return base_url('api/' . $this->resource . '/' . $this->attributes['slugURI']);
+		if (isset($this->attributes['URI']) && strlen($this->attributes['URI'])) {
+			return base_url('api/' . $this->resource . '/' . $this->attributes['URI']);
 		}
 	}
 
@@ -20,38 +20,45 @@ class APIEntity extends Entity
 		}
 	}
 
-	public function getSeasonSlugURI()
+	public function getRangerURI()
 	{
-		if (isset($this->attributes['seasonSlugURI']) && strlen($this->attributes['seasonSlugURI'])) {
-			return base_url('api/seasons/' . $this->attributes['seasonSlugURI']);
+		if (isset($this->attributes['rangerURI']) && strlen($this->attributes['rangerURI'])) {
+			return base_url('api/rangers/' . $this->attributes['rangerURI']);
 		}
 	}
 
-	public function getChapterSlugURI()
+	public function getSeasonURI()
 	{
-		if (isset($this->attributes['chapterSlugURI']) && strlen($this->attributes['chapterSlugURI'])) {
-			return base_url('api/chapters/' . $this->attributes['chapterSlugURI']);
+		if (isset($this->attributes['seasonURI']) && strlen($this->attributes['seasonURI'])) {
+			return base_url('api/seasons/' . $this->attributes['seasonURI']);
 		}
 	}
 
-	public function getCastingSlugURI()
+	public function getSerieURI()
 	{
-		if (isset($this->attributes['castingSlugURI']) && strlen($this->attributes['castingSlugURI'])) {
-			return base_url('api/casting/' . $this->attributes['castingSlugURI']);
+		if (isset($this->attributes['serieURI']) && strlen($this->attributes['serieURI'])) {
+			return base_url('api/series/' . $this->attributes['serieURI']);
 		}
 	}
 
-	public function getTeamupSlugURI()
+	public function getTransformationURI()
 	{
-		if (isset($this->attributes['teamupSlugURI']) && strlen($this->attributes['teamupSlugURI'])) {
-			return base_url('api/teamup/' . $this->attributes['castingSlugURI']);
+		if (isset($this->attributes['transformationURI']) && strlen($this->attributes['transformationURI'])) {
+			return base_url('api/transformations/' . $this->attributes['transformationURI']);
 		}
 	}
 
-	public function getRangerSlugURI()
+	public function getZordURI()
 	{
-		if (isset($this->attributes['rangerSlugURI']) && strlen($this->attributes['rangerSlugURI'])) {
-			return base_url('api/rangers/' . $this->attributes['rangerSlugURI']);
+		if (isset($this->attributes['zordURI']) && strlen($this->attributes['zordURI'])) {
+			return base_url('api/zords/' . $this->attributes['zordURI']);
+		}
+	}
+
+	public function getActorCastingURI()
+	{
+		if (isset($this->attributes['actorCastingURI']) && strlen($this->attributes['actorCastingURI'])) {
+			return base_url('api/castingby/actor/' . $this->attributes['actorCastingURI']);
 		}
 	}
 }

@@ -34,7 +34,7 @@ class SeasonZordModel extends Model
 	protected function setRecordsCondition($query, $serieId, $seasonNumber)
 	{
 		$this->setTable('view_season_zord');
-
+		$this->select(['zordId zordURI', 'rangerId rangerURI', 'zordName', 'rangerName']);
 		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
@@ -45,9 +45,20 @@ class SeasonZordModel extends Model
 
 	protected function setRecordCondition($serieId, $seasonNumber, $zordId)
 	{
-		$this->where('serieId', $serieId)
-			->where('seasonNumber', $seasonNumber)
-			->where('zordId', $zordId);
+		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber)->where('zordId', $zordId);
+	}
+
+	protected function setPublicRecordsCondition($query, $serieSlug, $seasonNumber)
+	{
+		$this->setTable('season_zord_view');
+		$this->select(['zordSlug zordURI', 'rangerSlug rangerURI', 'zordName', 'rangerName']);
+		$this->where('serieSlug', $serieSlug);
+		$this->where('seasonNumber', $seasonNumber);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('zordName', $query['q'], 'both');
+			$this->groupEnd();
+		}
 	}
 
 	public function insertRecord(&$record)
@@ -72,13 +83,5 @@ class SeasonZordModel extends Model
 		}
 
 		return empty($errors) ? true : $errors;
-	}
-
-	public function listByZord($zordSlug)
-	{
-		$this->setTable('season_zord_view');
-		$this->select(['serieTitle', 'seasonNumber', 'CONCAT(serieSlug,\'/\',seasonNumber) seasonSlugURI']);
-		$this->where('zordSlug', $zordSlug);
-		return $this->findAll();
 	}
 }

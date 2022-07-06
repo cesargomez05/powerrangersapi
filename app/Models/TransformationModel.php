@@ -29,15 +29,17 @@ class TransformationModel extends Model
 
 	protected function setRecordsCondition($query)
 	{
+		$this->select(['id URI', 'name']);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
-			$this->orLike('title', $query['q'], 'both');
+			$this->orLike('name', $query['q'], 'both');
 			$this->groupEnd();
 		}
 	}
 
 	protected function setRecordCondition($id)
 	{
+		$this->select(['*']);
 		$this->where('id', $id);
 	}
 
@@ -76,7 +78,7 @@ class TransformationModel extends Model
 
 	protected function setPublicRecordsCondition($query)
 	{
-		$this->select(['name', 'slug slugURI']);
+		$this->select(['slug URI', 'name']);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
 			$this->orLike('name', $query['q'], 'both');
@@ -88,12 +90,6 @@ class TransformationModel extends Model
 	{
 		$this->select(['name', 'description']);
 		$this->where('slug', $slug);
-	}
-
-	protected function addRecordAttributes($transformation, $slug)
-	{
-		$transformationRangerModel = model('App\Models\TransformationRangerModel');
-		$transformation->rangers = $transformationRangerModel->listByTransformation($slug);
 	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)

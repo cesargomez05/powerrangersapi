@@ -33,7 +33,7 @@ class SeasonVillainModel extends Model
 	protected function setRecordsCondition($query, $serieId, $seasonNumber)
 	{
 		$this->setTable('view_season_villain');
-
+		$this->select(['villainId villainURI', 'villainName']);
 		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
@@ -44,9 +44,20 @@ class SeasonVillainModel extends Model
 
 	protected function setRecordCondition($serieId, $seasonNumber, $villainId)
 	{
-		$this->where('serieId', $serieId)
-			->where('seasonNumber', $seasonNumber)
-			->where('villainId', $villainId);
+		$this->where('serieId', $serieId)->where('seasonNumber', $seasonNumber)->where('villainId', $villainId);
+	}
+
+	protected function setPublicRecordsCondition($query, $serieSlug, $seasonNumber)
+	{
+		$this->setTable('season_villain_view');
+		$this->select(['villainSlug villainURI', 'villainName']);
+		$this->where('serieSlug', $serieSlug);
+		$this->where('seasonNumber', $seasonNumber);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('villainName', $query['q'], 'both');
+			$this->groupEnd();
+		}
 	}
 
 	public function insertRecord(&$record)
@@ -71,13 +82,5 @@ class SeasonVillainModel extends Model
 		}
 
 		return empty($errors) ? true : $errors;
-	}
-
-	public function listByVillain($villainSlug)
-	{
-		$this->setTable('season_villain_view');
-		$this->select(['serieTitle', 'seasonNumber', 'CONCAT(serieSlug,\'/\',seasonNumber) seasonSlugURI']);
-		$this->where('villainSlug', $villainSlug);
-		return $this->findAll();
 	}
 }

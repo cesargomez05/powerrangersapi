@@ -27,7 +27,6 @@ class PermissionModel extends Model
 	protected function setRecordsCondition($query, $username)
 	{
 		$this->setTable('view_permissions');
-
 		$this->where('username', $username);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
