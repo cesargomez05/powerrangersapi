@@ -82,7 +82,7 @@ class RangerModel extends Model
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['name', 'description', 'photo photoURI']);
+		$this->select(['name', 'description', 'photo photoURI', 'slug rangerCastingURI']);
 		$this->where('slug', $slug);
 	}
 

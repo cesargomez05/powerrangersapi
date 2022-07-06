@@ -61,7 +61,7 @@ class CharacterModel extends Model
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['name', 'fullName', 'description', 'photo photoURI']);
+		$this->select(['name', 'fullName', 'description', 'photo photoURI', 'slug characterCastingURI']);
 		$this->where('slug', $slug);
 	}
 

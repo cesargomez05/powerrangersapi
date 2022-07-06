@@ -50,6 +50,9 @@ $routesTree = [
 		$routes->patch('(:segment)', 'Age::update/$1');
 		$routes->delete('(:segment)', 'Age::delete/$1');
 	},
+	'ageseasons' => function ($routes) {
+		$routes->get('(:segment)', 'Season::listByAge/$1');
+	},
 	'characters' => function ($routes) {
 		$routes->get('', 'Character::index');
 		$routes->get('(:segment)', 'Character::show/$1');
@@ -221,6 +224,7 @@ $routes->group('api', function ($routes) use ($routesTree) {
 	// Modules
 	$routes->group('actors', ['filter' => 'actor_filter:actor'], $routesTree['actors']);
 	$routes->group('ages', ['filter' => 'age_filter:age'], $routesTree['ages']);
+	$routes->group('ageseasons', ['filter' => 'age_season_filter:season'], $routesTree['ageseasons']);
 	$routes->group('characters', ['filter' => 'character_filter:character'], $routesTree['characters']);
 	$routes->group('rangers', ['filter' => 'ranger_filter:ranger'], $routesTree['rangers']);
 	$routes->group('rangermorpher', ['filter' => 'ranger_morpher_filter:ranger'], $routesTree['rangermorpher']);
@@ -228,7 +232,7 @@ $routes->group('api', function ($routes) use ($routesTree) {
 	$routes->group('seasons', ['filter' => 'season_filter:season'], $routesTree['seasons']);
 	$routes->group('chapters', ['filter' => 'chapter_filter:chapter'], $routesTree['chapters']);
 	$routes->group('casting', ['filter' => 'casting_filter:casting'], $routesTree['casting']);
-	$routes->group('castingby', ['filter' => 'casting_filter_by:casting'], $routesTree['castingby']);
+	$routes->group('castingby', ['filter' => 'casting_by_filter:casting'], $routesTree['castingby']);
 	$routes->group('teamup', ['filter' => 'casting_filter:casting'], $routesTree['teamup']);
 	$routes->group('zords', ['filter' => 'zord_filter:zord'], $routesTree['zords']);
 	$routes->group('seasonzord', ['filter' => 'seasonzord_filter:zord'], $routesTree['seasonzord']);

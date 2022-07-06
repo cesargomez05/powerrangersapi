@@ -56,7 +56,7 @@ class AgeModel extends Model
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['name']);
+		$this->select(['name', 'slug ageSeasonURI']);
 		$this->where('slug', $slug);
 	}
 

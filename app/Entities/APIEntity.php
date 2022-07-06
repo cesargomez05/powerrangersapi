@@ -6,11 +6,16 @@ use CodeIgniter\Entity\Entity;
 
 class APIEntity extends Entity
 {
+	protected function getURIProperty($propertyKey, $moduleKey)
+	{
+		if (isset($this->attributes[$propertyKey]) && strlen($this->attributes[$propertyKey])) {
+			return base_url('api/' . $moduleKey . '/' . $this->attributes[$propertyKey]);
+		}
+	}
+
 	public function getURI()
 	{
-		if (isset($this->attributes['URI']) && strlen($this->attributes['URI'])) {
-			return base_url('api/' . $this->resource . '/' . $this->attributes['URI']);
-		}
+		return $this->getURIProperty('URI', $this->resource);
 	}
 
 	public function getPhotoURI()
@@ -22,43 +27,26 @@ class APIEntity extends Entity
 
 	public function getRangerURI()
 	{
-		if (isset($this->attributes['rangerURI']) && strlen($this->attributes['rangerURI'])) {
-			return base_url('api/rangers/' . $this->attributes['rangerURI']);
-		}
+		return $this->getURIProperty('rangerURI', 'rangers');
 	}
 
 	public function getSeasonURI()
 	{
-		if (isset($this->attributes['seasonURI']) && strlen($this->attributes['seasonURI'])) {
-			return base_url('api/seasons/' . $this->attributes['seasonURI']);
-		}
+		return $this->getURIProperty('seasonURI', 'seasons');
 	}
 
 	public function getSerieURI()
 	{
-		if (isset($this->attributes['serieURI']) && strlen($this->attributes['serieURI'])) {
-			return base_url('api/series/' . $this->attributes['serieURI']);
-		}
+		return $this->getURIProperty('serieURI', 'series');
 	}
 
 	public function getTransformationURI()
 	{
-		if (isset($this->attributes['transformationURI']) && strlen($this->attributes['transformationURI'])) {
-			return base_url('api/transformations/' . $this->attributes['transformationURI']);
-		}
+		return $this->getURIProperty('transformationURI', 'transformations');
 	}
 
 	public function getZordURI()
 	{
-		if (isset($this->attributes['zordURI']) && strlen($this->attributes['zordURI'])) {
-			return base_url('api/zords/' . $this->attributes['zordURI']);
-		}
-	}
-
-	public function getActorCastingURI()
-	{
-		if (isset($this->attributes['actorCastingURI']) && strlen($this->attributes['actorCastingURI'])) {
-			return base_url('api/castingby/actor/' . $this->attributes['actorCastingURI']);
-		}
+		return $this->getURIProperty('zordURI', 'zords');
 	}
 }

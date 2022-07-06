@@ -6,15 +6,11 @@ class Casting extends APIEntity
 {
     public function getActorURI()
     {
-        if (isset($this->attributes['actorURI']) && strlen($this->attributes['actorURI'])) {
-            return base_url('api/actors/' . $this->attributes['actorURI']);
-        }
+        return $this->getURIProperty('actorURI', 'actors');
     }
 
     public function getCharacterURI()
     {
-        if (isset($this->attributes['characterURI']) && strlen($this->attributes['characterURI'])) {
-            return base_url('api/characters/' . $this->attributes['characterURI']);
-        }
+        return $this->getURIProperty('characterURI', 'characters');
     }
 }

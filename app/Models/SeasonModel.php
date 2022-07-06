@@ -169,4 +169,12 @@ class SeasonModel extends Model
 		$this->where('serieSlug', $serieSlug);
 		return $this->countAllResults();
 	}
+
+	public function listByAge($query, $ageSlug)
+	{
+		$this->setTable('seasons_view');
+		$this->select(['CONCAT(serieSlug,\'/\',number) seasonURI', 'title', 'number']);
+		$this->where('ageSlug', $ageSlug);
+		return $this->getResponse($query);
+	}
 }

@@ -93,4 +93,13 @@ class Season extends BaseResource
 
 		return $this->success("Record successfully updated");
 	}
+
+	public function listByAge($ageSlug)
+	{
+		$filter = $this->request->getGet();
+		set_pagination($filter);
+
+		$records = $this->model->listByAge($filter, $ageSlug);
+		return $this->respond($records);
+	}
 }
