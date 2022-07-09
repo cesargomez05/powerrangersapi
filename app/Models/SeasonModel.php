@@ -175,6 +175,11 @@ class SeasonModel extends Model
 		$this->setTable('seasons_view');
 		$this->select(['CONCAT(serieSlug,\'/\',number) seasonURI', 'title', 'number']);
 		$this->where('ageSlug', $ageSlug);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('title', $query['q'], 'both');
+			$this->groupEnd();
+		}
 		return $this->getResponse($query);
 	}
 }

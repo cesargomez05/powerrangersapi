@@ -94,6 +94,13 @@ class CastingModel extends Model
 		$this->setTable('casting_view');
 		$this->select(['CONCAT(serieSlug,\'/\',seasonNumber) seasonURI', 'serieTitle', 'seasonNumber', 'isTeamUp', 'characterSlug characterURI', 'characterName', 'rangerSlug rangerURI', 'rangerName']);
 		$this->where('actorSlug', $actorSlug);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('serieTitle', $query['q'], 'both');
+			$this->orLike('characterName', $query['q'], 'both');
+			$this->orLike('rangerName', $query['q'], 'both');
+			$this->groupEnd();
+		}
 		return $this->getResponse($query);
 	}
 
@@ -102,6 +109,13 @@ class CastingModel extends Model
 		$this->setTable('casting_view');
 		$this->select(['CONCAT(serieSlug,\'/\',seasonNumber) seasonURI', 'serieTitle', 'seasonNumber', 'isTeamUp', 'actorSlug actorURI', 'actorName', 'rangerSlug rangerURI', 'rangerName']);
 		$this->where('characterSlug', $characterSlug);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('serieTitle', $query['q'], 'both');
+			$this->orLike('actorName', $query['q'], 'both');
+			$this->orLike('rangerName', $query['q'], 'both');
+			$this->groupEnd();
+		}
 		return $this->getResponse($query);
 	}
 
@@ -110,6 +124,13 @@ class CastingModel extends Model
 		$this->setTable('casting_view');
 		$this->select(['CONCAT(serieSlug,\'/\',seasonNumber) seasonURI', 'serieTitle', 'seasonNumber', 'isTeamUp', 'actorSlug actorURI', 'actorName', 'characterSlug characterURI', 'characterName']);
 		$this->where('rangerSlug', $rangerSlug);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('serieTitle', $query['q'], 'both');
+			$this->orLike('actorName', $query['q'], 'both');
+			$this->orLike('characterName', $query['q'], 'both');
+			$this->groupEnd();
+		}
 		return $this->getResponse($query);
 	}
 

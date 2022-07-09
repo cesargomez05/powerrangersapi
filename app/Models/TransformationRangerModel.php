@@ -27,7 +27,7 @@ class TransformationRangerModel extends Model
 	protected function setRecordsCondition($query, $transformationId)
 	{
 		$this->setTable('view_transformation_ranger');
-		$this->select(['CONCAT(transformationId,\'/\',rangerId) URI', 'name']);
+		$this->select(['CONCAT(transformationId,\'/\',rangerId) URI', 'name', 'photo photoURI']);
 		$this->where('transformationId', $transformationId);
 		if (isset($query['q']) && !empty($query['q'])) {
 			$this->groupStart();
@@ -40,6 +40,26 @@ class TransformationRangerModel extends Model
 	{
 		$this->select(['name', 'description', 'photo', 'photo photoURI']);
 		$this->where('transformationId', $transformationId)->where('rangerId', $rangerId);
+	}
+
+	protected function setPublicRecordsCondition($query, $transformationSlug)
+	{
+		$this->setTable('transformation_ranger_view');
+		$this->select(['CONCAT(transformationSlug,\'/\',rangerSlug) URI', 'transformationName name', 'photo photoURI']);
+		$this->where('transformationSlug', $transformationSlug);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('transformationName', $query['q'], 'both');
+			$this->groupEnd();
+		}
+	}
+
+	protected function setPublicRecordCondition($transformationSlug, $rangerSlug)
+	{
+		$this->setTable('transformation_ranger_view');
+		$this->select(['rangerSlug rangerURI', 'rangerName', 'transformationName', 'description', 'photo photoURI']);
+		$this->where('transformationSlug', $transformationSlug);
+		$this->where('rangerSlug', $rangerSlug);
 	}
 
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
