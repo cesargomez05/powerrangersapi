@@ -8,6 +8,6 @@ class Character extends APIEntity
 
 	public function getCharacterCastingURI()
 	{
-		return $this->getURIProperty('characterCastingURI', 'castingby/character');
+		return $this->getURIProperty('characterCastingURI', 'charactercasting');
 	}
 }

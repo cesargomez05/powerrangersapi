@@ -8,6 +8,6 @@ class Ranger extends APIEntity
 
 	public function getRangerCastingURI()
 	{
-		return $this->getURIProperty('rangerCastingURI', 'castingby/ranger');
+		return $this->getURIProperty('rangerCastingURI', 'rangercasting');
 	}
 }

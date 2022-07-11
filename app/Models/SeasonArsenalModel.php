@@ -61,6 +61,19 @@ class SeasonArsenalModel extends Model
 		}
 	}
 
+	public function listByArsenal($query, $arsenalSlug)
+	{
+		$this->setTable('season_arsenal_view');
+		$this->select(['CONCAT(serieSlug,\'/\',seasonNumber) seasonURI', 'serieTitle']);
+		$this->where('arsenalSlug', $arsenalSlug);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('serieTitle', $query['q'], 'both');
+			$this->groupEnd();
+		}
+		return $this->getResponse($query);
+	}
+
 	public function insertRecord(&$record)
 	{
 		$prevRecord = $this->check($record['serieId'], $record['seasonNumber'], $record['arsenalId']);

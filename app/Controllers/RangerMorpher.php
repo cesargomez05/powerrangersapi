@@ -61,4 +61,13 @@ class RangerMorpher extends BaseResource
 
 		return $this->respondCreated($postData);
 	}
+
+	public function listByMorpher($morpherSlug)
+	{
+		$filter = $this->request->getGet();
+		set_pagination($filter);
+
+		$records = $this->model->listByMorpher($filter, $morpherSlug);
+		return $this->respond($records);
+	}
 }

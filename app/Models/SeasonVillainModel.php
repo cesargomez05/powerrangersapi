@@ -60,6 +60,19 @@ class SeasonVillainModel extends Model
 		}
 	}
 
+	public function listByVillain($query, $villainSlug)
+	{
+		$this->setTable('season_villain_view');
+		$this->select(['CONCAT(serieSlug,\'/\',seasonNumber) seasonURI', 'serieTitle']);
+		$this->where('villainSlug', $villainSlug);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('serieTitle', $query['q'], 'both');
+			$this->groupEnd();
+		}
+		return $this->getResponse($query);
+	}
+
 	public function insertRecord(&$record)
 	{
 		$prevRecord = $this->check($record['serieId'], $record['seasonNumber'], $record['villainId']);

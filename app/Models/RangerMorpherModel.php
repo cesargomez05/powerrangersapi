@@ -30,6 +30,19 @@ class RangerMorpherModel extends Model
 		$this->where('rangerId', $rangerId);
 	}
 
+	public function listByMorpher($query, $morpherSlug)
+	{
+		$this->setTable('ranger_morpher_view');
+		$this->select(['rangerSlug rangerURI', 'rangerName', 'photo photoURI']);
+		$this->where('morpherSlug', $morpherSlug);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('rangerName', $query['q'], 'both');
+			$this->groupEnd();
+		}
+		return $this->getResponse($query);
+	}
+
 	public function validateRecord(&$postData, $postFiles, $method, $prevRecord = null)
 	{
 		$errors = $this->validateUploadFiles($postData, $postFiles);

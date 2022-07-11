@@ -25,6 +25,11 @@ class APIEntity extends Entity
 		}
 	}
 
+	public function getMegazordURI()
+	{
+		return $this->getURIProperty('megazordURI', 'megazords');
+	}
+
 	public function getRangerURI()
 	{
 		return $this->getURIProperty('rangerURI', 'rangers');

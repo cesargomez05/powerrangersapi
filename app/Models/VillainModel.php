@@ -64,7 +64,7 @@ class VillainModel extends Model
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['name', 'description', 'photo photoURI']);
+		$this->select(['name', 'description', 'photo photoURI', 'slug villainSeasonURI']);
 		$this->where('slug', $slug);
 	}
 

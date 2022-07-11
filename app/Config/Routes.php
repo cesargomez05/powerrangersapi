@@ -50,9 +50,6 @@ $routesTree = [
 		$routes->patch('(:segment)', 'Age::update/$1');
 		$routes->delete('(:segment)', 'Age::delete/$1');
 	},
-	'ageseasons' => function ($routes) {
-		$routes->get('(:segment)', 'Season::listByAge/$1');
-	},
 	'characters' => function ($routes) {
 		$routes->get('', 'Character::index');
 		$routes->get('(:segment)', 'Character::show/$1');
@@ -104,14 +101,6 @@ $routesTree = [
 		$routes->delete('(:segment)/(:segment)/(:segment)/(:segment)', 'Casting::delete/$1/$2/$3/$4');
 		$routes->delete('(:segment)/(:segment)/(:segment)/(:segment)/(:segment)', 'Casting::delete/$1/$2/$3/$4/$5');
 	},
-	'castingby' => function ($routes) {
-		$routes->get('actor/(:segment)', 'Casting::listByActor/$1');
-		$routes->get('character/(:segment)', 'Casting::listByCharacter/$1');
-		$routes->get('ranger/(:segment)', 'Casting::listByRanger/$1');
-	},
-	'teamup' => function ($routes) {
-		$routes->get('(:segment)/(:segment)', 'Casting::indexTeamUpPublic/$1/$2');
-	},
 	'zords' => function ($routes) {
 		$routes->get('', 'Zord::index');
 		$routes->get('(:segment)', 'Zord::show/$1');
@@ -151,7 +140,7 @@ $routesTree = [
 		$routes->patch('(:segment)', 'Transformation::update/$1');
 		$routes->delete('(:segment)', 'Transformation::delete/$1');
 	},
-	'transformationrangers' => function ($routes) {
+	'transformationranger' => function ($routes) {
 		$routes->get('(:segment)', 'TransformationRanger::index/$1');
 		$routes->get('(:segment)/(:segment)', 'TransformationRanger::show/$1/$2');
 		$routes->post('(:segment)', 'TransformationRanger::create/$1');
@@ -224,7 +213,6 @@ $routes->group('api', function ($routes) use ($routesTree) {
 	// Modules
 	$routes->group('actors', ['filter' => 'actor_filter:actor'], $routesTree['actors']);
 	$routes->group('ages', ['filter' => 'age_filter:age'], $routesTree['ages']);
-	$routes->group('ageseasons', ['filter' => 'age_season_filter:season'], $routesTree['ageseasons']);
 	$routes->group('characters', ['filter' => 'character_filter:character'], $routesTree['characters']);
 	$routes->group('rangers', ['filter' => 'ranger_filter:ranger'], $routesTree['rangers']);
 	$routes->group('rangermorpher', ['filter' => 'ranger_morpher_filter:ranger'], $routesTree['rangermorpher']);
@@ -232,20 +220,31 @@ $routes->group('api', function ($routes) use ($routesTree) {
 	$routes->group('seasons', ['filter' => 'season_filter:season'], $routesTree['seasons']);
 	$routes->group('chapters', ['filter' => 'chapter_filter:chapter'], $routesTree['chapters']);
 	$routes->group('casting', ['filter' => 'casting_filter:casting'], $routesTree['casting']);
-	$routes->group('castingby', ['filter' => 'casting_by_filter:casting'], $routesTree['castingby']);
-	$routes->group('teamup', ['filter' => 'casting_filter:casting'], $routesTree['teamup']);
 	$routes->group('zords', ['filter' => 'zord_filter:zord'], $routesTree['zords']);
 	$routes->group('seasonzord', ['filter' => 'seasonzord_filter:zord'], $routesTree['seasonzord']);
 	$routes->group('megazords', ['filter' => 'megazord_filter:megazord'], $routesTree['megazords']);
 	$routes->group('seasonmegazord', ['filter' => 'seasonmegazord_filter:megazord'], $routesTree['seasonmegazord']);
 	$routes->group('megazordzord', ['filter' => 'megazordzord_filter:megazord'], $routesTree['megazordzord']);
 	$routes->group('transformations', ['filter' => 'transformation_filter:transformation'], $routesTree['transformations']);
-	$routes->group('transformationrangers', ['filter' => 'transformationranger_filter:transformation'], $routesTree['transformationrangers']);
+	$routes->group('transformationranger', ['filter' => 'transformationranger_filter:transformation'], $routesTree['transformationranger']);
 	$routes->group('morphers', ['filter' => 'morpher_filter:morpher'], $routesTree['morphers']);
 	$routes->group('arsenal', ['filter' => 'arsenal_filter:arsenal'], $routesTree['arsenal']);
 	$routes->group('seasonarsenal', ['filter' => 'seasonarsenal_filter:arsenal'], $routesTree['seasonarsenal']);
 	$routes->group('villains', ['filter' => 'villain_filter:villain'], $routesTree['villains']);
 	$routes->group('seasonvillain', ['filter' => 'seasonvillain_filter:villain'], $routesTree['seasonvillain']);
+
+	// Rutas de consulta de datos adicionales
+	$routes->get('ageseason/(:segment)', 'Season::listByAge/$1', ['filter' => 'age_filter:season']);
+	$routes->get('actorcasting/(:segment)', 'Casting::listByActor/$1', ['filter' => 'actor_filter:casting']);
+	$routes->get('charactercasting/(:segment)', 'Casting::listByCharacter/$1', ['filter' => 'character_filter:casting']);
+	$routes->get('rangercasting/(:segment)', 'Casting::listByRanger/$1', ['filter' => 'ranger_filter:casting']);
+	$routes->get('teamup/(:segment)/(:segment)', 'Casting::indexTeamUpPublic/$1/$2', ['filter' => 'casting_filter:casting']);
+	$routes->get('zordmegazord/(:segment)', 'MegazordZord::listByZord/$1', ['filter' => 'zord_filter:megazord']);
+	$routes->get('zordseason/(:segment)', 'SeasonZord::listByZord/$1', ['filter' => 'zord_filter:season']);
+	$routes->get('megazordseason/(:segment)', 'SeasonMegazord::listByMegazord/$1', ['filter' => 'megazord_filter:season']);
+	$routes->get('morpherranger/(:segment)', 'RangerMorpher::listByMorpher/$1', ['filter' => 'morpher_filter:ranger']);
+	$routes->get('arsenalseason/(:segment)', 'SeasonArsenal::listByArsenal/$1', ['filter' => 'arsenal_filter:season']);
+	$routes->get('villainseason/(:segment)', 'SeasonVillain::listByVillain/$1', ['filter' => 'villain_filter:season']);
 
 	// Usuarios y permisos
 	$routes->group('modules', ['filter' => 'module_filter:module'], $routesTree['modules']);

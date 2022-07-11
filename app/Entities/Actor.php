@@ -8,6 +8,6 @@ class Actor extends APIEntity
 
 	public function getActorCastingURI()
 	{
-		return $this->getURIProperty('actorCastingURI', 'castingby/actor');
+		return $this->getURIProperty('actorCastingURI', 'actorcasting');
 	}
 }

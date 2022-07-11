@@ -4,5 +4,5 @@ namespace App\Entities;
 
 class TransformationRanger extends APIEntity
 {
-    protected $resource = 'transformationrangers';
+    protected $resource = 'transformationranger';
 }

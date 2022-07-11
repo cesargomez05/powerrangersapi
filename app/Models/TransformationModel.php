@@ -88,7 +88,7 @@ class TransformationModel extends Model
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['name', 'description', 'slug transformationRangersURI']);
+		$this->select(['name', 'description', 'slug transformationRangerURI']);
 		$this->where('slug', $slug);
 	}
 

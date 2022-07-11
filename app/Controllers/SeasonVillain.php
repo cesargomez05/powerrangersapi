@@ -47,4 +47,13 @@ class SeasonVillain extends BaseResource
 
 		return $this->success("Record successfully created", 201);
 	}
+
+	public function listByVillain($villainSlug)
+	{
+		$filter = $this->request->getGet();
+		set_pagination($filter);
+
+		$records = $this->model->listByVillain($filter, $villainSlug);
+		return $this->respond($records);
+	}
 }

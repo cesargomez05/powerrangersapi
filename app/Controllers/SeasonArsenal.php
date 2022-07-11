@@ -47,4 +47,13 @@ class SeasonArsenal extends BaseResource
 
 		return $this->success("Record successfully created", 201);
 	}
+
+	public function listByArsenal($arsenalSlug)
+	{
+		$filter = $this->request->getGet();
+		set_pagination($filter);
+
+		$records = $this->model->listByArsenal($filter, $arsenalSlug);
+		return $this->respond($records);
+	}
 }

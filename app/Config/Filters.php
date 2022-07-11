@@ -28,10 +28,6 @@ class Filters extends BaseConfig
 			\App\Filters\AuthFilter::class,
 			\App\Filters\AgeFilter::class
 		],
-		'age_season_filter' => [
-			\App\Filters\AuthFilter::class,
-			\App\Filters\AgeSeasonFilter::class
-		],
 		'character_filter' => [
 			\App\Filters\AuthFilter::class,
 			\App\Filters\CharacterFilter::class
@@ -59,10 +55,6 @@ class Filters extends BaseConfig
 		'casting_filter' => [
 			\App\Filters\AuthFilter::class,
 			\App\Filters\CastingFilter::class
-		],
-		'casting_by_filter' => [
-			\App\Filters\AuthFilter::class,
-			\App\Filters\CastingByFilter::class
 		],
 		'zord_filter' => [
 			\App\Filters\AuthFilter::class,

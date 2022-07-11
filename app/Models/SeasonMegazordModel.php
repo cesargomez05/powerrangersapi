@@ -60,6 +60,19 @@ class SeasonMegazordModel extends Model
 		}
 	}
 
+	public function listByMegazord($query, $megazordSlug)
+	{
+		$this->setTable('season_megazord_view');
+		$this->select(['CONCAT(serieSlug,\'/\',seasonNumber) seasonURI', 'serieTitle']);
+		$this->where('megazordSlug', $megazordSlug);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('serieTitle', $query['q'], 'both');
+			$this->groupEnd();
+		}
+		return $this->getResponse($query);
+	}
+
 	public function insertRecord(&$record)
 	{
 		$prevRecord = $this->check($record['serieId'], $record['seasonNumber'], $record['megazordId']);

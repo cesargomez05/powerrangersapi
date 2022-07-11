@@ -119,7 +119,7 @@ class MegazordModel extends Model
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['name', 'description', 'photo photoURI', 'slug megazordZordURI']);
+		$this->select(['name', 'description', 'photo photoURI', 'slug megazordZordURI', 'slug megazordSeasonURI']);
 		$this->where('slug', $slug);
 	}
 

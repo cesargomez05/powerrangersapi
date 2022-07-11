@@ -46,4 +46,13 @@ class MegazordZord extends BaseResource
 
 		return $this->success("Record successfully created", 201);
 	}
+
+	public function listByZord($zordSlug)
+	{
+		$filter = $this->request->getGet();
+		set_pagination($filter);
+
+		$records = $this->model->listByZord($filter, $zordSlug);
+		return $this->respond($records);
+	}
 }

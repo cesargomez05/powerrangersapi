@@ -10,4 +10,9 @@ class Megazord extends APIEntity
 	{
 		return $this->getURIProperty('megazordZordURI', 'megazordzord');
 	}
+
+	public function getMegazordSeasonURI()
+	{
+		return $this->getURIProperty('megazordSeasonURI', 'megazordseason');
+	}
 }

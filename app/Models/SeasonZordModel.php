@@ -61,6 +61,19 @@ class SeasonZordModel extends Model
 		}
 	}
 
+	public function listByZord($query, $zordSlug)
+	{
+		$this->setTable('season_zord_view');
+		$this->select(['CONCAT(serieSlug,\'/\',seasonNumber) seasonURI', 'serieTitle']);
+		$this->where('zordSlug', $zordSlug);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('serieTitle', $query['q'], 'both');
+			$this->groupEnd();
+		}
+		return $this->getResponse($query);
+	}
+
 	public function insertRecord(&$record)
 	{
 		$prevRecord = $this->check($record['serieId'], $record['seasonNumber'], $record['zordId']);

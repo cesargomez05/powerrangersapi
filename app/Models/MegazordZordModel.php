@@ -51,6 +51,19 @@ class MegazordZordModel extends Model
 		}
 	}
 
+	public function listByZord($query, $zordSlug)
+	{
+		$this->setTable('megazord_zord_view');
+		$this->select(['megazordSlug megazordURI', 'megazordName']);
+		$this->where('zordSlug', $zordSlug);
+		if (isset($query['q']) && !empty($query['q'])) {
+			$this->groupStart();
+			$this->orLike('megazordName', $query['q'], 'both');
+			$this->groupEnd();
+		}
+		return $this->getResponse($query);
+	}
+
 	public function insertRecord(&$record)
 	{
 		$prevRecord = $this->check($record['megazordId'], $record['zordId']);

@@ -47,4 +47,13 @@ class SeasonMegazord extends BaseResource
 
 		return $this->success("Record successfully created", 201);
 	}
+
+	public function listByMegazord($megazordSlug)
+	{
+		$filter = $this->request->getGet();
+		set_pagination($filter);
+
+		$records = $this->model->listByMegazord($filter, $megazordSlug);
+		return $this->respond($records);
+	}
 }

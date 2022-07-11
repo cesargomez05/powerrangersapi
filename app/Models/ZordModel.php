@@ -64,7 +64,7 @@ class ZordModel extends Model
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['name', 'description', 'photo photoURI']);
+		$this->select(['name', 'description', 'photo photoURI', 'slug zordMegazordURI', 'slug zordSeasonURI']);
 		$this->where('slug', $slug);
 	}
 

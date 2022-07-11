@@ -67,7 +67,7 @@ class MorpherModel extends Model
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['name', 'description', 'photo photoURI']);
+		$this->select(['name', 'description', 'photo photoURI', 'slug morpherRangerURI']);
 		$this->where('slug', $slug);
 	}
 

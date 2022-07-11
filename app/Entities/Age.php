@@ -8,6 +8,6 @@ class Age extends APIEntity
 
 	public function getAgeSeasonURI()
 	{
-		return $this->getURIProperty('ageSeasonURI', 'ageseasons');
+		return $this->getURIProperty('ageSeasonURI', 'ageseason');
 	}
 }

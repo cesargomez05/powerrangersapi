@@ -6,8 +6,8 @@ class Transformation extends APIEntity
 {
 	protected $resource = 'transformations';
 
-	public function getTransformationRangersURI()
+	public function getTransformationRangerURI()
 	{
-		return $this->getURIProperty('transformationRangersURI', 'transformationrangers');
+		return $this->getURIProperty('transformationRangerURI', 'transformationranger');
 	}
 }

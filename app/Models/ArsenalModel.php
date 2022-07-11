@@ -64,7 +64,7 @@ class ArsenalModel extends Model
 
 	protected function setPublicRecordCondition($slug)
 	{
-		$this->select(['name', 'description', 'photo photoURI']);
+		$this->select(['name', 'description', 'photo photoURI', 'slug arsenalSeasonURI']);
 		$this->where('slug', $slug);
 	}
 
