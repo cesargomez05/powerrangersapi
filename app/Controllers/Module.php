@@ -22,24 +22,21 @@ class Module extends BaseResource
 	public function create()
 	{
 		// Datos de entrada de la petición
-		$postData = $this->request->getPost();
-		$postFiles = $this->request->getFiles();
-
-		// Se valida si no existen datos enviados por método POST
-		if (empty($postData) && empty($postFiles)) {
-			return $this->fail('Please define the data to be recorded');
+		$checkRequestData = $this->checkRequestData($postData, $postFiles);
+		if (isset($checkRequestData)) {
+			return $checkRequestData;
 		}
 
 		// Se valida los datos de la petición
 		$validateRecord = $this->model->validateRecord($postData, $postFiles, 'post');
 		if ($validateRecord !== true) {
-			return $this->respond(['errors' => $validateRecord], 400);
+			return $this->getResponse(400, $validateRecord);
 		}
 
 		$result = $this->model->insertRecord($postData);
 		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen
-			return $this->respond(['errors' => $result], 500);
+			return $this->getResponse(500, $result);
 		}
 
 		return $this->respondCreated($postData);
@@ -47,33 +44,28 @@ class Module extends BaseResource
 
 	public function update($id)
 	{
-		$module = $this->model->get($id)->toArray();
-
 		// Datos de entrada de la petición
-		$postData = $this->request->getPost();
-		unset($postData['_method']);
-		$postData['_id'] = $id;
-		$postFiles = $this->request->getFiles();
-
-		// Se valida si no existen datos enviados por método POST
-		if (empty($postData) && empty($postFiles)) {
-			return $this->fail('Please define the data to be recorded');
+		$checkRequestData = $this->checkRequestData($postData, $postFiles, $method);
+		if (isset($checkRequestData)) {
+			return $checkRequestData;
 		}
-
-		// Se obtiene el tipo de petición que se realiza a la función (PUT o PATCH)
-		$request = service('request');
-		$method = $request->getMethod();
+		$this->addSegmentProperties($postData, ['_id' => $id]);
 
 		// Se valida los datos de la petición
-		$validateRecord = $this->model->validateRecord($postData, $postFiles, $method, $module);
+		$validateRecord = $this->model->validateRecord(
+			$postData,
+			$postFiles,
+			$method,
+			$this->model->get($id)->toArray()
+		);
 		if ($validateRecord !== true) {
-			return $this->respond(['errors' => $validateRecord], 400);
+			return $this->getResponse(400, $validateRecord);
 		}
 
 		$result = $this->model->updateRecord($postData, $id);
 		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen
-			return $this->respond(['errors' => $result], 500);
+			return $this->getResponse(500, $result);
 		}
 
 		return $this->success("Record successfully updated");

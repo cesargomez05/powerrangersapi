@@ -147,7 +147,7 @@ class AuthFilter implements FilterInterface
 		}
 	}
 
-	private static function validateBasicAuthentication(&$username)
+	public static function validateBasicAuthentication(&$username)
 	{
 		// Usuario y contraseña de autenticación
 		$username = isset($_SERVER['PHP_AUTH_USER']) ? $_SERVER['PHP_AUTH_USER'] : '';

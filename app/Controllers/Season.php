@@ -22,31 +22,27 @@ class Season extends BaseResource
 	public function create($serieId)
 	{
 		// Datos de entrada de la petición
-		$postData = $this->request->getPost();
-		$postFiles = $this->request->getFiles();
-
-		// Se valida si no existen datos enviados por método POST
-		if (empty($postData) && empty($postFiles)) {
-			return $this->fail('Please define the data to be recorded');
+		$checkRequestData = $this->checkRequestData($postData, $postFiles);
+		if (isset($checkRequestData)) {
+			return $checkRequestData;
 		}
-
-		$postData['serieId'] = $serieId;
+		$this->setSeasonProperties($postData, $serieId);
 
 		// Se valida los datos de la petición
 		$validateRecord = $this->model->validateRecord($postData, $postFiles, 'post');
 		if ($validateRecord !== true) {
-			return $this->respond(['errors' => $validateRecord], 400);
+			return $this->getResponse(400, $validateRecord);
 		}
 
-		$season = $this->model->check($postData['serieId'], $postData['number']);
-		if ($season) {
-			return $this->respond(['error' => 'There one or many season with same serieId and number'], 409);
+		$checkRecord = $this->checkSeason($postData['serieId'], $postData['number']);
+		if (isset($checkRecord)) {
+			return $checkRecord;
 		}
 
 		$result = $this->model->insertRecord($postData);
 		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen
-			return $this->respond(['errors' => $result], 500);
+			return $this->getResponse(500, $result);
 		}
 
 		unset($postData['age']);
@@ -56,39 +52,34 @@ class Season extends BaseResource
 
 	public function update($serieId, $number)
 	{
-		$season = $this->model->get($serieId, $number);
-
 		// Datos de entrada de la petición
-		$postData = $this->request->getPost();
-		unset($postData['_method']);
-		$postFiles = $this->request->getFiles();
-
-		// Se valida si no existen datos enviados por método POST
-		if (empty($postData) && empty($postFiles)) {
-			return $this->fail('Please define the data to be recorded');
+		$checkRequestData = $this->checkRequestData($postData, $postFiles, $method);
+		if (isset($checkRequestData)) {
+			return $checkRequestData;
 		}
 
-		// Se obtiene el tipo de petición que se realiza a la función (PUT o PATCH)
-		$request = service('request');
-		$method = $request->getMethod();
-
 		// Se valida los datos de la petición
-		$validateRecord = $this->model->validateRecord($postData, $postFiles, $method, $season);
+		$validateRecord = $this->model->validateRecord(
+			$postData,
+			$postFiles,
+			$method,
+			$this->model->get($serieId, $number)
+		);
 		if ($validateRecord !== true) {
-			return $this->respond(['errors' => $validateRecord], 400);
+			return $this->getResponse(400, $validateRecord);
 		}
 
 		if ($postData['serieId'] != $serieId || $postData['number'] != $number) {
-			$season = $this->model->check($postData['serieId'], $postData['number']);
-			if ($season) {
-				return $this->respond(['error' => 'There one or many season with same serieId and number'], 409);
+			$checkRecord = $this->checkSeason($postData['serieId'], $postData['number']);
+			if (isset($checkRecord)) {
+				return $checkRecord;
 			}
 		}
 
 		$result = $this->model->updateRecord($postData, $serieId, $number);
 		if ($result !== true) {
 			// Se retorna un mensaje de error si las validaciones no se cumplen
-			return $this->respond(['errors' => $result], 500);
+			return $this->getResponse(500, $result);
 		}
 
 		return $this->success("Record successfully updated");
@@ -101,5 +92,13 @@ class Season extends BaseResource
 
 		$records = $this->model->listByAge($filter, $ageSlug);
 		return $this->respond($records);
+	}
+
+	private function checkSeason($serieId, $number)
+	{
+		$season = $this->model->check($serieId, $number);
+		if ($season) {
+			return $this->getResponse(409, 'There one or many season with same serieId and number');
+		}
 	}
 }

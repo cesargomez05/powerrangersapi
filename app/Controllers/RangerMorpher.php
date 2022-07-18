@@ -22,21 +22,16 @@ class RangerMorpher extends BaseResource
 	public function create($rangerId)
 	{
 		// Datos de entrada de la petición
-		$postData = $this->request->getPost();
-		$postFiles = $this->request->getFiles();
-
-		// Se valida si no existen datos enviados por método POST
-		if (empty($postData) && empty($postFiles)) {
-			return $this->fail('Please define the data to be recorded');
+		$checkRequestData = $this->checkRequestData($postData, $postFiles);
+		if (isset($checkRequestData)) {
+			return $checkRequestData;
 		}
-
-		// Se define el Id del ranger
-		$postData['rangerId'] = $rangerId;
+		$this->addSegmentProperties($postData, ['rangerId' => $rangerId]);
 
 		// Se valida los datos de la petición
 		$validateRecord = $this->model->validateRecord($postData, $postFiles, 'post');
 		if ($validateRecord !== true) {
-			return $this->respond(['errors' => $validateRecord], 400);
+			return $this->getResponse(400, $validateRecord);
 		}
 
 		// Se valida la existencia de la asociación del morpher al ranger
@@ -45,14 +40,14 @@ class RangerMorpher extends BaseResource
 			$result = $this->model->updateRecord($postData, $rangerId);
 			if ($result !== true) {
 				// Se retorna un mensaje de error si las validaciones no se cumplen
-				return $this->respond(['errors' => $result], 500);
+				return $this->getResponse(500, $result);
 			}
 		} else {
 			// Se inserta en base de datos el registro
 			$result = $this->model->insertRecord($postData);
 			if ($result !== true) {
 				// Se retorna un mensaje de error si las validaciones no se cumplen
-				return $this->respond(['errors' => $result], 500);
+				return $this->getResponse(500, $result);
 			}
 		}
 

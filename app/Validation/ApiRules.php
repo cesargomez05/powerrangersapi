@@ -16,7 +16,7 @@ class ApiRules
 	public function is_year(string $year): bool
 	{
 		if (isset($year) && !empty($year)) {
-			$bool = preg_match('/^(?:19|[2-9][0-9])\d{2}$/', $year);
+			$bool = preg_match('/^(?:19|[2-9]\d)\d{2}$/', $year);
 			return $bool == 0 ? false : true;
 		}
 		return false;
@@ -145,7 +145,7 @@ class ApiRules
 	public function validate_password($password = null, string $fields = null, array $data = null, &$error = null)
 	{
 		if (isset($password) && strlen($password)) {
-			$pattern = '/^(?=.*[!@#$%^&*-])(?=.*[0-9])(?=.*[A-Z]).{8,20}$/';
+			$pattern = '/^(?=.*[!@#$%^&*-])(?=.*\d)(?=.*[A-Z]).{8,20}$/';
 			if (preg_match($pattern, $password)) {
 				return true;
 			} else {
