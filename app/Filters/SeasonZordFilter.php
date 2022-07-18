@@ -5,7 +5,6 @@ namespace App\Filters;
 use App\Traits\FilterTrait;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use Config\Services;
 
 class SeasonZordFilter implements FilterInterface
 {
@@ -27,10 +26,9 @@ class SeasonZordFilter implements FilterInterface
 				return $validation;
 			}
 
-			$response = Services::response();
 			$exists = $model->check($serieId, $seasonNumber, $zordId);
 			if (!$exists) {
-				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Season-Zord not found']);
+				return self::throwError(ResponseInterface::HTTP_NOT_FOUND, 'Season-Zord not found');
 			}
 		}
 	}

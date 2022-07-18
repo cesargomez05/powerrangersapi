@@ -5,7 +5,6 @@ namespace App\Filters;
 use App\Traits\FilterTrait;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use Config\Services;
 
 class RangerMorpherFilter implements FilterInterface
 {
@@ -22,10 +21,9 @@ class RangerMorpherFilter implements FilterInterface
 		$model->setPublic(self::isPublic());
 
 		if (in_array($requestType, ['get', 'delete'])) {
-			$response = Services::response();
 			$exists = $model->check($rangerId);
 			if (!$exists) {
-				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Ranger morpher not found']);
+				return self::throwError(ResponseInterface::HTTP_NOT_FOUND, 'Ranger morpher not found');
 			}
 		}
 	}

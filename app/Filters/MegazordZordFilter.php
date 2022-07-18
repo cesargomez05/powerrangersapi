@@ -5,7 +5,6 @@ namespace App\Filters;
 use App\Traits\FilterTrait;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use Config\Services;
 
 class MegazordZordFilter implements FilterInterface
 {
@@ -27,10 +26,9 @@ class MegazordZordFilter implements FilterInterface
 				return $validation;
 			}
 
-			$response = Services::response();
 			$exists = $model->check($megazordId, $zordId);
 			if (!$exists) {
-				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Megazord-Zord not found']);
+				return self::throwError(ResponseInterface::HTTP_NOT_FOUND, 'Megazord-Zord not found');
 			}
 		}
 	}

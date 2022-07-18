@@ -5,7 +5,6 @@ namespace App\Filters;
 use App\Traits\FilterTrait;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use Config\Services;
 
 class ChapterFilter implements FilterInterface
 {
@@ -22,16 +21,14 @@ class ChapterFilter implements FilterInterface
 		$model->setPublic(self::isPublic());
 
 		if (isset($number)) {
-			$response = Services::response();
-
 			$validationId = $model->validateId($number, null, 'Number', 'Number');
 			if ($validationId !== true) {
-				return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
+				return self::throwError(ResponseInterface::HTTP_BAD_REQUEST, $validationId);
 			}
 
 			$exists = $model->check($serieId, $seasonNumber, $number);
 			if (!$exists) {
-				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Chapter not found']);
+				return self::throwError(ResponseInterface::HTTP_NOT_FOUND, 'Chapter not found');
 			}
 		}
 	}

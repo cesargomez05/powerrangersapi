@@ -10,6 +10,10 @@ class OAuth
 	 * @var \OAuth2\Server
 	 */
 	public $server;
+
+	/**
+	 * @var \OAuth2\Storage\Pdo
+	 */
 	protected $storage;
 
 	public function __construct()
@@ -39,8 +43,7 @@ class OAuth
 		$request = Request::createFromGlobals();
 
 		if (!$this->server->verifyResourceRequest($request)) {
-			$this->server->getResponse()->send();
-			exit();
+			return $this->server->getResponse();
 		}
 
 		// Obtiene el dato del usuario autenticado con el Token

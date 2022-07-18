@@ -5,7 +5,6 @@ namespace App\Filters;
 use App\Traits\FilterTrait;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use Config\Services;
 
 class ModuleFilter implements FilterInterface
 {
@@ -17,16 +16,14 @@ class ModuleFilter implements FilterInterface
 		$model->setPublic(self::isPublic());
 
 		if (!empty($moduleId)) {
-			$response = Services::response();
-
 			$validationId = $model->validateId($moduleId, $module);
 			if ($validationId !== true) {
-				return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
+				return self::throwError(ResponseInterface::HTTP_BAD_REQUEST, $validationId);
 			}
 
 			$exists = $model->check($moduleId);
 			if (!$exists) {
-				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Module not found']);
+				return self::throwError(ResponseInterface::HTTP_NOT_FOUND, 'Module not found');
 			}
 		}
 	}

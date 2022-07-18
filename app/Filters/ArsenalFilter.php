@@ -5,7 +5,6 @@ namespace App\Filters;
 use App\Traits\FilterTrait;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use Config\Services;
 
 class ArsenalFilter implements FilterInterface
 {
@@ -17,16 +16,14 @@ class ArsenalFilter implements FilterInterface
 		$model->setPublic(self::isPublic());
 
 		if (!empty($arsenalId)) {
-			$response = Services::response();
-
 			$validationId = $model->validateId($arsenalId, $module);
 			if ($validationId !== true) {
-				return $response->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST)->setJSON(['errors' => $validationId]);
+				return self::throwError(ResponseInterface::HTTP_BAD_REQUEST, $validationId);
 			}
 
 			$exists = $model->check($arsenalId);
 			if (!$exists) {
-				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Arsenal not found']);
+				return self::throwError(ResponseInterface::HTTP_NOT_FOUND, 'Arsenal not found');
 			}
 		}
 	}

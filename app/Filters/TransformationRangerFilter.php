@@ -5,7 +5,6 @@ namespace App\Filters;
 use App\Traits\FilterTrait;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use Config\Services;
 
 class TransformationRangerFilter implements FilterInterface
 {
@@ -27,10 +26,9 @@ class TransformationRangerFilter implements FilterInterface
 				return $validation;
 			}
 
-			$response = Services::response();
 			$exists = $model->check($transformationId, $rangerId);
 			if (!$exists) {
-				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Transformation-Ranger not found']);
+				return self::throwError(ResponseInterface::HTTP_NOT_FOUND, 'Transformation-Ranger not found');
 			}
 		}
 	}

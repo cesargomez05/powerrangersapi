@@ -5,7 +5,6 @@ namespace App\Filters;
 use App\Traits\FilterTrait;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use Config\Services;
 
 class PermissionFilter implements FilterInterface
 {
@@ -27,10 +26,9 @@ class PermissionFilter implements FilterInterface
 				return $validation;
 			}
 
-			$response = Services::response();
 			$exists = $model->check($userId, $moduleId);
 			if (!$exists) {
-				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Permission not found']);
+				return self::throwError(ResponseInterface::HTTP_NOT_FOUND, 'Permission not found');
 			}
 		}
 	}

@@ -5,7 +5,6 @@ namespace App\Filters;
 use App\Traits\FilterTrait;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use Config\Services;
 
 class SeasonMegazordFilter implements FilterInterface
 {
@@ -27,10 +26,9 @@ class SeasonMegazordFilter implements FilterInterface
 				return $validation;
 			}
 
-			$response = Services::response();
 			$exists = $model->check($serieId, $seasonNumber, $megazordId);
 			if (!$exists) {
-				return $response->setStatusCode(ResponseInterface::HTTP_NOT_FOUND)->setJSON(['error' => 'Season-Megazord not found']);
+				return self::throwError(ResponseInterface::HTTP_NOT_FOUND, 'Season-Megazord not found');
 			}
 		}
 	}

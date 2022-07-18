@@ -30,4 +30,9 @@ trait FilterTrait
         $session = Services::session();
         return ($session->get('type') ?? '') == 'public';
     }
+
+    protected static function throwError($code, $error)
+    {
+        return Services::response()->setStatusCode($code)->setJSON(['status' => $code, 'error' => $error]);
+    }
 }
