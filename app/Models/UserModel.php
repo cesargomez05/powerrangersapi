@@ -99,6 +99,36 @@ class UserModel extends Model
 	{
 		$errors = [];
 
+		$this->setUserValidationRules($method, $postData, $prevRecord);
+
+		$this->validateRecordProperties($postData, $method, $prevRecord);
+
+		if (!$this->validate($postData)) {
+			$errors = array_merge($this->errors(), $errors);
+		}
+
+		// Se valida si no hubo error de validación en el campo de contraseña, para establecer el respectivo valor encriptado
+		if (!isset($errors['password'])) {
+			if (isset($postData['password'])) {
+				$postData['password'] = hash('sha256', $postData['password']);
+			} else {
+				unset($postData['password']);
+			}
+		}
+
+		if ($method == 'post' && isset($postData['permissions'])) {
+			if (!is_array($postData['permissions'])) {
+				$errors = array_merge(['permissions' => 'The permissions value is not a array'], $errors);
+			} else {
+				$this->setPermissions($postData, $errors);
+			}
+		}
+
+		return empty($errors) ? true : $errors;
+	}
+
+	private function setUserValidationRules($method, &$postData, $prevRecord)
+	{
 		if ($method == 'post') {
 			$this->setValidationRule('confirmPassword', 'required_with[password]|matches[password]');
 		}
@@ -113,53 +143,33 @@ class UserModel extends Model
 			$this->setValidationRule('newPassword', 'required_with[password]|max_length[100]|validate_password');
 			$this->setValidationRule('confirmPassword', 'required_with[password]|matches[newPassword]');
 		}
+	}
 
-		$this->validateRecordProperties($postData, $method, $prevRecord);
+	private function setPermissions($postData, &$errors)
+	{
+		$permissionModel = model($this->nestedModelClasses['permissionModel']);
+		$permissionModel->setValidationRule('username', 'permit_empty');
 
-		if (!$this->validate($postData)) {
-			$errors = array_merge($this->errors(), $errors);
-		}
+		$permissionsErrors = [];
+		$modulesId = [];
 
-		// Se valida si no hubo error de validación en el campo de contraseña, para establecer el respectivo valor encriptado
-		if (!isset($errors['password'])) {
-			if (isset($postData['password'])) {
-				$postData['password'] = password_hash($postData['password'], PASSWORD_BCRYPT);
+		foreach ($postData['permissions'] as $i => $permission) {
+			$permissionErrors = $permissionModel->validateRecord($permission, [], 'post');
+			if ($permissionErrors !== true) {
+				$permissionsErrors[$i] = $permissionErrors;
 			} else {
-				unset($postData['password']);
-			}
-		}
-
-		if ($method == 'post' && isset($postData['permissions'])) {
-			if (!is_array($postData['permissions'])) {
-				$errors = array_merge(['permissions' => 'The permissions value is not a array'], $errors);
-			} else {
-				$permissionModel = model($this->nestedModelClasses['permissionModel']);
-				$permissionModel->setValidationRule('username', 'permit_empty');
-
-				$permissionsErrors = [];
-				$modulesId = [];
-
-				foreach ($postData['permissions'] as $i => $permission) {
-					$permissionErrors = $permissionModel->validateRecord($permission, [], 'post');
-					if ($permissionErrors !== true) {
-						$permissionsErrors[$i] = $permissionErrors;
-					} else {
-						$moduleId = $permission['moduleId'];
-						if (in_array($moduleId, $modulesId)) {
-							$permissionsErrors[$i] = ['moduleId' => 'The module id is used by other record'];
-						} else {
-							$modulesId[] = $moduleId;
-						}
-					}
-				}
-
-				if (!empty($permissionsErrors)) {
-					$errors['permissions'] = $permissionsErrors;
+				$moduleId = $permission['moduleId'];
+				if (in_array($moduleId, $modulesId)) {
+					$permissionsErrors[$i] = ['moduleId' => 'The module id is used by other record'];
+				} else {
+					$modulesId[] = $moduleId;
 				}
 			}
 		}
 
-		return empty($errors) ? true : $errors;
+		if (!empty($permissionsErrors)) {
+			$errors['permissions'] = $permissionsErrors;
+		}
 	}
 
 	public function checkUser($username, $password)
@@ -172,7 +182,7 @@ class UserModel extends Model
 		// Se ejecuta la consulta y se valida si esta retornó algun resultado
 		$query = $builder->get();
 		$row = $query->getRow();
-		if ($row !== NULL && sha1($password) == $row->password) {
+		if ($row !== NULL && hash('sha256', $password) == $row->password) {
 			return $row;
 		}
 		return false;
